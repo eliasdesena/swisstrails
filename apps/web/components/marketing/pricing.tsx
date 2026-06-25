@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Check, Zap, Shield, Star, RefreshCw, Smartphone } from "lucide-react";
+import { Check, Zap, Shield } from "lucide-react";
 import { Reveal } from "@/components/shared/reveal";
 import { Button } from "@/components/ui/button";
 import { PRICING } from "@/data/categories";
