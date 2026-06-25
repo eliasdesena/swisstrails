@@ -64,16 +64,18 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
 
         {/* Close */}
         <button
-          className="absolute top-4 left-4 w-8 h-8 bg-black/50 backdrop-blur-md rounded-lg flex items-center justify-center text-white/70 hover:text-white transition-colors"
+          aria-label="Close"
+          className="absolute top-3 left-3 w-11 h-11 bg-black/50 backdrop-blur-md rounded-lg flex items-center justify-center text-white/80 hover:text-white active:scale-95 transition-colors"
           onClick={onClose}
         >
-          <ChevronLeft className="w-4 h-4" />
+          <ChevronLeft className="w-5 h-5" />
         </button>
 
         {/* Action buttons */}
-        <div className="absolute top-4 right-4 flex items-center gap-1.5">
+        <div className="absolute top-3 right-3 flex items-center gap-2">
           <button
-            className="w-8 h-8 bg-black/50 backdrop-blur-md rounded-lg flex items-center justify-center text-white/70 hover:text-white transition-colors"
+            aria-label="Share"
+            className="w-11 h-11 bg-black/50 backdrop-blur-md rounded-lg flex items-center justify-center text-white/80 hover:text-white active:scale-95 transition-colors"
             onClick={() => {
               const url = `https://swiss-trails.com/location/${location.slug}`;
               if (navigator.share) {
@@ -83,27 +85,28 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
               }
             }}
           >
-            <Share2 className="w-3.5 h-3.5" />
+            <Share2 className="w-4 h-4" />
           </button>
           <button
+            aria-label={fav ? "Remove favourite" : "Add favourite"}
             className={cn(
-              "w-8 h-8 rounded-lg backdrop-blur-md flex items-center justify-center transition-colors",
-              fav ? "bg-red-500/20 text-red-400" : "bg-black/50 text-white/70 hover:text-white"
+              "w-11 h-11 rounded-lg backdrop-blur-md flex items-center justify-center active:scale-95 transition-colors",
+              fav ? "bg-red-500/20 text-red-400" : "bg-black/50 text-white/80 hover:text-white"
             )}
             onClick={() => toggleFavorite(location.id)}
           >
-            <Heart className={cn("w-3.5 h-3.5", fav && "fill-red-400")} />
+            <Heart className={cn("w-4 h-4", fav && "fill-red-400")} />
           </button>
         </div>
 
         {/* Name overlay */}
         <div className="absolute bottom-0 left-0 right-0 px-5 pb-4">
-          <p className="text-[10px] font-medium tracking-[0.12em] uppercase text-stone-500 mb-1">
+          <p className="text-xs font-medium tracking-[0.12em] uppercase text-fg-muted mb-1">
             {cat.label}
           </p>
           <h2 className="text-fg text-xl font-semibold leading-tight">{location.name}</h2>
           {location.tagline && (
-            <p className="text-stone-500 text-sm mt-0.5 line-clamp-1">{location.tagline}</p>
+            <p className="text-fg-muted text-sm mt-0.5 line-clamp-1">{location.tagline}</p>
           )}
         </div>
       </div>
@@ -112,7 +115,7 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
       <div className="flex-1 overflow-y-auto overscroll-contain">
         <div className="px-5 py-4 space-y-6">
           {/* Quick meta row */}
-          <div className="flex items-center gap-4 text-xs text-stone-500">
+          <div className="flex items-center gap-4 text-xs text-fg-muted">
             <span className="flex items-center gap-1.5">
               <MapPin className="w-3 h-3" />
               {location.region.charAt(0).toUpperCase() + location.region.slice(1).replace("-", " ")}
@@ -140,7 +143,7 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
           {/* Highlights */}
           {location.highlights.length > 0 && (
             <div>
-              <p className="text-[10px] font-medium tracking-[0.12em] uppercase text-stone-600 mb-3">
+              <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-fg-muted mb-3">
                 Highlights
               </p>
               <ul className="space-y-2">
@@ -156,7 +159,7 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
 
           {/* Best season */}
           <div>
-            <p className="text-[10px] font-medium tracking-[0.12em] uppercase text-stone-600 mb-3">
+            <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-fg-muted mb-3">
               Best season
             </p>
             <div className="flex flex-wrap gap-2">
@@ -168,10 +171,10 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
                     key={s}
                     className="flex items-center gap-1.5 bg-white/[0.04] rounded px-2.5 py-1.5"
                   >
-                    <Icon className="w-3 h-3 text-stone-500" />
+                    <Icon className="w-3 h-3 text-fg-muted" />
                     <div>
-                      <p className="text-stone-300 text-xs font-medium">{sc.label}</p>
-                      <p className="text-stone-600 text-[10px]">{sc.months}</p>
+                      <p className="text-stone-200 text-xs font-medium">{sc.label}</p>
+                      <p className="text-fg-muted text-[11px]">{sc.months}</p>
                     </div>
                   </div>
                 );
@@ -182,14 +185,14 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
           {/* Tips */}
           {location.tips.length > 0 && (
             <div>
-              <p className="text-[10px] font-medium tracking-[0.12em] uppercase text-stone-600 mb-3 flex items-center gap-1.5">
+              <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-fg-muted mb-3 flex items-center gap-1.5">
                 <Lightbulb className="w-3 h-3" />
                 Insider tips
               </p>
               <ol className="space-y-2.5">
                 {location.tips.map((tip, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm text-stone-400">
-                    <span className="text-stone-700 text-[10px] font-mono mt-0.5 flex-shrink-0">
+                    <span className="text-alpine-400 text-[11px] font-mono mt-0.5 flex-shrink-0">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     {tip}
@@ -202,7 +205,7 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
           {/* What to bring */}
           {location.whatToBring.length > 0 && (
             <div>
-              <p className="text-[10px] font-medium tracking-[0.12em] uppercase text-stone-600 mb-3 flex items-center gap-1.5">
+              <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-fg-muted mb-3 flex items-center gap-1.5">
                 <Package className="w-3 h-3" />
                 What to bring
               </p>
@@ -223,7 +226,7 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
           {location.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {location.tags.map((tag) => (
-                <span key={tag} className="text-stone-600 text-xs">
+                <span key={tag} className="text-fg-muted text-xs">
                   #{tag}
                 </span>
               ))}
@@ -232,7 +235,7 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
 
           {/* Getting there */}
           <div>
-            <p className="text-[10px] font-medium tracking-[0.12em] uppercase text-stone-600 mb-3 flex items-center gap-1.5">
+            <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-fg-muted mb-3 flex items-center gap-1.5">
               <Navigation className="w-3 h-3" />
               Getting there
             </p>
@@ -241,12 +244,12 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
             )}
             <div className="flex gap-3">
               {location.parkingAvailable && (
-                <span className="flex items-center gap-1.5 text-xs text-stone-500">
+                <span className="flex items-center gap-1.5 text-xs text-fg-muted">
                   <Car className="w-3 h-3" /> Parking
                 </span>
               )}
               {location.publicTransport && (
-                <span className="flex items-center gap-1.5 text-xs text-stone-500">
+                <span className="flex items-center gap-1.5 text-xs text-fg-muted">
                   <Bus className="w-3 h-3" /> Public transport
                 </span>
               )}
@@ -255,16 +258,16 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
 
           {/* Coordinates */}
           <div className="bg-white/[0.03] rounded-lg p-3 flex items-center justify-between">
-            <p className="font-mono text-stone-500 text-xs">
+            <p className="font-mono text-fg-muted text-xs">
               {location.coordinates.lat.toFixed(6)}, {location.coordinates.lng.toFixed(6)}
             </p>
-            <MapPin className="w-3 h-3 text-stone-700" />
+            <MapPin className="w-3 h-3 text-fg-subtle" />
           </div>
 
           {/* Gallery */}
           {location.gallery.length > 0 && (
             <div>
-              <p className="text-[10px] font-medium tracking-[0.12em] uppercase text-stone-600 mb-3 flex items-center gap-1.5">
+              <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-fg-muted mb-3 flex items-center gap-1.5">
                 <Camera className="w-3 h-3" />
                 Gallery
               </p>
@@ -291,10 +294,10 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
       </div>
 
       {/* Bottom CTA */}
-      <div className="flex-shrink-0 px-4 py-3 flex gap-2">
+      <div className="flex-shrink-0 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2">
         <button
           className={cn(
-            "flex-1 flex items-center justify-center gap-2 h-9 text-sm rounded-lg bg-white/[0.04] transition-colors",
+            "flex-1 flex items-center justify-center gap-2 h-11 text-sm rounded-lg bg-white/[0.04] transition-colors",
             fav ? "text-red-400 bg-red-950/30" : "text-stone-400 hover:text-fg"
           )}
           onClick={() => toggleFavorite(location.id)}
@@ -304,7 +307,7 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
         </button>
         <Button
           variant="alpine"
-          size="md"
+          size="lg"
           className="flex-1"
           asChild
         >
@@ -317,7 +320,7 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Navigation className="w-3.5 h-3.5" />
+            <Navigation className="w-4 h-4" />
             Open in Maps
           </a>
         </Button>
@@ -334,8 +337,8 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
             transition={{ duration: 0.15 }}
             onClick={() => setActiveGalleryIndex(null)}
           >
-            <button className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white/70 hover:text-white">
-              <X className="w-4 h-4" />
+            <button aria-label="Close" className="absolute top-[max(1rem,env(safe-area-inset-top))] right-4 w-11 h-11 rounded-lg bg-white/10 flex items-center justify-center text-white/80 hover:text-white">
+              <X className="w-5 h-5" />
             </button>
             <div className="relative w-full max-w-2xl aspect-video rounded-lg overflow-hidden">
               <Image
