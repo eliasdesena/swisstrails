@@ -5,7 +5,7 @@
 ───────────────────────────────────────────── */
 @theme {
   --font-heading: "Alcyone", Georgia, "Times New Roman", serif;
-  --font-body: var(--font-space-grotesk), -apple-system, "Helvetica Neue", sans-serif;
+  --font-body: var(--font-sans), -apple-system, "Helvetica Neue", sans-serif;
 
   /* ── TRAIL (near-black navy backgrounds) ── */
   --color-trail-950: #06080F;

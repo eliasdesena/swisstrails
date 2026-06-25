@@ -1,11 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk } from "next/font/google";
+import { DM_Sans } from "next/font/google";
 import "./globals.css";
 
-const spaceGrotesk = Space_Grotesk({
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-space-grotesk",
+  variable: "--font-sans",
   display: "swap",
 });
 
@@ -65,7 +64,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={spaceGrotesk.variable}>
+    <html lang="en" suppressHydrationWarning className={dmSans.variable}>
       <body className="bg-trail-950 text-fg antialiased">
         {children}
       </body>
