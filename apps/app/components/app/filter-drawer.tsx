@@ -76,7 +76,7 @@ export function FilterDrawer({ isOpen, onClose, resultCount }: FilterDrawerProps
           {/* Panel */}
           <motion.div
             className={cn(
-              "fixed z-[1200] bg-trail-950 overflow-hidden",
+              "fixed z-[1200] bg-trail-950 overflow-hidden flex flex-col",
               "bottom-[calc(74px+env(safe-area-inset-bottom))] left-2 right-2 max-h-[72dvh] rounded-xl",
               "lg:bottom-auto lg:left-auto lg:top-[56px] lg:right-4 lg:w-72 lg:max-h-[calc(100vh-72px)] lg:rounded-xl"
             )}
@@ -85,8 +85,8 @@ export function FilterDrawer({ isOpen, onClose, resultCount }: FilterDrawerProps
             exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="overflow-y-auto max-h-[inherit]">
-              <div className="p-4">
+            <div className="flex-1 overflow-y-auto overscroll-contain min-h-0">
+              <div className="p-4 pb-2">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-5">
                   <div className="flex items-center gap-2.5">
@@ -218,14 +218,17 @@ export function FilterDrawer({ isOpen, onClose, resultCount }: FilterDrawerProps
                   </div>
                 </div>
 
-                {/* CTA */}
-                <button
-                  onClick={onClose}
-                  className="w-full py-3 bg-alpine-600 hover:bg-alpine-500 active:bg-alpine-700 text-white text-sm font-medium rounded-lg transition-colors"
-                >
-                  Show {resultCount} result{resultCount !== 1 ? "s" : ""}
-                </button>
               </div>
+            </div>
+
+            {/* Pinned footer CTA — always reachable even on the long Region list */}
+            <div className="flex-shrink-0 border-t border-white/[0.06] bg-trail-950/95 p-3">
+              <button
+                onClick={onClose}
+                className="w-full py-3 bg-alpine-600 hover:bg-alpine-500 active:bg-alpine-700 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                Show {resultCount} result{resultCount !== 1 ? "s" : ""}
+              </button>
             </div>
           </motion.div>
         </>

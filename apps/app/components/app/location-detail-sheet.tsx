@@ -201,16 +201,6 @@ export function LocationDetailSheet({
                   </div>
                 )}
 
-                {/* View on map CTA */}
-                <button
-                  onClick={viewOnMap}
-                  className="w-full flex items-center justify-center gap-2 py-3.5 bg-alpine-600 hover:bg-alpine-500 active:bg-alpine-700 text-white text-sm font-medium rounded-lg transition-colors"
-                >
-                  <MapPin className="w-4 h-4" />
-                  View on Map
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-
                 {/* Similar */}
                 {similar.length > 0 && (
                   <div>
@@ -249,8 +239,20 @@ export function LocationDetailSheet({
                   </div>
                 )}
 
-                <div className="h-2 pb-[env(safe-area-inset-bottom)]" />
+                <div className="h-1" />
               </div>
+            </div>
+
+            {/* Sticky footer CTA — always visible above the fold + home indicator */}
+            <div className="flex-shrink-0 border-t border-white/[0.06] bg-trail-950/95 px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+              <button
+                onClick={viewOnMap}
+                className="w-full flex items-center justify-center gap-2 py-3.5 bg-alpine-600 hover:bg-alpine-500 active:bg-alpine-700 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                <MapPin className="w-4 h-4" />
+                View on Map
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
           </motion.div>
         </>
