@@ -54,7 +54,7 @@ export function AppHeader() {
       </header>
 
       {/* Bottom nav — mobile */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-trail-950/98 backdrop-blur-xl pb-[env(safe-area-inset-bottom)]" style={{ boxShadow: "0 -1px 0 rgba(255,255,255,0.04)" }}>
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-trail-950/98 backdrop-blur-xl pb-[calc(0.625rem+env(safe-area-inset-bottom))]" style={{ boxShadow: "0 -1px 0 rgba(255,255,255,0.04)" }}>
         <div className="flex items-stretch justify-around h-16 px-2">
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href || (item.href === "/explore" && pathname === "/");
@@ -63,11 +63,11 @@ export function AppHeader() {
                 key={item.href}
                 href={item.href}
                 aria-current={isActive ? "page" : undefined}
-                className="flex flex-1 flex-col items-center justify-center gap-1 min-w-[56px]"
+                className="flex flex-1 flex-col items-center justify-center gap-1.5 min-w-[56px]"
               >
                 <item.icon
                   className={cn(
-                    "w-5 h-5 transition-colors duration-150",
+                    "w-6 h-6 transition-colors duration-150",
                     isActive ? "text-alpine-400" : "text-fg-muted"
                   )}
                 />
