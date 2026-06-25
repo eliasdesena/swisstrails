@@ -5,7 +5,7 @@ import { Check, Zap, Shield } from "lucide-react";
 import { Reveal } from "@/components/shared/reveal";
 import { Button } from "@/components/ui/button";
 import { PRICING } from "@/data/categories";
-
+import { APP_URL } from "@/lib/config";
 
 export function Pricing() {
   return (
@@ -87,7 +87,7 @@ export function Pricing() {
                 size="xl"
                 className="w-full shadow-[0_0_40px_rgba(245,184,40,0.2)]"
               >
-                <a href="/checkout">
+                <a href={`${APP_URL}/checkout`}>
                   Unlock The Map — CHF 29 →
                 </a>
               </Button>

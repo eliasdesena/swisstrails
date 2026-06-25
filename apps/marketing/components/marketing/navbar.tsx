@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/brand/logo";
 import { cn } from "@/lib/utils";
+import { APP_URL } from "@/lib/config";
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -63,12 +64,12 @@ export function Navbar() {
 
             {/* Desktop CTA */}
             <div className="hidden lg:flex items-center gap-3">
-              <Link
-                href="/login"
+              <a
+                href={`${APP_URL}/login`}
                 className="text-fg-muted hover:text-fg text-sm transition-colors"
               >
                 Log in
-              </Link>
+              </a>
               <Button asChild size="sm" variant="gold">
                 <a href="#pricing">Get Access →</a>
               </Button>
@@ -121,13 +122,13 @@ export function Navbar() {
                 Unlock the Map — CHF 29
               </a>
             </Button>
-            <Link
-              href="/login"
+            <a
+              href={`${APP_URL}/login`}
               className="text-center text-fg-muted text-sm py-2"
               onClick={() => setIsMenuOpen(false)}
             >
               Already have access? Log in
-            </Link>
+            </a>
           </div>
         </motion.div>
       </motion.div>
