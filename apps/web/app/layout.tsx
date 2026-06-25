@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     template: "%s | Swiss Trails",
   },
   description:
-    "50+ handpicked locations across Switzerland — hidden lakes, secret viewpoints, and weekends you'll remember forever. One payment. Lifetime access.",
+    "500+ handpicked locations across Switzerland — hidden lakes, secret viewpoints, and weekends you'll remember forever. One payment. Lifetime access.",
   keywords: [
     "Switzerland hiking",
     "hidden lakes Switzerland",
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     siteName: "Swiss Trails",
     title: "Swiss Trails — Your Best Summer, Already Planned",
     description:
-      "50+ handpicked locations across Switzerland. Hidden lakes, secret viewpoints, and weekends you'll remember forever.",
+      "500+ handpicked locations across Switzerland. Hidden lakes, secret viewpoints, and weekends you'll remember forever.",
     images: [
       {
         url: "/og-image.jpg",
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Swiss Trails — Your Best Summer, Already Planned",
     description:
-      "50+ handpicked locations across Switzerland. One payment. Lifetime access.",
+      "500+ handpicked locations across Switzerland. One payment. Lifetime access.",
     images: ["/og-image.jpg"],
   },
   robots: {

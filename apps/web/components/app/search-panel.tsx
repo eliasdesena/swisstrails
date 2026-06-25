@@ -189,7 +189,9 @@ export function SearchPanel({ isOpen, onClose }: SearchPanelProps) {
           <div className="flex-1 overflow-y-auto p-3 space-y-2">
             {filteredLocations.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-48 text-center px-4">
-                <span className="text-3xl mb-3">🗺</span>
+                <div className="w-10 h-10 rounded-full bg-white/[0.04] flex items-center justify-center mb-3">
+                  <svg className="w-5 h-5 text-stone-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg>
+                </div>
                 <p className="text-fg-muted text-sm font-medium">No locations found</p>
                 <p className="text-fg-subtle text-xs mt-1">Try adjusting your filters</p>
               </div>

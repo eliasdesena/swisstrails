@@ -11,7 +11,7 @@ import {
 const FAQ_ITEMS = [
   {
     q: "What exactly do I get?",
-    a: "You get instant access to our curated map of 50+ handpicked locations across Switzerland. Each location includes photos, descriptions, insider tips, coordinates, difficulty ratings, best times to visit, what to bring, travel time estimates, and more. Everything you need, nothing you don't.",
+    a: "You get instant access to our curated map of 500+ handpicked locations across Switzerland. Each location includes photos, descriptions, insider tips, coordinates, difficulty ratings, best times to visit, what to bring, travel time estimates, and more. Everything you need, nothing you don't.",
   },
   {
     q: "Is this really a one-time payment?",

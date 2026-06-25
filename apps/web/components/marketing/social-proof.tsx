@@ -30,7 +30,7 @@ export function SocialProof() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/[0.04] rounded-xl overflow-hidden">
           {[
             { value: "3,200+", label: "Explorers" },
-            { value: "50+", label: "Locations" },
+            { value: "500+", label: "Locations" },
             { value: "★ 4.9", label: "Average rating" },
             { value: "CHF 29", label: "One-time, forever" },
           ].map((stat, i) => (

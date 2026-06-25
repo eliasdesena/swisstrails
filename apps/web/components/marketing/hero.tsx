@@ -82,7 +82,7 @@ export function Hero() {
         >
           <span className="t-eyebrow text-alpine-400">Switzerland · Summer 2025</span>
           <span className="w-1 h-1 rounded-full bg-alpine-700" />
-          <span className="t-eyebrow text-fg-subtle">50+ Hidden Locations</span>
+          <span className="t-eyebrow text-fg-subtle">500+ Hidden Locations</span>
         </motion.div>
 
         {/* Main headline */}

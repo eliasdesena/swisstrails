@@ -7,22 +7,18 @@ import { Reveal } from "@/components/shared/reveal";
 
 const PAIN_POINTS = [
   {
-    emoji: "😔",
     title: "Same places, every weekend",
     body: "Interlaken again? The Instagram crowd? You know Switzerland is incredible — but somehow you end up in the same ten spots every summer.",
   },
   {
-    emoji: "⏳",
     title: "Summer slipping away",
     body: "June turns to September in a blink. How many weekends did you actually remember? How many times did you say 'I'll go next weekend'?",
   },
   {
-    emoji: "🔍",
     title: "Hours of research, no results",
     body: "Down the rabbit hole of blog posts, Reddit threads, and half-baked Google Maps lists. You spend more time researching than actually going.",
   },
   {
-    emoji: "🗺",
     title: "Missing the places worth finding",
     body: "The spots that become stories — the ones you talk about years later — are never the ones you stumble across. They take insider knowledge.",
   },

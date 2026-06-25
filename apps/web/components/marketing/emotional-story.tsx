@@ -5,11 +5,11 @@ import { useRef } from "react";
 import { Reveal } from "@/components/shared/reveal";
 
 const STORY_MOMENTS = [
-  { emoji: "🌅", text: "The sunrise you nearly missed" },
-  { emoji: "💧", text: "The lake no one else knew about" },
-  { emoji: "🚗", text: "The drive that made you realize Switzerland is something else" },
-  { emoji: "✨", text: "The night sky that made you go quiet" },
-  { emoji: "🏔", text: "The view that stopped the conversation mid-sentence" },
+  "The sunrise you nearly missed",
+  "The lake no one else knew about",
+  "The drive that made you realize Switzerland is something else",
+  "The night sky that made you go quiet",
+  "The view that stopped the conversation mid-sentence",
 ];
 
 export function EmotionalStory() {
@@ -71,13 +71,13 @@ export function EmotionalStory() {
 
         {/* Moments list */}
         <div className="flex flex-col max-w-lg mx-auto mb-16">
-          {STORY_MOMENTS.map((moment, i) => (
-            <Reveal key={moment.text} delay={0.35 + i * 0.1} direction="left">
+          {STORY_MOMENTS.map((text, i) => (
+            <Reveal key={text} delay={0.35 + i * 0.1} direction="left">
               <div className="flex items-center gap-5 py-4 text-left">
                 <span className="font-mono text-alpine-600 flex-shrink-0 tabular-nums" style={{ fontSize: 11 }}>
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <p className="text-fg text-sm">{moment.text}</p>
+                <p className="text-fg text-sm">{text}</p>
               </div>
             </Reveal>
           ))}

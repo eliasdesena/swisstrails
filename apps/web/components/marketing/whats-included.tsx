@@ -44,7 +44,7 @@ export function WhatsIncluded() {
           </div>
           <Reveal delay={0.2}>
             <p className="t-body text-fg-muted max-w-md">
-              50+ locations spanning 8 categories — every one researched, verified,
+              500+ locations spanning 8 categories — every one researched, verified,
               and packed with everything you need to make the trip perfect.
             </p>
           </Reveal>

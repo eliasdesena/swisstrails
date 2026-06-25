@@ -2,10 +2,16 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "swiss-trails",
+      "name": "Next.js (Turbo)",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "swiss-trails-web", "dev"],
+      "runtimeArgs": ["dev"],
       "port": 3000
+    },
+    {
+      "name": "Prisma Studio",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "swiss-trails-web", "db:studio"],
+      "port": 5555
     }
   ]
 }
