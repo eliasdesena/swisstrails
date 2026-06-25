@@ -99,6 +99,12 @@ export const regionConfig: Record<Region, { label: string; canton: string }> =
     fribourg: { label: "Fribourg", canton: "FR" },
     vaud: { label: "Vaud", canton: "VD" },
     obwalden: { label: "Obwalden", canton: "OW" },
+    nidwalden: { label: "Nidwalden", canton: "NW" },
+    schwyz: { label: "Schwyz", canton: "SZ" },
+    glarus: { label: "Glarus", canton: "GL" },
+    jura: { label: "Jura", canton: "JU" },
+    neuchatel: { label: "Neuchâtel", canton: "NE" },
+    solothurn: { label: "Solothurn", canton: "SO" },
   };
 
 export function slugify(text: string): string {

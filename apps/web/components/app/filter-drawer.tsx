@@ -15,18 +15,23 @@ const DIFFICULTIES: { id: Difficulty; label: string }[] = [
 ];
 
 const REGIONS: { id: Region; label: string }[] = [
+  { id: "graubunden", label: "Graubünden" },
   { id: "valais", label: "Valais" },
   { id: "bern", label: "Bern" },
-  { id: "graubunden", label: "Graubünden" },
   { id: "ticino", label: "Ticino" },
-  { id: "lucerne", label: "Lucerne" },
   { id: "uri", label: "Uri" },
-  { id: "zurich", label: "Zurich" },
-  { id: "fribourg", label: "Fribourg" },
-  { id: "vaud", label: "Vaud" },
+  { id: "schwyz", label: "Schwyz" },
+  { id: "glarus", label: "Glarus" },
+  { id: "lucerne", label: "Lucerne" },
   { id: "obwalden", label: "Obwalden" },
+  { id: "nidwalden", label: "Nidwalden" },
   { id: "st-gallen", label: "St. Gallen" },
   { id: "appenzell", label: "Appenzell" },
+  { id: "fribourg", label: "Fribourg" },
+  { id: "vaud", label: "Vaud" },
+  { id: "jura", label: "Jura" },
+  { id: "neuchatel", label: "Neuchâtel" },
+  { id: "solothurn", label: "Solothurn" },
 ];
 
 const DIFF_COLORS: Record<Difficulty, string> = {

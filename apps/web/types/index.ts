@@ -30,7 +30,13 @@ export type Region =
   | "appenzell"
   | "fribourg"
   | "vaud"
-  | "obwalden";
+  | "obwalden"
+  | "nidwalden"
+  | "schwyz"
+  | "glarus"
+  | "jura"
+  | "neuchatel"
+  | "solothurn";
 
 export interface Coordinates {
   lat: number;
