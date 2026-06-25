@@ -120,36 +120,16 @@ export default function ExplorePage() {
             </p>
           </div>
         ) : (
-          <div className="flex gap-1 px-1 pt-1 pb-20 lg:gap-1.5 lg:px-1.5 lg:pt-1.5 lg:pb-8">
-            {/* Column 1 */}
-            <div className="flex-1 flex flex-col gap-1 lg:gap-1.5">
-              {filteredLocations
-                .filter((_, i) => i % 2 === 0)
-                .map((loc, i) => (
-                  <MasonryCard
-                    key={loc.id}
-                    location={loc}
-                    aspectRatio={ASPECT_RATIOS[(i * 2) % ASPECT_RATIOS.length]}
-                    onClick={() => setSelectedLocation(loc)}
-                    animDelay={Math.min(i * 0.03, 0.24)}
-                  />
-                ))}
-            </div>
-
-            {/* Column 2 — offset for stagger rhythm */}
-            <div className="flex-1 flex flex-col gap-1 lg:gap-1.5 mt-10">
-              {filteredLocations
-                .filter((_, i) => i % 2 === 1)
-                .map((loc, i) => (
-                  <MasonryCard
-                    key={loc.id}
-                    location={loc}
-                    aspectRatio={ASPECT_RATIOS[(i * 2 + 1) % ASPECT_RATIOS.length]}
-                    onClick={() => setSelectedLocation(loc)}
-                    animDelay={Math.min(i * 0.03 + 0.05, 0.26)}
-                  />
-                ))}
-            </div>
+            <div className="columns-2 lg:columns-3 xl:columns-4 [column-gap:4px] lg:[column-gap:6px] px-1 pt-1 pb-20 lg:px-1.5 lg:pt-1.5 lg:pb-8">
+            {filteredLocations.map((loc, i) => (
+              <MasonryCard
+                key={loc.id}
+                location={loc}
+                aspectRatio={ASPECT_RATIOS[i % ASPECT_RATIOS.length]}
+                onClick={() => setSelectedLocation(loc)}
+                animDelay={Math.min(i * 0.025, 0.3)}
+              />
+            ))}
           </div>
         )}
       </div>
@@ -181,7 +161,7 @@ function MasonryCard({ location, aspectRatio, onClick, animDelay }: MasonryCardP
 
   return (
     <motion.button
-      className="relative w-full rounded-md overflow-hidden bg-white/[0.04] block"
+      className="relative w-full rounded-md overflow-hidden bg-white/[0.04] block break-inside-avoid mb-1 lg:mb-1.5"
       style={{ aspectRatio }}
       onClick={onClick}
       initial={{ opacity: 0 }}
