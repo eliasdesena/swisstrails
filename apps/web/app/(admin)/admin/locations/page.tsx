@@ -1,0 +1,107 @@
+import { Plus, Edit, Trash2, Eye } from "lucide-react";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { PLACEHOLDER_LOCATIONS } from "@/data/locations";
+import { categoryConfig, difficultyConfig } from "@/lib/utils";
+
+export default function AdminLocationsPage() {
+  return (
+    <div className="min-h-screen bg-trail-950 p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="t-h2 text-fg">Locations</h1>
+            <p className="text-fg-muted text-sm mt-1">
+              {PLACEHOLDER_LOCATIONS.length} locations total
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link href="/admin" className="text-fg-subtle hover:text-fg text-sm transition-colors">
+              ← Dashboard
+            </Link>
+            <Button variant="alpine" size="sm">
+              <Plus className="w-4 h-4" />
+              Add Location
+            </Button>
+          </div>
+        </div>
+
+        {/* Locations table */}
+        <div className="card-solid rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-stone-800">
+                  {["Name", "Category", "Region", "Difficulty", "Status", "Actions"].map((h) => (
+                    <th
+                      key={h}
+                      className="text-left px-5 py-3 text-fg-subtle text-xs font-medium uppercase tracking-wider"
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {PLACEHOLDER_LOCATIONS.map((loc) => {
+                  const cat = categoryConfig[loc.category];
+                  const diff = difficultyConfig[loc.difficulty];
+                  return (
+                    <tr
+                      key={loc.id}
+                      className="border-b border-stone-800/50 last:border-0 hover:bg-trail-800/40 transition-colors"
+                    >
+                      <td className="px-5 py-4">
+                        <p className="text-fg text-sm font-medium">{loc.name}</p>
+                        <p className="text-fg-subtle text-xs mt-0.5">{loc.slug}</p>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className="text-fg-muted text-sm">
+                          {cat.emoji} {cat.label}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className="text-fg-muted text-sm capitalize">
+                          {loc.region}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className={`text-xs font-medium ${diff.color}`}>
+                          {diff.label}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        {loc.isFeatured ? (
+                          <Badge variant="alpine" size="sm">Featured</Badge>
+                        ) : loc.isNew ? (
+                          <Badge variant="gold" size="sm">New</Badge>
+                        ) : (
+                          <Badge variant="default" size="sm">Active</Badge>
+                        )}
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-2">
+                          <button className="w-7 h-7 rounded-lg bg-trail-700 border border-stone-700 flex items-center justify-center text-fg-subtle hover:text-fg transition-colors">
+                            <Eye className="w-3.5 h-3.5" />
+                          </button>
+                          <button className="w-7 h-7 rounded-lg bg-trail-700 border border-stone-700 flex items-center justify-center text-fg-subtle hover:text-fg transition-colors">
+                            <Edit className="w-3.5 h-3.5" />
+                          </button>
+                          <button className="w-7 h-7 rounded-lg bg-red-950 border border-red-900 flex items-center justify-center text-red-400 hover:text-red-300 transition-colors">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
