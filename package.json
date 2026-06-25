@@ -1,9 +1,11 @@
 {
-  "name": "betteryou",
+  "name": "swiss-trails-monorepo",
   "private": true,
   "packageManager": "pnpm@10.12.1",
   "scripts": {
     "dev": "turbo run dev",
+    "dev:marketing": "turbo run dev --filter=swiss-trails-marketing",
+    "dev:app": "turbo run dev --filter=swiss-trails-app",
     "build": "turbo run build",
     "start": "turbo run start",
     "lint": "turbo run lint",

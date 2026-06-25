@@ -1,0 +1,14 @@
+@import "tailwindcss";
+@source "../../../packages/ui/src";
+
+@font-face {
+  font-family: "Alcyone";
+  src: url("/fonts/Alcyone-Medium.woff2") format("woff2"),
+       url("/fonts/Alcyone-Medium.woff") format("woff"),
+       url("/fonts/Alcyone-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@import "../../../packages/ui/src/globals.css";

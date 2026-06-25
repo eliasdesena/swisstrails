@@ -1,0 +1,8 @@
+{
+  "name": "@swiss-trails/types",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    ".": "./index.ts"
+  }
+}

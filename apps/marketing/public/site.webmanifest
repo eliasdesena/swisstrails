@@ -1,0 +1,35 @@
+{
+  "name": "Swiss Trails",
+  "short_name": "Swiss Trails",
+  "description": "500+ hidden gems across Switzerland",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#06080F",
+  "theme_color": "#06080F",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["travel", "navigation", "lifestyle"],
+  "lang": "en-CH",
+  "dir": "ltr",
+  "scope": "/",
+  "prefer_related_applications": false
+}

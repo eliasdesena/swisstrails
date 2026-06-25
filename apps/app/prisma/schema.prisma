@@ -1,0 +1,248 @@
+// Swiss Trails — Prisma Schema
+// Used alongside Supabase (Supabase is the primary backend)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─────────────────────────────────────────────
+// USERS & AUTH
+// ─────────────────────────────────────────────
+
+model Profile {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  name             String?
+  avatarUrl        String?   @map("avatar_url")
+  role             UserRole  @default(USER)
+  hasPurchased     Boolean   @default(false) @map("has_purchased")
+  purchasedAt      DateTime? @map("purchased_at")
+  stripeCustomerId String?   @map("stripe_customer_id")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  favorites  Favorite[]
+  purchases  Purchase[]
+  auditLogs  AuditLog[]
+
+  @@map("profiles")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+
+  @@map("user_role")
+}
+
+// ─────────────────────────────────────────────
+// LOCATIONS
+// ─────────────────────────────────────────────
+
+model Location {
+  id                  String           @id @default(uuid())
+  slug                String           @unique
+  name                String
+  tagline             String
+  description         String           @db.Text
+  longDescription     String?          @db.Text @map("long_description")
+  category            LocationCategory
+  difficulty          Difficulty
+  region              Region
+  lat                 Float
+  lng                 Float
+  heroImageUrl        String           @map("hero_image_url")
+  heroImageAlt        String           @map("hero_image_alt")
+  tags                String[]
+  bestSeason          Season[]         @map("best_season")
+  travelTimeMinutes   Int              @map("travel_time_minutes")
+  visitDurationMin    Int              @map("visit_duration_min")
+  visitDurationMax    Int              @map("visit_duration_max")
+  highlights          String[]
+  tips                String[]
+  whatToBring         String[]         @map("what_to_bring")
+  accessInfo          String           @map("access_info") @db.Text
+  parkingAvailable    Boolean          @default(false) @map("parking_available")
+  publicTransport     Boolean          @default(false) @map("public_transport")
+  elevation           Int?
+  distanceKm          Float?           @map("distance_km")
+  isFeatured          Boolean          @default(false) @map("is_featured")
+  isPublished         Boolean          @default(false) @map("is_published")
+  viewCount           Int              @default(0) @map("view_count")
+  saveCount           Int              @default(0) @map("save_count")
+  createdAt           DateTime         @default(now()) @map("created_at")
+  updatedAt           DateTime         @updatedAt @map("updated_at")
+
+  images    LocationImage[]
+  favorites Favorite[]
+
+  @@index([category])
+  @@index([region])
+  @@index([difficulty])
+  @@index([isFeatured])
+  @@index([isPublished])
+  @@map("locations")
+}
+
+model LocationImage {
+  id         String   @id @default(uuid())
+  locationId String   @map("location_id")
+  url        String
+  alt        String
+  width      Int?
+  height     Int?
+  credit     String?
+  sortOrder  Int      @default(0) @map("sort_order")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@index([locationId])
+  @@map("location_images")
+}
+
+enum LocationCategory {
+  HIDDEN_LAKE    @map("hidden-lake")
+  VIEWPOINT
+  WATERFALL
+  GORGE
+  SUNSET_SPOT    @map("sunset-spot")
+  NIGHT_SKY      @map("night-sky")
+  ROAD_TRIP      @map("road-trip")
+  PHOTO_SPOT     @map("photo-spot")
+  FOREST
+  GLACIER
+  ALPINE_MEADOW  @map("alpine-meadow")
+  RIVER
+
+  @@map("location_category")
+}
+
+enum Difficulty {
+  EASY       @map("easy")
+  MODERATE   @map("moderate")
+  CHALLENGING @map("challenging")
+  EXPERT     @map("expert")
+
+  @@map("difficulty")
+}
+
+enum Region {
+  BERN
+  ZURICH
+  GRAUBUNDEN
+  VALAIS
+  LUCERNE
+  URI
+  TICINO
+  ST_GALLEN   @map("st-gallen")
+  APPENZELL
+  FRIBOURG
+  VAUD
+  OBWALDEN
+
+  @@map("region")
+}
+
+enum Season {
+  SPRING     @map("spring")
+  SUMMER     @map("summer")
+  AUTUMN     @map("autumn")
+  WINTER     @map("winter")
+  YEAR_ROUND @map("year-round")
+
+  @@map("season")
+}
+
+// ─────────────────────────────────────────────
+// FAVORITES
+// ─────────────────────────────────────────────
+
+model Favorite {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  locationId String   @map("location_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user     Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, locationId])
+  @@index([userId])
+  @@map("favorites")
+}
+
+// ─────────────────────────────────────────────
+// PURCHASES
+// ─────────────────────────────────────────────
+
+model Purchase {
+  id                     String         @id @default(uuid())
+  userId                 String         @map("user_id")
+  stripeSessionId        String         @unique @map("stripe_session_id")
+  stripePaymentIntentId  String?        @unique @map("stripe_payment_intent_id")
+  amount                 Float
+  currency               String         @default("chf")
+  status                 PurchaseStatus @default(PENDING)
+  createdAt              DateTime       @default(now()) @map("created_at")
+  updatedAt              DateTime       @updatedAt @map("updated_at")
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("purchases")
+}
+
+enum PurchaseStatus {
+  PENDING   @map("pending")
+  COMPLETED @map("completed")
+  REFUNDED  @map("refunded")
+
+  @@map("purchase_status")
+}
+
+// ─────────────────────────────────────────────
+// TESTIMONIALS
+// ─────────────────────────────────────────────
+
+model Testimonial {
+  id              String   @id @default(uuid())
+  name            String
+  age             Int?
+  city            String
+  country         String   @default("Switzerland")
+  avatarUrl       String?  @map("avatar_url")
+  content         String   @db.Text
+  rating          Int      @default(5)
+  isPublished     Boolean  @default(false) @map("is_published")
+  locationVisited String?  @map("location_visited")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@map("testimonials")
+}
+
+// ─────────────────────────────────────────────
+// AUDIT LOGS
+// ─────────────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?  @map("user_id")
+  action    String
+  resource  String
+  resourceId String? @map("resource_id")
+  metadata  Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user Profile? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([resource])
+  @@map("audit_logs")
+}
