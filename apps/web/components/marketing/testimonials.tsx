@@ -20,7 +20,7 @@ function TestimonialCard({
     <motion.div
       className={cn(
         "flex-shrink-0 w-full max-w-sm card-solid p-7 rounded-xl transition-all duration-500",
-        isActive ? "border-white/[0.08]" : "opacity-60"
+        isActive ? "" : "opacity-50"
       )}
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}

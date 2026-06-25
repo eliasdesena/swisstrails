@@ -73,7 +73,7 @@ export function EmotionalStory() {
         <div className="flex flex-col max-w-lg mx-auto mb-16">
           {STORY_MOMENTS.map((moment, i) => (
             <Reveal key={moment.text} delay={0.35 + i * 0.1} direction="left">
-              <div className="flex items-center gap-5 py-4 border-b border-white/[0.06] last:border-0 text-left">
+              <div className="flex items-center gap-5 py-4 text-left">
                 <span className="font-mono text-alpine-600 flex-shrink-0 tabular-nums" style={{ fontSize: 11 }}>
                   {String(i + 1).padStart(2, "0")}
                 </span>

@@ -39,7 +39,7 @@ export function Pricing() {
         {/* Pricing card */}
         <div className="max-w-lg mx-auto">
           <motion.div
-            className="relative card-solid rounded-2xl overflow-hidden border-gold-900/40"
+            className="relative card-solid rounded-2xl overflow-hidden"
             initial={{ opacity: 0, y: 40, scale: 0.97 }}
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
             viewport={{ once: true }}

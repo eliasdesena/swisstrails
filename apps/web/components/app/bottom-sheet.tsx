@@ -140,9 +140,10 @@ export function BottomSheet() {
             style={{
               zIndex: PANEL_Z,
               width: 420,
-              background: "rgb(11,15,28)",
-              borderLeft: "1px solid rgba(255,255,255,0.05)",
-              boxShadow: "-12px 0 80px rgba(0,0,0,0.6)",
+              background: "rgba(11,15,28,0.92)",
+              backdropFilter: "blur(24px)",
+              WebkitBackdropFilter: "blur(24px)",
+              boxShadow: "-16px 0 80px rgba(0,0,0,0.7)",
             }}
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
@@ -163,11 +164,12 @@ export function BottomSheet() {
         style={{
           y,
           zIndex: PANEL_Z,
-          background: "rgb(11,15,28)",
+          background: "rgba(11,15,28,0.94)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
           borderTopLeftRadius: 16,
           borderTopRightRadius: 16,
-          borderTop: "1px solid rgba(255,255,255,0.06)",
-          boxShadow: "0 -8px 60px rgba(0,0,0,0.6)",
+          boxShadow: "0 -12px 60px rgba(0,0,0,0.7)",
         }}
       >
         {/* Drag handle */}

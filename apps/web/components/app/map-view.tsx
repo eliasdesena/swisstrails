@@ -37,10 +37,9 @@ if (process.env.NODE_ENV === "development" && typeof window !== "undefined") {
 function createLocationIcon(_location: Location, isSelected: boolean) {
   const dot = isSelected ? 20 : 14;
   const bg = isSelected ? "#FFFFFF" : "rgba(255,255,255,0.85)";
-  const border = isSelected ? "2.5px solid rgba(107,120,255,0.8)" : "2px solid rgba(0,0,0,0.18)";
   const shadow = isSelected
-    ? "0 0 0 4px rgba(107,120,255,0.22), 0 2px 10px rgba(0,0,0,0.45)"
-    : "0 1px 5px rgba(0,0,0,0.35)";
+    ? "0 0 0 5px rgba(107,120,255,0.28), 0 3px 14px rgba(0,0,0,0.6)"
+    : "0 2px 8px rgba(0,0,0,0.55), 0 0 0 1.5px rgba(255,255,255,0.1)";
 
   return L.divIcon({
     html: `<div style="
@@ -51,7 +50,6 @@ function createLocationIcon(_location: Location, isSelected: boolean) {
       width:${dot}px;height:${dot}px;
       border-radius:50%;
       background:${bg};
-      border:${border};
       box-shadow:${shadow};
       transition:all 0.15s;
     "></div></div>`,
@@ -68,12 +66,11 @@ function createClusterIcon(cluster: L.MarkerCluster) {
   return L.divIcon({
     html: `<div style="
       width:${size}px;height:${size}px;
-      background:rgba(255,255,255,0.92);
-      border:1.5px solid rgba(0,0,0,0.12);
+      background:rgba(255,255,255,0.88);
       border-radius:50%;
       display:flex;align-items:center;justify-content:center;
-      box-shadow:0 2px 10px rgba(0,0,0,0.3);
-      backdrop-filter:blur(4px);
+      box-shadow:0 3px 14px rgba(0,0,0,0.45);
+      backdrop-filter:blur(8px);
     "><span style="
       color:#0b0f1c;
       font-size:${count >= 100 ? 11 : 12}px;

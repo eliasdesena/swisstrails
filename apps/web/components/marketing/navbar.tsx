@@ -31,7 +31,7 @@ export function Navbar() {
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
           hasScrolled
-            ? "bg-trail-950/90 backdrop-blur-xl border-b border-white/[0.07] shadow-lg"
+            ? "bg-trail-950/85 backdrop-blur-xl shadow-[0_2px_40px_rgba(0,0,0,0.4)]"
             : "bg-transparent"
         )}
         initial={{ y: -80, opacity: 0 }}
