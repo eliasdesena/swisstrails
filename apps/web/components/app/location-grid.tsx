@@ -99,7 +99,7 @@ export function LocationGrid({
         {hasMore && (
           <div className="flex justify-center mt-6">
             <button
-              className="px-5 py-2.5 bg-trail-800 border border-white/[0.07] text-fg-muted text-sm rounded-xl hover:text-fg hover:border-white/[0.12] transition-colors"
+              className="px-5 py-2.5 bg-white/[0.04] text-stone-500 text-sm rounded-lg hover:bg-white/[0.07] hover:text-stone-300 transition-colors"
               onClick={() => setPage((p) => p + 1)}
             >
               Load more · {locations.length - visible.length} remaining

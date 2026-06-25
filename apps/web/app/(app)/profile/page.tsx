@@ -84,7 +84,7 @@ export default function ProfilePage() {
               <motion.a
                 key={item.label}
                 href={item.href}
-                className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.03] transition-colors group"
+                className="flex items-center gap-3 px-5 py-4 hover:bg-white/[0.03] transition-colors group"
                 whileTap={{ scale: 0.99 }}
               >
                 <div className="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center flex-shrink-0">

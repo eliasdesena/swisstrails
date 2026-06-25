@@ -98,7 +98,7 @@ export function Navbar() {
           onClick={() => setIsMenuOpen(false)}
         />
         <motion.div
-          className="absolute top-16 left-0 right-0 bg-trail-900 border-b border-white/[0.07] p-6"
+          className="absolute top-16 left-0 right-0 bg-trail-900 p-6"
           initial={{ y: -20, opacity: 0 }}
           animate={isMenuOpen ? { y: 0, opacity: 1 } : { y: -20, opacity: 0 }}
           transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
@@ -108,7 +108,7 @@ export function Navbar() {
               <a
                 key={link.href}
                 href={link.href}
-                className="text-fg-muted hover:text-fg py-3 text-base transition-colors border-b border-white/[0.06] last:border-0"
+                className="text-fg-muted hover:text-fg py-3 text-base transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 {link.label}

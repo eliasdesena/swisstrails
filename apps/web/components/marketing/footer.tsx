@@ -6,9 +6,9 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-white/[0.06]">
+    <footer>
       {/* Final CTA */}
-      <div className="py-20 lg:py-28 text-center border-b border-white/[0.06] bg-trail-900/30 relative overflow-hidden">
+      <div className="py-20 lg:py-28 text-center bg-trail-900/30 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-alpine-900/10 blur-3xl" />
         </div>
@@ -71,7 +71,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 pt-8 border-t border-white/[0.06] flex flex-col lg:flex-row items-center justify-between gap-4">
+        <div className="mt-10 pt-8 flex flex-col lg:flex-row items-center justify-between gap-4">
           <p className="text-fg-subtle text-xs">
             © {currentYear} Swiss Trails. All rights reserved.
           </p>

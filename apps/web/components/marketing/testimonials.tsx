@@ -62,7 +62,7 @@ function TestimonialCard({
       </div>
 
       {testimonial.locationVisited && (
-        <div className="mt-4 pt-4 border-t border-white/[0.06]">
+        <div className="mt-4 pt-3">
           <p className="text-fg-subtle text-xs">
             Visited: <span className="text-fg-muted">{testimonial.locationVisited}</span>
           </p>
@@ -112,7 +112,7 @@ export function Testimonials() {
 
         {/* Rating summary */}
         <Reveal delay={0.3}>
-          <div className="mt-12 flex flex-col lg:flex-row items-center justify-center gap-8 py-8 border-y border-white/[0.06]">
+          <div className="mt-12 flex flex-col lg:flex-row items-center justify-center gap-8 py-8">
             <div className="text-center">
               <p className="text-5xl font-bold text-fg tracking-tight">4.9</p>
               <div className="flex gap-1 justify-center mt-2">

@@ -10,6 +10,14 @@ import "leaflet.markercluster/dist/MarkerCluster.css";
 import L from "leaflet";
 import "leaflet.markercluster";
 
+const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "";
+
+const TILE_SATELLITE = `https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v12/tiles/256/{z}/{x}/{y}@2x?access_token=${MAPBOX_TOKEN}`;
+const TILE_DARK = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+
+const ATTR_SATELLITE = '&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a> &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+const ATTR_DARK = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+
 // Patch HMR re-mount issue in dev
 if (process.env.NODE_ENV === "development" && typeof window !== "undefined") {
   const proto = L.Map.prototype as unknown as Record<string, unknown>;
@@ -24,44 +32,55 @@ if (process.env.NODE_ENV === "development" && typeof window !== "undefined") {
   }
 }
 
+// 40px transparent hit area wrapping a 16–20px visible dot.
+// White on satellite, white on dark — universally readable.
 function createLocationIcon(_location: Location, isSelected: boolean) {
-  const size = isSelected ? 14 : 10;
-  const bg = isSelected ? "#6B78FF" : "rgba(107,120,255,0.7)";
-  const ring = isSelected ? "0 0 0 3px rgba(107,120,255,0.25), 0 2px 8px rgba(0,0,0,0.5)" : "0 2px 6px rgba(0,0,0,0.4)";
+  const dot = isSelected ? 20 : 14;
+  const bg = isSelected ? "#FFFFFF" : "rgba(255,255,255,0.85)";
+  const border = isSelected ? "2.5px solid rgba(107,120,255,0.8)" : "2px solid rgba(0,0,0,0.18)";
+  const shadow = isSelected
+    ? "0 0 0 4px rgba(107,120,255,0.22), 0 2px 10px rgba(0,0,0,0.45)"
+    : "0 1px 5px rgba(0,0,0,0.35)";
 
   return L.divIcon({
     html: `<div style="
-      width:${size}px;height:${size}px;
-      background:${bg};
+      width:44px;height:44px;
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;
+    "><div style="
+      width:${dot}px;height:${dot}px;
       border-radius:50%;
-      box-shadow:${ring};
-    "></div>`,
+      background:${bg};
+      border:${border};
+      box-shadow:${shadow};
+      transition:all 0.15s;
+    "></div></div>`,
     className: "",
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
-    popupAnchor: [0, -size],
+    iconSize: [44, 44],
+    iconAnchor: [22, 22],
+    popupAnchor: [0, -22],
   });
 }
 
 function createClusterIcon(cluster: L.MarkerCluster) {
   const count = cluster.getChildCount();
-  const size = count >= 100 ? 44 : count >= 10 ? 36 : 28;
-  const fontSize = count >= 100 ? 12 : 13;
+  const size = count >= 100 ? 48 : count >= 10 ? 40 : 32;
   return L.divIcon({
     html: `<div style="
       width:${size}px;height:${size}px;
-      background:rgba(10,14,36,0.9);
-      border:1px solid rgba(107,120,255,0.4);
+      background:rgba(255,255,255,0.92);
+      border:1.5px solid rgba(0,0,0,0.12);
       border-radius:50%;
       display:flex;align-items:center;justify-content:center;
-      backdrop-filter:blur(8px);
-      box-shadow:0 2px 12px rgba(0,0,0,0.4);
+      box-shadow:0 2px 10px rgba(0,0,0,0.3);
+      backdrop-filter:blur(4px);
     "><span style="
-      color:#9ba5ff;
-      font-size:${fontSize}px;
-      font-weight:600;
+      color:#0b0f1c;
+      font-size:${count >= 100 ? 11 : 12}px;
+      font-weight:700;
       font-family:inherit;
       line-height:1;
+      letter-spacing:-0.3px;
     ">${count}</span></div>`,
     className: "",
     iconSize: [size, size],
@@ -105,16 +124,12 @@ function ClusterLayer({ locations }: { locations: Location[] }) {
     });
 
     map.addLayer(group);
-
-    return () => {
-      map.removeLayer(group);
-    };
+    return () => { map.removeLayer(group); };
   }, [map, openBottomSheet, locations]);
 
   return null;
 }
 
-// Selected marker rendered separately so it always floats above clusters
 function SelectedMarker() {
   const { selectedLocationId } = useMapStore();
   const location = PLACEHOLDER_LOCATIONS.find((l) => l.id === selectedLocationId);
@@ -130,9 +145,10 @@ function SelectedMarker() {
 
 interface MapViewProps {
   locations: Location[];
+  isSatellite?: boolean;
 }
 
-export function MapView({ locations }: MapViewProps) {
+export function MapView({ locations, isSatellite = true }: MapViewProps) {
   const mapRef = useRef<L.Map | null>(null);
 
   useEffect(() => {
@@ -151,18 +167,19 @@ export function MapView({ locations }: MapViewProps) {
       zoom={SWITZERLAND_DEFAULT_ZOOM}
       zoomControl={false}
       className="w-full h-full"
-      style={{ background: "#0b0f1c" }}
+      style={{ background: isSatellite ? "#1a2a1a" : "#0b0f1c" }}
     >
       <MapController />
 
       <TileLayer
-        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        subdomains="abcd"
+        key={isSatellite ? "satellite" : "dark"}
+        url={isSatellite ? TILE_SATELLITE : TILE_DARK}
+        attribution={isSatellite ? ATTR_SATELLITE : ATTR_DARK}
+        subdomains={isSatellite ? "" : "abcd"}
         maxZoom={20}
       />
 
-      <ZoomControl position="topleft" />
+      <ZoomControl position="bottomright" />
       <ClusterLayer locations={locations} />
       <SelectedMarker />
     </MapContainer>

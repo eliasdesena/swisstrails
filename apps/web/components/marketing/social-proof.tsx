@@ -24,7 +24,7 @@ const TRUST_ITEMS = [
 
 export function SocialProof() {
   return (
-    <section id="stats" className="relative py-6 border-y border-white/[0.06]">
+    <section id="stats" className="relative py-6">
       {/* Stats row */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/[0.04] rounded-xl overflow-hidden">

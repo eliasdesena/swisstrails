@@ -11,7 +11,6 @@ import { LocationDetailSheet } from "@/components/app/location-detail-sheet";
 import { categoryConfig, regionConfig, cn } from "@/lib/utils";
 import type { Location } from "@/types";
 
-// Cycle through aspect ratios to create Pinterest-like height variation
 const ASPECT_RATIOS = ["3/4", "4/5", "2/3", "4/5", "3/4", "1/1", "4/5", "3/5"];
 
 export default function ExplorePage() {
@@ -31,8 +30,8 @@ export default function ExplorePage() {
 
   return (
     <div className="relative w-full h-full flex flex-col">
-      {/* Search bar */}
-      <div className="flex-shrink-0 flex items-center gap-2 px-3 py-2.5 border-b border-white/[0.05] bg-trail-950 z-[1100]">
+      {/* Search bar — no border, bg shift handles separation */}
+      <div className="flex-shrink-0 flex items-center gap-2 px-3 py-2.5 bg-trail-950/90 backdrop-blur-xl z-[1100]">
         <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-600 pointer-events-none" />
           <input
@@ -40,7 +39,7 @@ export default function ExplorePage() {
             placeholder="Search locations…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-8 bg-white/[0.04] rounded-lg text-sm text-fg placeholder:text-stone-600 outline-none transition-colors focus:bg-white/[0.07] focus:ring-0"
+            className="w-full h-8 bg-white/[0.05] rounded-lg text-sm text-fg placeholder:text-stone-600 outline-none transition-colors focus:bg-white/[0.09]"
             style={{ paddingLeft: "2.25rem", paddingRight: searchQuery ? "2rem" : "0.75rem" }}
           />
           <AnimatePresence>
@@ -71,7 +70,7 @@ export default function ExplorePage() {
           <SlidersHorizontal className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Filters</span>
           {activeFilterCount > 0 && (
-            <span className="text-[10px] font-bold text-alpine-400">
+            <span className="text-[10px] font-bold text-alpine-400 ml-0.5">
               {activeFilterCount}
             </span>
           )}
@@ -82,7 +81,7 @@ export default function ExplorePage() {
       <AnimatePresence>
         {(activeFilterCount > 0 || searchQuery) && (
           <motion.div
-            className="flex-shrink-0 flex items-center gap-2 px-3 py-1.5 border-b border-white/[0.04]"
+            className="flex-shrink-0 flex items-center gap-2 px-3 py-1 bg-trail-950/70"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -102,7 +101,7 @@ export default function ExplorePage() {
         )}
       </AnimatePresence>
 
-      {/* Masonry wall */}
+      {/* Masonry wall — full width, no max-width cap */}
       <div className="flex-1 overflow-y-auto overscroll-contain">
         {filteredLocations.length === 0 ? (
           <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center">
@@ -114,16 +113,16 @@ export default function ExplorePage() {
               Try a different search or{" "}
               <button
                 onClick={() => setShowFilters(true)}
-                className="text-alpine-400 underline underline-offset-2 transition-colors"
+                className="text-alpine-400 underline underline-offset-2"
               >
                 adjust filters
               </button>
             </p>
           </div>
         ) : (
-          <div className="flex gap-1.5 px-1.5 pt-1.5 pb-20 lg:max-w-4xl lg:mx-auto lg:px-4 lg:pt-4 lg:gap-2 lg:pb-8">
+          <div className="flex gap-1 px-1 pt-1 pb-20 lg:gap-1.5 lg:px-1.5 lg:pt-1.5 lg:pb-8">
             {/* Column 1 */}
-            <div className="flex-1 flex flex-col gap-1.5 lg:gap-2">
+            <div className="flex-1 flex flex-col gap-1 lg:gap-1.5">
               {filteredLocations
                 .filter((_, i) => i % 2 === 0)
                 .map((loc, i) => (
@@ -132,13 +131,13 @@ export default function ExplorePage() {
                     location={loc}
                     aspectRatio={ASPECT_RATIOS[(i * 2) % ASPECT_RATIOS.length]}
                     onClick={() => setSelectedLocation(loc)}
-                    animDelay={Math.min(i * 0.035, 0.28)}
+                    animDelay={Math.min(i * 0.03, 0.24)}
                   />
                 ))}
             </div>
 
-            {/* Column 2 — offset for rhythm */}
-            <div className="flex-1 flex flex-col gap-1.5 lg:gap-2 mt-8">
+            {/* Column 2 — offset for stagger rhythm */}
+            <div className="flex-1 flex flex-col gap-1 lg:gap-1.5 mt-10">
               {filteredLocations
                 .filter((_, i) => i % 2 === 1)
                 .map((loc, i) => (
@@ -147,7 +146,7 @@ export default function ExplorePage() {
                     location={loc}
                     aspectRatio={ASPECT_RATIOS[(i * 2 + 1) % ASPECT_RATIOS.length]}
                     onClick={() => setSelectedLocation(loc)}
-                    animDelay={Math.min(i * 0.035 + 0.05, 0.3)}
+                    animDelay={Math.min(i * 0.03 + 0.05, 0.26)}
                   />
                 ))}
             </div>
@@ -182,13 +181,13 @@ function MasonryCard({ location, aspectRatio, onClick, animDelay }: MasonryCardP
 
   return (
     <motion.button
-      className="relative w-full rounded-lg overflow-hidden bg-white/[0.04] block"
+      className="relative w-full rounded-md overflow-hidden bg-white/[0.04] block"
       style={{ aspectRatio }}
       onClick={onClick}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4, delay: animDelay }}
-      whileTap={{ scale: 0.98 }}
+      whileTap={{ scale: 0.99 }}
     >
       {!imgError ? (
         <img
@@ -204,13 +203,11 @@ function MasonryCard({ location, aspectRatio, onClick, animDelay }: MasonryCardP
         </div>
       )}
 
-      {/* Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-transparent" />
 
-      {/* Text */}
       <div className="absolute bottom-0 left-0 right-0 p-2.5 text-left">
         <p className="text-white text-xs font-medium leading-tight line-clamp-2">{location.name}</p>
-        <p className="text-white/50 text-[10px] mt-0.5">{regionConfig[location.region].label}</p>
+        <p className="text-white/45 text-[10px] mt-0.5">{regionConfig[location.region].label}</p>
       </div>
     </motion.button>
   );

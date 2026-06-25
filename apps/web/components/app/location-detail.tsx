@@ -291,10 +291,10 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
       </div>
 
       {/* Bottom CTA */}
-      <div className="flex-shrink-0 px-4 py-3 border-t border-white/[0.05] flex gap-2">
+      <div className="flex-shrink-0 px-4 py-3 flex gap-2">
         <button
           className={cn(
-            "flex-1 flex items-center justify-center gap-2 h-9 text-sm rounded-lg border border-white/[0.06] transition-colors",
+            "flex-1 flex items-center justify-center gap-2 h-9 text-sm rounded-lg bg-white/[0.04] transition-colors",
             fav ? "text-red-400 bg-red-950/30" : "text-stone-400 hover:text-fg"
           )}
           onClick={() => toggleFavorite(location.id)}
