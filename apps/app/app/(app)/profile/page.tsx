@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/shared/reveal";
 import { useFavoritesStore } from "@/store/favorites-store";
+import { useVisitedStore } from "@/store/visited-store";
 
 const MENU_ITEMS = [
   {
@@ -40,6 +41,7 @@ const MENU_ITEMS = [
 
 export default function ProfilePage() {
   const { favoriteIds } = useFavoritesStore();
+  const { visitedIds } = useVisitedStore();
 
   return (
     <div className="h-full overflow-y-auto">
@@ -67,7 +69,7 @@ export default function ProfilePage() {
           <div className="grid grid-cols-3 gap-3 mb-8">
             {[
               { label: "Saved", value: favoriteIds.size.toString(), Icon: Heart },
-              { label: "Explored", value: "0", Icon: MapPin },
+              { label: "Explored", value: visitedIds.size.toString(), Icon: MapPin },
               { label: "Since", value: "2025", Icon: Star },
             ].map((stat) => (
               <div

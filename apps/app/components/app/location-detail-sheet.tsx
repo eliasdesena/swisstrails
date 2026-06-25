@@ -2,10 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, MapPin, ArrowRight, Clock, Mountain, Navigation, Calendar } from "lucide-react";
+import { X, MapPin, ArrowRight, Clock, Mountain, Navigation, Calendar, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMapStore } from "@/store/map-store";
 import { useGeoStore } from "@/store/geo-store";
+import { useVisitedStore } from "@/store/visited-store";
 import { distanceKm as haversineKm, formatDistance } from "@/lib/distance";
 import { categoryConfig, regionConfig, cn } from "@/lib/utils";
 import { OpenInSheet } from "@/components/app/open-in-sheet";
@@ -46,6 +47,10 @@ export function LocationDetailSheet({
   const router = useRouter();
   const { openBottomSheet } = useMapStore();
   const userPosition = useGeoStore((s) => s.position);
+  const visited = useVisitedStore((s) =>
+    location ? s.visitedIds.has(location.id) : false
+  );
+  const toggleVisited = useVisitedStore((s) => s.toggleVisited);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [openInSheet, setOpenInSheet] = useState(false);
 
@@ -179,6 +184,21 @@ export function LocationDetailSheet({
                     </span>
                   )}
                 </div>
+
+                {/* Mark as visited */}
+                <button
+                  aria-pressed={visited}
+                  onClick={() => toggleVisited(location.id)}
+                  className={cn(
+                    "flex items-center justify-center gap-2 w-full h-11 px-4 text-sm font-medium rounded-lg border transition-colors active:scale-[0.99]",
+                    visited
+                      ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
+                      : "bg-transparent border-white/10 text-stone-400 hover:text-fg hover:border-white/20"
+                  )}
+                >
+                  <CheckCircle2 className={cn("w-4 h-4", visited && "text-emerald-400")} />
+                  {visited ? "Visited ✓" : "Mark as visited"}
+                </button>
 
                 {/* Description */}
                 {location.description && (

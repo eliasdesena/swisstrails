@@ -1,9 +1,10 @@
 "use client";
 
-import { Heart, Clock, TrendingUp, MapPin } from "lucide-react";
+import { Heart, Clock, TrendingUp, MapPin, Check } from "lucide-react";
 import Image from "next/image";
 import { cn, difficultyConfig, categoryConfig, formatDuration } from "@/lib/utils";
 import { useFavoritesStore } from "@/store/favorites-store";
+import { useVisitedStore } from "@/store/visited-store";
 import { useGeoStore } from "@/store/geo-store";
 import { distanceKm, formatDistance } from "@/lib/distance";
 import type { Location } from "@/types";
@@ -22,6 +23,7 @@ export function LocationCard({
   compact = false,
 }: LocationCardProps) {
   const { isFavorite, toggleFavorite } = useFavoritesStore();
+  const visited = useVisitedStore((s) => s.visitedIds.has(location.id));
   const userPosition = useGeoStore((s) => s.position);
   const fav = isFavorite(location.id);
   const diff = difficultyConfig[location.difficulty];
@@ -57,6 +59,15 @@ export function LocationCard({
               sizes="80px"
             />
             <div className="absolute inset-0 bg-trail-950/20" />
+            {/* Visited badge */}
+            {visited && (
+              <div
+                aria-label="Visited"
+                className="absolute top-1 left-1 w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center shadow-sm"
+              >
+                <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+              </div>
+            )}
           </div>
           {/* Content */}
           <div className="flex-1 min-w-0 px-3 py-2.5 bg-trail-900">
@@ -124,6 +135,16 @@ export function LocationCard({
                 )}
               />
             </button>
+
+            {/* Visited chip */}
+            {visited && (
+              <div className="absolute bottom-3 left-3">
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold tracking-wide uppercase text-emerald-300 bg-emerald-900/70 backdrop-blur-sm rounded px-1.5 py-0.5">
+                  <Check className="w-2.5 h-2.5" strokeWidth={3} />
+                  Visited
+                </span>
+              </div>
+            )}
 
             {/* New label */}
             {location.isNew && (
