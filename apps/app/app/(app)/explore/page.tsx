@@ -2,12 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Search, SlidersHorizontal, X, Sparkles } from "lucide-react";
 import { useMapStore } from "@/store/map-store";
 import { useGeoStore } from "@/store/geo-store";
 import { PLACEHOLDER_LOCATIONS } from "@/data/locations";
 import { filterLocations, countActiveFilters } from "@/lib/filters";
 import { sortLocations, type SortMode } from "@/lib/sort";
+import { currentSeason, isInSeason } from "@/lib/season";
+import { seasonConfig } from "@/lib/utils";
 import { FilterDrawer } from "@/components/app/filter-drawer";
 import { SortControl } from "@/components/app/sort-control";
 import { LocationDetailSheet } from "@/components/app/location-detail-sheet";
@@ -17,12 +19,16 @@ import type { Location } from "@/types";
 
 const ASPECT_RATIOS = ["3/4", "4/5", "2/3", "4/5", "3/4", "1/1", "4/5", "3/5"];
 
+// How many spots to show in the "In season now" rail.
+const SEASON_RAIL_LIMIT = 12;
+
 export default function ExplorePage() {
   const { searchQuery, setSearchQuery, activeFilters, clearFilters } = useMapStore();
   const userPosition = useGeoStore((s) => s.position);
   const [showFilters, setShowFilters] = useState(false);
   const [sortMode, setSortMode] = useState<SortMode>("featured");
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [seasonRailDismissed, setSeasonRailDismissed] = useState(false);
 
   const filteredLocations = useMemo(
     () =>
@@ -38,6 +44,26 @@ export default function ExplorePage() {
     () => countActiveFilters(activeFilters),
     [activeFilters]
   );
+
+  // "In season now" — month-of-year based, applied uniformly to every category.
+  // Featured spots first so the rail leads with the strongest picks.
+  const season = currentSeason();
+  const inSeasonLocations = useMemo(
+    () =>
+      PLACEHOLDER_LOCATIONS.filter((loc) => isInSeason(loc, season))
+        .slice()
+        .sort((a, b) => Number(b.isFeatured) - Number(a.isFeatured))
+        .slice(0, SEASON_RAIL_LIMIT),
+    [season]
+  );
+
+  // Only surface the rail on the unfiltered, unsearched default view so it never
+  // competes with an active search/filter result set.
+  const showSeasonRail =
+    !seasonRailDismissed &&
+    !searchQuery &&
+    activeFilterCount === 0 &&
+    inSeasonLocations.length > 0;
 
   return (
     <div className="relative w-full h-full flex flex-col">
@@ -121,6 +147,67 @@ export default function ExplorePage() {
 
       {/* Masonry wall — full width, no max-width cap */}
       <div className="flex-1 overflow-y-auto overscroll-contain">
+        {/* "In season now" rail — dismissible, sits above the masonry */}
+        <AnimatePresence initial={false}>
+          {showSeasonRail && (
+            <motion.section
+              aria-label={`In season now — ${seasonConfig[season].label}`}
+              className="overflow-hidden"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="pt-2 pb-1">
+                <div className="flex items-center justify-between px-3 mb-2">
+                  <p className="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.12em] uppercase text-fg-muted">
+                    <Sparkles className="w-3 h-3 text-gold-400" />
+                    In season now
+                    <span className="text-stone-600 normal-case tracking-normal">
+                      · {seasonConfig[season].label}
+                    </span>
+                  </p>
+                  <button
+                    onClick={() => setSeasonRailDismissed(true)}
+                    aria-label="Dismiss in-season suggestions"
+                    className="w-11 h-11 -mr-2 flex items-center justify-center text-stone-500 hover:text-fg transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <div
+                  className="flex gap-2 overflow-x-auto px-3 pb-2"
+                  style={{ scrollbarWidth: "none" }}
+                >
+                  {inSeasonLocations.map((loc) => (
+                    <button
+                      key={loc.id}
+                      onClick={() => setSelectedLocation(loc)}
+                      className="group relative flex-shrink-0 w-36 h-24 rounded-lg overflow-hidden bg-white/[0.04] text-left active:scale-[0.98] transition-transform"
+                    >
+                      <img
+                        src={loc.heroImage.url}
+                        alt={loc.name}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-2">
+                        <p className="text-white text-xs font-medium leading-tight line-clamp-2">
+                          {loc.name}
+                        </p>
+                        <p className="text-white/70 text-[11px] mt-0.5">
+                          {regionConfig[loc.region].label}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </motion.section>
+          )}
+        </AnimatePresence>
+
         {filteredLocations.length === 0 ? (
           <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center">
             <div className="w-12 h-12 rounded-lg bg-white/[0.04] flex items-center justify-center mb-4">

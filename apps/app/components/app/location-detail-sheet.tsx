@@ -9,6 +9,7 @@ import { useGeoStore } from "@/store/geo-store";
 import { useVisitedStore } from "@/store/visited-store";
 import { useTripStore } from "@/store/trip-store";
 import { distanceKm as haversineKm, formatDistance } from "@/lib/distance";
+import { similarLocations } from "@/lib/similarity";
 import { categoryConfig, regionConfig, cn } from "@/lib/utils";
 import { OpenInSheet } from "@/components/app/open-in-sheet";
 import { WeatherWidget } from "@/components/app/weather-widget";
@@ -19,18 +20,6 @@ interface LocationDetailSheetProps {
   location: Location | null;
   onClose: () => void;
   onSelectSimilar: (location: Location) => void;
-}
-
-// Deterministic shuffle seeded by a number
-function seededShuffle<T>(arr: T[], seed: number): T[] {
-  const copy = [...arr];
-  let s = seed;
-  for (let i = copy.length - 1; i > 0; i--) {
-    s = (s * 1664525 + 1013904223) & 0xffffffff;
-    const j = Math.abs(s) % (i + 1);
-    [copy[i], copy[j]] = [copy[j], copy[i]];
-  }
-  return copy;
 }
 
 const DIFF_COLORS: Record<Difficulty, string> = {
@@ -65,15 +54,10 @@ export function LocationDetailSheet({
       ? formatDistance(haversineKm(userPosition, location.coordinates))
       : null;
 
-  // TODO: Replace with visual similarity engine — currently picks same-category locations
-  // using a deterministic shuffle seeded by the location ID hash to keep renders stable.
+  // Real "More like this" ranking — scores every other spot by a weighted blend
+  // of category, geographic proximity, difficulty and region. Deterministic.
   const similar = location
-    ? seededShuffle(
-        PLACEHOLDER_LOCATIONS.filter(
-          (l) => l.category === location.category && l.id !== location.id
-        ),
-        location.id.split("").reduce((a, c) => a + c.charCodeAt(0), 0)
-      ).slice(0, 10)
+    ? similarLocations(location, PLACEHOLDER_LOCATIONS, 10)
     : [];
 
   useEffect(() => {
@@ -263,7 +247,7 @@ export function LocationDetailSheet({
                 {similar.length > 0 && (
                   <div>
                     <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-fg-muted mb-2.5">
-                      More {cat?.label} spots
+                      Similar nearby
                     </p>
                     <div
                       className="flex gap-2 overflow-x-auto pb-1"
