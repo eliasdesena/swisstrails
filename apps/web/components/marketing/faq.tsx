@@ -66,7 +66,7 @@ export function FAQ() {
               </p>
             </Reveal>
             <Reveal delay={0.3}>
-              <div className="mt-10 p-6 card-solid rounded-2xl">
+              <div className="mt-10 p-6 card-solid rounded-xl">
                 <p className="text-fg font-medium mb-2">Still have a question?</p>
                 <p className="text-fg-muted text-sm mb-4">
                   Reach us at{" "}

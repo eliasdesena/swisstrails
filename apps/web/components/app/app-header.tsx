@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Map, Heart, User, Compass } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 import { Logo } from "@/components/brand/logo";
 
 const NAV_ITEMS = [
@@ -20,76 +19,61 @@ export function AppHeader() {
   return (
     <>
       {/* Top bar — desktop */}
-      <header className="hidden lg:flex fixed top-0 left-0 right-0 z-40 h-14 bg-trail-900/90 backdrop-blur-xl border-b border-white/[0.07] items-center px-4 gap-4">
-        {/* Logo */}
-        <Link href="/explore" className="mr-4">
+      <header className="hidden lg:flex fixed top-0 left-0 right-0 z-40 h-14 bg-trail-950/95 backdrop-blur-xl border-b border-white/[0.05] items-center px-6 gap-6">
+        <Link href="/explore" className="mr-2">
           <Logo
-            iconClassName="h-6 text-alpine-500"
-            wordmarkClassName="h-4 text-fg"
+            iconClassName="h-5 text-alpine-500"
+            wordmarkClassName="h-3.5 text-fg"
           />
         </Link>
 
-        {/* Nav links */}
         <nav className="flex items-center gap-1">
           {NAV_ITEMS.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = pathname === item.href || (item.href === "/explore" && pathname === "/");
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all duration-150",
-                  isActive
-                    ? "bg-alpine-900/60 text-alpine-300 border border-alpine-800/50"
-                    : "text-fg-muted hover:text-fg hover:bg-trail-800"
+                  "flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors duration-150 rounded",
+                  isActive ? "text-fg" : "text-fg-subtle hover:text-fg-muted"
                 )}
               >
-                <item.icon className="w-3.5 h-3.5" />
+                <item.icon className={cn("w-3.5 h-3.5", isActive ? "text-alpine-400" : "")} />
                 {item.label}
               </Link>
             );
           })}
         </nav>
 
-        {/* Right side */}
-        <div className="ml-auto flex items-center gap-3">
-          <Link
-            href="/"
-            className="text-fg-subtle hover:text-fg text-xs transition-colors"
-          >
+        <div className="ml-auto flex items-center gap-4">
+          <Link href="/" className="text-fg-subtle hover:text-fg text-xs transition-colors">
             ← Back to site
           </Link>
         </div>
       </header>
 
       {/* Bottom nav — mobile */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-trail-900/95 backdrop-blur-xl border-t border-white/[0.07] safe-bottom">
-        <div className="flex items-center justify-around h-16 px-4">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-trail-950/98 backdrop-blur-xl border-t border-white/[0.05]">
+        <div className="flex items-center justify-around h-16 px-2">
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex flex-col items-center gap-1 px-4 py-2 relative"
+                className="flex flex-col items-center gap-1 px-3 py-2 min-w-[56px]"
               >
-                {isActive && (
-                  <motion.div
-                    layoutId="mobile-nav-indicator"
-                    className="absolute inset-0 bg-alpine-900/50 rounded-xl border border-alpine-800/50"
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
-                )}
                 <item.icon
                   className={cn(
-                    "relative z-10 w-5 h-5 transition-colors",
-                    isActive ? "text-alpine-400" : "text-fg-subtle"
+                    "w-5 h-5 transition-colors duration-150",
+                    isActive ? "text-alpine-400" : "text-stone-600"
                   )}
                 />
                 <span
                   className={cn(
-                    "relative z-10 text-xs transition-colors",
-                    isActive ? "text-alpine-400" : "text-fg-subtle"
+                    "text-[10px] font-medium tracking-wide transition-colors duration-150",
+                    isActive ? "text-alpine-400" : "text-stone-600"
                   )}
                 >
                   {item.label}

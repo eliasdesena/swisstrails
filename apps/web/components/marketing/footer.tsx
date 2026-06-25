@@ -76,7 +76,7 @@ export function Footer() {
             © {currentYear} Swiss Trails. All rights reserved.
           </p>
           <p className="text-fg-subtle text-xs">
-            Made with love in Switzerland 🇨🇭
+            Made in Switzerland
           </p>
         </div>
       </div>

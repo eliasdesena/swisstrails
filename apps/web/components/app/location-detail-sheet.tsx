@@ -15,7 +15,7 @@ interface LocationDetailSheetProps {
   onSelectSimilar: (location: Location) => void;
 }
 
-// Deterministic shuffle seeded by a number — keeps renders stable
+// Deterministic shuffle seeded by a number
 function seededShuffle<T>(arr: T[], seed: number): T[] {
   const copy = [...arr];
   let s = seed;
@@ -27,11 +27,11 @@ function seededShuffle<T>(arr: T[], seed: number): T[] {
   return copy;
 }
 
-const DIFF_STYLES: Record<Difficulty, string> = {
-  easy: "text-alpine-300 bg-alpine-900/50 border-alpine-800/50",
-  moderate: "text-yellow-300 bg-yellow-900/40 border-yellow-800/40",
-  challenging: "text-orange-300 bg-orange-900/40 border-orange-800/40",
-  expert: "text-red-300 bg-red-900/40 border-red-800/40",
+const DIFF_COLORS: Record<Difficulty, string> = {
+  easy: "text-alpine-400",
+  moderate: "text-yellow-400",
+  challenging: "text-orange-400",
+  expert: "text-red-400",
 };
 
 export function LocationDetailSheet({
@@ -54,7 +54,6 @@ export function LocationDetailSheet({
       ).slice(0, 10)
     : [];
 
-  // Lock body scroll while open
   useEffect(() => {
     if (location) {
       scrollRef.current?.scrollTo(0, 0);
@@ -62,9 +61,7 @@ export function LocationDetailSheet({
     } else {
       document.body.style.overflow = "";
     }
-    return () => {
-      document.body.style.overflow = "";
-    };
+    return () => { document.body.style.overflow = ""; };
   }, [location?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function viewOnMap() {
@@ -83,122 +80,109 @@ export function LocationDetailSheet({
         <>
           {/* Backdrop */}
           <motion.div
-            className="fixed inset-0 z-[1300] bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-[1300] bg-black/70"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.18 }}
             onClick={onClose}
           />
 
-          {/* Sheet — full screen on mobile, centered modal on desktop */}
+          {/* Sheet */}
           <motion.div
             className={cn(
               "fixed z-[1400] flex flex-col overflow-hidden bg-trail-950",
-              // Mobile: slide up from bottom, full screen
-              "inset-x-0 bottom-0 rounded-t-2xl",
-              // Desktop: centered modal
+              "inset-x-0 bottom-0 rounded-t-xl",
               "lg:inset-auto lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2",
-              "lg:w-[560px] lg:max-h-[88vh] lg:rounded-2xl"
+              "lg:w-[520px] lg:max-h-[86vh] lg:rounded-xl"
             )}
-            style={{ maxHeight: "calc(100dvh - env(safe-area-inset-top, 0px) - 24px)" }}
+            style={{ maxHeight: "calc(100dvh - 24px)" }}
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ type: "spring", stiffness: 320, damping: 32, mass: 0.9 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
           >
-            {/* Hero image */}
-            <div className="relative flex-shrink-0 h-[42vh] lg:h-64 bg-trail-900">
+            {/* Hero */}
+            <div className="relative flex-shrink-0 h-[40vh] lg:h-56 bg-trail-900">
               <img
                 src={location.heroImage.url}
                 alt={location.name}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-trail-950 via-trail-950/20 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-trail-950 via-trail-950/10 to-transparent" />
 
-              {/* Close button */}
               <button
                 onClick={onClose}
-                className="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/50 backdrop-blur-md border border-white/[0.15] flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+                className="absolute top-4 right-4 w-8 h-8 bg-black/60 backdrop-blur-md rounded-lg flex items-center justify-center text-white/70 hover:text-white transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
 
-              {/* Category badge */}
-              <div className="absolute top-4 left-4">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-black/50 backdrop-blur-md border border-white/[0.12] rounded-full text-xs text-white font-medium">
-                  {cat?.emoji} {cat?.label}
-                </span>
-              </div>
-
-              {/* Name at bottom of hero */}
-              <div className="absolute bottom-0 left-0 right-0 px-5 pb-4 pt-8">
-                <h2 className="text-fg text-xl font-bold leading-tight">{location.name}</h2>
+              <div className="absolute bottom-0 left-0 right-0 px-5 pb-4">
+                <p className="text-[10px] font-medium tracking-[0.12em] uppercase text-stone-500 mb-1">
+                  {cat?.label}
+                </p>
+                <h2 className="text-fg text-xl font-semibold leading-tight">{location.name}</h2>
                 {location.tagline && (
-                  <p className="text-fg-subtle text-sm mt-0.5 line-clamp-1">{location.tagline}</p>
+                  <p className="text-stone-500 text-sm mt-0.5 line-clamp-1">{location.tagline}</p>
                 )}
               </div>
             </div>
 
-            {/* Scrollable body */}
+            {/* Body */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto overscroll-contain">
-              <div className="px-5 py-4 space-y-5 pb-8">
-                {/* Meta chips */}
-                <div className="flex flex-wrap gap-1.5">
-                  <Chip icon={<MapPin className="w-3 h-3" />} label={region?.label ?? location.region} />
-                  <Chip
-                    label={location.difficulty.charAt(0).toUpperCase() + location.difficulty.slice(1)}
-                    className={DIFF_STYLES[location.difficulty]}
-                  />
+              <div className="px-5 py-4 space-y-5">
+                {/* Meta row */}
+                <div className="flex flex-wrap gap-3 text-xs text-stone-500">
+                  <span className="flex items-center gap-1.5">
+                    <MapPin className="w-3 h-3" />
+                    {region?.label ?? location.region}
+                  </span>
+                  <span className={cn("font-medium", DIFF_COLORS[location.difficulty])}>
+                    {location.difficulty.charAt(0).toUpperCase() + location.difficulty.slice(1)}
+                  </span>
                   {location.elevation != null && (
-                    <Chip icon={<Mountain className="w-3 h-3" />} label={`${location.elevation}m`} />
+                    <span className="flex items-center gap-1.5">
+                      <Mountain className="w-3 h-3" />
+                      {location.elevation}m
+                    </span>
                   )}
                   {location.distanceKm != null && (
-                    <Chip icon={<Navigation className="w-3 h-3" />} label={`${location.distanceKm}km`} />
+                    <span className="flex items-center gap-1.5">
+                      <Navigation className="w-3 h-3" />
+                      {location.distanceKm}km
+                    </span>
                   )}
-                  <Chip
-                    icon={<Clock className="w-3 h-3" />}
-                    label={`${location.visitDurationHours.min}–${location.visitDurationHours.max}h`}
-                  />
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="w-3 h-3" />
+                    {location.visitDurationHours.min}–{location.visitDurationHours.max}h visit
+                  </span>
                   {location.bestSeason.length > 0 && (
-                    <Chip
-                      icon={<Calendar className="w-3 h-3" />}
-                      label={location.bestSeason
+                    <span className="flex items-center gap-1.5">
+                      <Calendar className="w-3 h-3" />
+                      {location.bestSeason
                         .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
                         .join(", ")}
-                    />
+                    </span>
                   )}
                 </div>
 
                 {/* Description */}
                 {location.description && (
-                  <p className="text-fg-muted text-sm leading-relaxed">{location.description}</p>
+                  <p className="text-stone-400 text-sm leading-relaxed">{location.description}</p>
                 )}
 
                 {/* Highlights */}
                 {location.highlights.length > 0 && (
                   <div>
-                    <SectionLabel>Highlights</SectionLabel>
-                    <ul className="space-y-1.5 mt-2">
+                    <p className="text-[10px] font-medium tracking-[0.12em] uppercase text-stone-600 mb-2.5">
+                      Highlights
+                    </p>
+                    <ul className="space-y-1.5">
                       {location.highlights.map((h, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-fg-muted">
-                          <span className="text-alpine-500 mt-0.5 flex-shrink-0">·</span>
+                        <li key={i} className="flex items-start gap-2.5 text-sm text-stone-400">
+                          <span className="w-px h-3 bg-alpine-600 mt-1.5 flex-shrink-0" />
                           {h}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Tips */}
-                {location.tips.length > 0 && (
-                  <div>
-                    <SectionLabel>Tips</SectionLabel>
-                    <ul className="space-y-1.5 mt-2">
-                      {location.tips.map((t, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-fg-muted">
-                          <span className="text-yellow-500 mt-0.5 flex-shrink-0">→</span>
-                          {t}
                         </li>
                       ))}
                     </ul>
@@ -207,12 +191,9 @@ export function LocationDetailSheet({
 
                 {/* Tags */}
                 {location.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-2">
                     {location.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="px-2 py-0.5 bg-trail-800 border border-white/[0.06] rounded-full text-xs text-fg-subtle"
-                      >
+                      <span key={tag} className="text-stone-600 text-xs">
                         #{tag}
                       </span>
                     ))}
@@ -222,19 +203,18 @@ export function LocationDetailSheet({
                 {/* View on map CTA */}
                 <button
                   onClick={viewOnMap}
-                  className="w-full flex items-center justify-center gap-2 py-3 bg-alpine-600 hover:bg-alpine-500 active:bg-alpine-700 text-white text-sm font-semibold rounded-xl transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 bg-alpine-600 hover:bg-alpine-500 active:bg-alpine-700 text-white text-sm font-medium rounded-lg transition-colors"
                 >
-                  <MapPin className="w-4 h-4" />
+                  <MapPin className="w-3.5 h-3.5" />
                   View on Map
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
 
-                {/* Similar locations */}
+                {/* Similar */}
                 {similar.length > 0 && (
                   <div>
-                    <SectionLabel>Similar locations</SectionLabel>
-                    <p className="text-fg-subtle text-[10px] mt-0.5 mb-3">
-                      More {cat?.label.toLowerCase()} spots to discover
+                    <p className="text-[10px] font-medium tracking-[0.12em] uppercase text-stone-600 mb-2.5">
+                      More {cat?.label} spots
                     </p>
                     <div
                       className="flex gap-2 overflow-x-auto pb-1"
@@ -247,64 +227,33 @@ export function LocationDetailSheet({
                             scrollRef.current?.scrollTo(0, 0);
                             onSelectSimilar(sim);
                           }}
-                          className="flex-shrink-0 w-32 rounded-xl overflow-hidden bg-trail-800 border border-white/[0.06] text-left hover:border-white/[0.12] transition-colors"
+                          className="flex-shrink-0 w-28 rounded-lg overflow-hidden bg-white/[0.04] text-left"
                         >
-                          <div className="relative h-20">
+                          <div className="relative h-16">
                             <img
                               src={sim.heroImage.url}
                               alt={sim.name}
                               className="w-full h-full object-cover"
                               loading="lazy"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                           </div>
-                          <div className="p-2">
-                            <p className="text-fg text-xs font-medium line-clamp-1">{sim.name}</p>
-                            <p className="text-fg-subtle text-[10px] mt-0.5">
-                              {regionConfig[sim.region].label}
-                            </p>
+                          <div className="p-1.5">
+                            <p className="text-stone-300 text-xs font-medium line-clamp-1">{sim.name}</p>
+                            <p className="text-stone-600 text-[10px] mt-0.5">{regionConfig[sim.region].label}</p>
                           </div>
                         </button>
                       ))}
                     </div>
                   </div>
                 )}
+
+                <div className="h-2" />
               </div>
             </div>
           </motion.div>
         </>
       )}
     </AnimatePresence>
-  );
-}
-
-function Chip({
-  icon,
-  label,
-  className,
-}: {
-  icon?: React.ReactNode;
-  label: string;
-  className?: string;
-}) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs border",
-        "text-fg-muted bg-trail-800 border-white/[0.06]",
-        className
-      )}
-    >
-      {icon}
-      {label}
-    </span>
-  );
-}
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="text-fg-subtle text-[10px] font-semibold tracking-widest uppercase">
-      {children}
-    </p>
   );
 }

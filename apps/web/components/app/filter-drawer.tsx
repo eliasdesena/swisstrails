@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { X, Check } from "lucide-react";
 import { useMapStore } from "@/store/map-store";
 import { CATEGORIES } from "@/data/categories";
 import { cn } from "@/lib/utils";
@@ -29,11 +29,11 @@ const REGIONS: { id: Region; label: string }[] = [
   { id: "appenzell", label: "Appenzell" },
 ];
 
-const DIFF_ACTIVE: Record<Difficulty, string> = {
-  easy: "bg-alpine-900 border-alpine-700 text-alpine-300",
-  moderate: "bg-yellow-900/60 border-yellow-700/60 text-yellow-300",
-  challenging: "bg-orange-900/60 border-orange-700/60 text-orange-300",
-  expert: "bg-red-900/60 border-red-700/60 text-red-300",
+const DIFF_COLORS: Record<Difficulty, string> = {
+  easy: "text-alpine-300",
+  moderate: "text-yellow-300",
+  challenging: "text-orange-300",
+  expert: "text-red-300",
 };
 
 interface FilterDrawerProps {
@@ -60,66 +60,62 @@ export function FilterDrawer({ isOpen, onClose, resultCount }: FilterDrawerProps
         <>
           {/* Backdrop */}
           <motion.div
-            className="fixed inset-0 z-[1190] bg-black/40 backdrop-blur-[2px]"
+            className="fixed inset-0 z-[1190] bg-black/50"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
+            transition={{ duration: 0.15 }}
             onClick={onClose}
           />
 
-          {/* Panel
-              Mobile:  floats above bottom nav (bottom-[76px], inset-x-3)
-              Desktop: slides in from top-right below the header (top-[58px] right-3, w-80) */}
+          {/* Panel */}
           <motion.div
             className={cn(
-              "fixed z-[1200] bg-trail-950 border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden",
-              // mobile
-              "bottom-[76px] left-3 right-3 max-h-[70vh]",
-              // desktop
-              "lg:bottom-auto lg:left-auto lg:top-[58px] lg:right-3 lg:w-80 lg:max-h-[calc(100vh-74px)]"
+              "fixed z-[1200] bg-trail-950 overflow-hidden",
+              "bottom-[64px] left-2 right-2 max-h-[72vh] rounded-xl",
+              "lg:bottom-auto lg:left-auto lg:top-[56px] lg:right-4 lg:w-72 lg:max-h-[calc(100vh-72px)] lg:rounded-xl"
             )}
-            initial={{ opacity: 0, y: 6, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 6, scale: 0.98 }}
-            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className="overflow-y-auto max-h-[inherit]">
               <div className="p-4">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-fg text-sm font-semibold">Filters</span>
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-fg text-sm font-semibold tracking-tight">Filters</span>
                     {totalActive > 0 && (
-                      <span className="flex items-center justify-center w-4 h-4 text-[10px] font-bold bg-alpine-600 text-white rounded-full">
-                        {totalActive}
+                      <span className="text-xs text-stone-500">
+                        {totalActive} active
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     {totalActive > 0 && (
                       <button
                         onClick={clearFilters}
-                        className="text-fg-subtle hover:text-fg text-xs transition-colors"
+                        className="text-xs text-stone-500 hover:text-fg-muted transition-colors"
                       >
-                        Clear all
+                        Clear
                       </button>
                     )}
                     <button
                       onClick={onClose}
-                      className="w-6 h-6 rounded-lg bg-trail-800 border border-white/[0.06] flex items-center justify-center text-fg-subtle hover:text-fg transition-colors"
+                      className="text-stone-600 hover:text-fg-muted transition-colors"
                     >
-                      <X className="w-3 h-3" />
+                      <X className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
 
                 {/* Category */}
-                <div className="mb-4">
-                  <p className="text-fg-subtle text-[10px] font-semibold tracking-widest uppercase mb-2">
+                <div className="mb-5">
+                  <p className="text-stone-600 text-[10px] font-medium tracking-[0.12em] uppercase mb-2.5">
                     Category
                   </p>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-x-0 gap-y-0">
                     {CATEGORIES.map((cat) => {
                       const on = activeFilters.categories.includes(cat.id as LocationCategory);
                       return (
@@ -131,13 +127,16 @@ export function FilterDrawer({ isOpen, onClose, resultCount }: FilterDrawerProps
                             })
                           }
                           className={cn(
-                            "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-all",
-                            on
-                              ? "bg-alpine-900 border-alpine-700 text-alpine-300"
-                              : "bg-trail-800 border-white/[0.06] text-fg-muted hover:border-white/[0.12] hover:text-fg"
+                            "flex items-center gap-2 px-2 py-1.5 text-xs transition-colors duration-100 w-1/2 text-left",
+                            on ? "text-fg" : "text-stone-600 hover:text-stone-400"
                           )}
                         >
-                          <span className="text-[11px]">{cat.icon}</span>
+                          <Check
+                            className={cn(
+                              "w-3 h-3 flex-shrink-0 transition-opacity",
+                              on ? "opacity-100 text-alpine-400" : "opacity-0"
+                            )}
+                          />
                           {cat.name}
                         </button>
                       );
@@ -146,11 +145,11 @@ export function FilterDrawer({ isOpen, onClose, resultCount }: FilterDrawerProps
                 </div>
 
                 {/* Difficulty */}
-                <div className="mb-4">
-                  <p className="text-fg-subtle text-[10px] font-semibold tracking-widest uppercase mb-2">
+                <div className="mb-5">
+                  <p className="text-stone-600 text-[10px] font-medium tracking-[0.12em] uppercase mb-2.5">
                     Difficulty
                   </p>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-x-0 gap-y-0">
                     {DIFFICULTIES.map(({ id, label }) => {
                       const on = activeFilters.difficulties.includes(id);
                       return (
@@ -162,12 +161,16 @@ export function FilterDrawer({ isOpen, onClose, resultCount }: FilterDrawerProps
                             })
                           }
                           className={cn(
-                            "px-2.5 py-1 rounded-full text-xs font-medium border transition-all",
-                            on
-                              ? DIFF_ACTIVE[id]
-                              : "bg-trail-800 border-white/[0.06] text-fg-muted hover:border-white/[0.12] hover:text-fg"
+                            "flex items-center gap-2 px-2 py-1.5 text-xs transition-colors duration-100 w-1/2 text-left",
+                            on ? DIFF_COLORS[id] : "text-stone-600 hover:text-stone-400"
                           )}
                         >
+                          <Check
+                            className={cn(
+                              "w-3 h-3 flex-shrink-0 transition-opacity",
+                              on ? "opacity-100" : "opacity-0"
+                            )}
+                          />
                           {label}
                         </button>
                       );
@@ -177,10 +180,10 @@ export function FilterDrawer({ isOpen, onClose, resultCount }: FilterDrawerProps
 
                 {/* Region */}
                 <div className="mb-5">
-                  <p className="text-fg-subtle text-[10px] font-semibold tracking-widest uppercase mb-2">
+                  <p className="text-stone-600 text-[10px] font-medium tracking-[0.12em] uppercase mb-2.5">
                     Region
                   </p>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-x-0 gap-y-0">
                     {REGIONS.map(({ id, label }) => {
                       const on = activeFilters.regions.includes(id);
                       return (
@@ -192,12 +195,16 @@ export function FilterDrawer({ isOpen, onClose, resultCount }: FilterDrawerProps
                             })
                           }
                           className={cn(
-                            "px-2.5 py-1 rounded-full text-xs font-medium border transition-all",
-                            on
-                              ? "bg-alpine-900 border-alpine-700 text-alpine-300"
-                              : "bg-trail-800 border-white/[0.06] text-fg-muted hover:border-white/[0.12] hover:text-fg"
+                            "flex items-center gap-2 px-2 py-1.5 text-xs transition-colors duration-100 w-1/2 text-left",
+                            on ? "text-fg" : "text-stone-600 hover:text-stone-400"
                           )}
                         >
+                          <Check
+                            className={cn(
+                              "w-3 h-3 flex-shrink-0 transition-opacity",
+                              on ? "opacity-100 text-alpine-400" : "opacity-0"
+                            )}
+                          />
                           {label}
                         </button>
                       );
@@ -208,7 +215,7 @@ export function FilterDrawer({ isOpen, onClose, resultCount }: FilterDrawerProps
                 {/* CTA */}
                 <button
                   onClick={onClose}
-                  className="w-full py-2.5 bg-alpine-600 hover:bg-alpine-500 text-white text-sm font-semibold rounded-xl transition-colors"
+                  className="w-full py-2.5 bg-alpine-600 hover:bg-alpine-500 active:bg-alpine-700 text-white text-sm font-medium rounded-lg transition-colors"
                 >
                   Show {resultCount} result{resultCount !== 1 ? "s" : ""}
                 </button>

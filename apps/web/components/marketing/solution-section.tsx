@@ -3,7 +3,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { Reveal, Stagger } from "@/components/shared/reveal";
-import { MapPin, Search, Heart, Route } from "lucide-react";
+import { MapPin, Search, Heart, Route, Droplets } from "lucide-react";
 
 const FEATURES = [
   {
@@ -60,8 +60,8 @@ export function SolutionSection() {
               <Stagger initialDelay={0.3} staggerDelay={0.1} direction="left">
                 {FEATURES.map((feature) => (
                   <div key={feature.title} className="flex gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-alpine-900 border border-alpine-800 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <feature.icon className="w-4.5 h-4.5 text-alpine-400" />
+                    <div className="w-9 h-9 rounded-lg bg-white/[0.04] flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <feature.icon className="w-4 h-4 text-stone-500" />
                     </div>
                     <div>
                       <h3 className="t-label text-fg mb-1">{feature.title}</h3>
@@ -118,53 +118,39 @@ export function SolutionSection() {
 
                       {/* Simulated pins */}
                       {[
-                        { x: "50%", y: "35%" },
-                        { x: "30%", y: "55%" },
-                        { x: "68%", y: "60%" },
+                        { x: "50%", y: "35%", active: true },
+                        { x: "30%", y: "55%", active: false },
+                        { x: "68%", y: "60%", active: false },
                       ].map((pos, i) => (
-                        <motion.div
+                        <div
                           key={i}
-                          className="absolute flex flex-col items-center"
-                          style={{ left: pos.x, top: pos.y, transform: "translate(-50%, -100%)" }}
-                          animate={{ y: [0, -4, 0] }}
-                          transition={{
-                            duration: 3,
-                            repeat: Infinity,
-                            delay: i * 0.8,
-                            ease: "easeInOut",
-                          }}
+                          className="absolute"
+                          style={{ left: pos.x, top: pos.y, transform: "translate(-50%, -50%)" }}
                         >
-                          <div className={`w-6 h-6 rounded-full border-2 border-trail-900 shadow-lg flex items-center justify-center text-xs ${i === 0 ? "bg-alpine-400" : "bg-stone-600"}`}>
-                            {i === 0 ? "💧" : "•"}
-                          </div>
-                          <div className="w-0.5 h-2 bg-alpine-400 opacity-60" />
-                          <div className="w-1 h-1 bg-alpine-400 rounded-full opacity-40" />
-                        </motion.div>
+                          <div className={`w-2.5 h-2.5 rounded-full shadow ${pos.active ? "bg-alpine-400" : "bg-stone-600/70"}`} />
+                        </div>
                       ))}
                     </div>
                   </div>
 
                   {/* Bottom sheet preview */}
-                  <div className="mt-3 mx-3 card-glass-strong rounded-2xl p-4">
-                    <div className="w-8 h-1 bg-stone-600 rounded-full mx-auto mb-3" />
+                  <div className="mt-3 mx-3 card-glass-strong rounded-xl p-4">
+                    <div className="w-6 h-0.5 bg-stone-700 rounded-full mx-auto mb-3" />
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-alpine-900/60 border border-alpine-800 flex items-center justify-center text-xl">
-                        💧
+                      <div className="w-10 h-10 rounded-lg bg-white/[0.04] flex items-center justify-center">
+                        <Droplets className="w-4 h-4 text-stone-500" />
                       </div>
                       <div className="flex-1">
                         <p className="text-fg text-sm font-medium">Hidden Alpine Lake</p>
-                        <p className="text-fg-subtle text-xs mt-0.5">Valais · 2,100m · Moderate</p>
+                        <p className="text-stone-600 text-xs mt-0.5">Valais · 2,100m · Moderate</p>
                       </div>
-                      <motion.button
-                        className="w-8 h-8 rounded-full bg-trail-700 border border-white/[0.1] flex items-center justify-center"
-                        whileTap={{ scale: 0.9 }}
-                      >
-                        <Heart className="w-3.5 h-3.5 text-fg-muted" />
-                      </motion.button>
+                      <button className="w-7 h-7 rounded-lg bg-white/[0.05] flex items-center justify-center">
+                        <Heart className="w-3.5 h-3.5 text-stone-600" />
+                      </button>
                     </div>
-                    <div className="mt-3 flex gap-2">
+                    <div className="mt-3 flex gap-1.5">
                       {["2h hike", "Swimming", "Photography"].map((tag) => (
-                        <span key={tag} className="text-xs bg-trail-700 text-fg-subtle px-2 py-1 rounded-full">
+                        <span key={tag} className="text-xs bg-white/[0.04] text-stone-500 px-2 py-0.5 rounded">
                           {tag}
                         </span>
                       ))}

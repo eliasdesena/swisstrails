@@ -5,14 +5,14 @@ import { motion } from "framer-motion";
 import { Shield, Zap, Star, RefreshCw } from "lucide-react";
 
 const MARQUEE_ITEMS = [
-  { icon: "💧", text: "Hidden Lakes" },
-  { icon: "🏔", text: "Secret Viewpoints" },
-  { icon: "🌊", text: "Waterfalls" },
-  { icon: "🌅", text: "Sunset Spots" },
-  { icon: "✨", text: "Night Sky" },
-  { icon: "🚗", text: "Road Trips" },
-  { icon: "📸", text: "Photo Locations" },
-  { icon: "🪨", text: "Gorges" },
+  "Hidden Lakes",
+  "Secret Viewpoints",
+  "Waterfalls",
+  "Sunset Spots",
+  "Night Sky",
+  "Road Trips",
+  "Photo Locations",
+  "Gorges",
 ];
 
 const TRUST_ITEMS = [
@@ -27,7 +27,7 @@ export function SocialProof() {
     <section id="stats" className="relative py-6 border-y border-white/[0.06]">
       {/* Stats row */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/[0.05] rounded-2xl overflow-hidden">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/[0.04] rounded-xl overflow-hidden">
           {[
             { value: "3,200+", label: "Explorers" },
             { value: "50+", label: "Locations" },
@@ -61,10 +61,10 @@ export function SocialProof() {
           {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, i) => (
             <div
               key={i}
-              className="flex items-center gap-3 px-8 py-3 border-r border-white/[0.06] whitespace-nowrap flex-shrink-0"
+              className="flex items-center gap-6 px-8 py-3 whitespace-nowrap flex-shrink-0"
             >
-              <span className="text-lg">{item.icon}</span>
-              <span className="text-fg-subtle text-sm font-medium">{item.text}</span>
+              <span className="text-stone-600 text-sm tracking-wide">{item}</span>
+              <span className="w-px h-3 bg-stone-800 flex-shrink-0" />
             </div>
           ))}
         </div>

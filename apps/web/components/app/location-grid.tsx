@@ -31,10 +31,10 @@ export function LocationGrid({
   if (locations.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full min-h-[60vh] text-center p-8">
-        <div className="w-16 h-16 rounded-2xl bg-trail-800 border border-white/[0.06] flex items-center justify-center mb-4">
-          <span className="text-2xl">🗺</span>
+        <div className="w-12 h-12 rounded-lg bg-white/[0.04] flex items-center justify-center mb-4">
+          <SlidersHorizontal className="w-5 h-5 text-stone-600" />
         </div>
-        <p className="text-fg text-sm font-semibold mb-1">No locations found</p>
+        <p className="text-fg text-sm font-medium mb-1">No locations found</p>
         <p className="text-fg-subtle text-xs">
           Try a different search or{" "}
           <button

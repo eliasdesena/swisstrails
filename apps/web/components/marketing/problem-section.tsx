@@ -87,7 +87,7 @@ export function ProblemSection() {
 
         {/* Stat callout */}
         <Reveal delay={0.5}>
-          <div className="mt-16 p-8 lg:p-12 border border-white/[0.08] rounded-3xl bg-trail-900/50 text-center">
+          <div className="mt-16 p-8 lg:p-12 border border-white/[0.06] rounded-xl bg-trail-900/50 text-center">
             <p className="t-h2 text-fg mb-4">
               83% of people visit the{" "}
               <span className="text-stone-500">same 10 tourist spots</span>{" "}

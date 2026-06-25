@@ -141,17 +141,7 @@ export function Hero() {
           transition={{ duration: 0.8, delay: 0.5 }}
         >
           <div className="flex items-center gap-2">
-            <div className="flex -space-x-2">
-              {["bg-alpine-700", "bg-gold-700", "bg-stone-600"].map((c, i) => (
-                <div
-                  key={i}
-                  className={`w-7 h-7 rounded-full ${c} border-2 border-trail-950 flex items-center justify-center text-xs`}
-                >
-                  {["L", "N", "J"][i]}
-                </div>
-              ))}
-            </div>
-            <span className="text-fg-subtle text-sm">3,200+ explorers</span>
+            <span className="text-stone-500 text-sm">3,200+ explorers</span>
           </div>
           <span className="text-stone-800">·</span>
           <div className="flex items-center gap-1.5">
@@ -194,23 +184,21 @@ export function Hero() {
         </motion.div>
       ))}
 
-      {/* Access indicator — bottom */}
+      {/* Scroll indicator — bottom */}
       <motion.div
         className="absolute bottom-8 left-0 right-0 flex justify-center z-10"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5, duration: 0.8 }}
       >
-        <motion.div
-          className="flex flex-col items-center gap-2 cursor-pointer"
+        <button
+          className="flex flex-col items-center gap-2 text-stone-700 hover:text-stone-500 transition-colors cursor-pointer"
           onClick={() =>
             document.getElementById("stats")?.scrollIntoView({ behavior: "smooth" })
           }
-          animate={{ y: [0, 6, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         >
-          <ArrowDown className="w-5 h-5 text-fg-subtle" />
-        </motion.div>
+          <ArrowDown className="w-4 h-4" />
+        </button>
       </motion.div>
     </section>
   );

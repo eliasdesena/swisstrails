@@ -19,10 +19,8 @@ function TestimonialCard({
   return (
     <motion.div
       className={cn(
-        "flex-shrink-0 w-full max-w-sm card-solid p-7 rounded-2xl transition-all duration-500",
-        isActive
-          ? "border-alpine-800/60 shadow-[0_0_40px_rgba(81,94,255,0.12)]"
-          : "opacity-70"
+        "flex-shrink-0 w-full max-w-sm card-solid p-7 rounded-xl transition-all duration-500",
+        isActive ? "border-white/[0.08]" : "opacity-60"
       )}
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -46,7 +44,7 @@ function TestimonialCard({
 
       {/* Author */}
       <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-alpine-700 to-alpine-900 border border-alpine-700 flex items-center justify-center text-sm font-semibold text-alpine-200">
+        <div className="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center text-xs font-semibold text-stone-400">
           {testimonial.name.charAt(0)}
         </div>
         <div>

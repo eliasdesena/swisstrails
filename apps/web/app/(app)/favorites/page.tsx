@@ -43,8 +43,8 @@ export default function FavoritesPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="w-20 h-20 rounded-2xl bg-trail-800 border border-stone-800 flex items-center justify-center mb-6">
-              <Heart className="w-8 h-8 text-fg-subtle" />
+            <div className="w-14 h-14 rounded-lg bg-white/[0.04] flex items-center justify-center mb-6">
+              <Heart className="w-6 h-6 text-stone-600" />
             </div>
             <h2 className="t-h3 text-fg mb-3">No saved locations yet</h2>
             <p className="t-body text-fg-muted max-w-sm mb-8">

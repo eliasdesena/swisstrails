@@ -17,7 +17,9 @@ export default function CheckoutCancelPage() {
           />
         </Link>
 
-        <span className="text-5xl mb-6 block">💭</span>
+        <div className="w-12 h-12 rounded-lg bg-white/[0.04] flex items-center justify-center mb-6 mx-auto">
+          <ArrowLeft className="w-5 h-5 text-stone-600" />
+        </div>
         <h1 className="t-h2 text-fg mb-3">No worries</h1>
         <p className="t-body text-fg-muted mb-8">
           You didn&apos;t complete the purchase. Your best Swiss summer is still

@@ -4,7 +4,6 @@ import { useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, useMap, ZoomControl } from "react-leaflet";
 import { useMapStore } from "@/store/map-store";
 import { PLACEHOLDER_LOCATIONS, SWITZERLAND_CENTER, SWITZERLAND_DEFAULT_ZOOM } from "@/data/locations";
-import { categoryConfig } from "@/lib/utils";
 import type { Location } from "@/types";
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
@@ -25,48 +24,40 @@ if (process.env.NODE_ENV === "development" && typeof window !== "undefined") {
   }
 }
 
-function createLocationIcon(location: Location, isSelected: boolean) {
-  const cat = categoryConfig[location.category];
-  const size = isSelected ? 48 : 36;
-  const borderColor = isSelected ? "#515EFF" : "#1B2040";
-  const bgColor = isSelected ? "rgba(81,94,255,0.95)" : "rgba(26,32,100,0.85)";
-  const shadow = isSelected
-    ? "0 0 0 3px rgba(81,94,255,0.3), 0 8px 24px rgba(0,0,0,0.5)"
-    : "0 4px 12px rgba(0,0,0,0.4)";
+function createLocationIcon(_location: Location, isSelected: boolean) {
+  const size = isSelected ? 14 : 10;
+  const bg = isSelected ? "#6B78FF" : "rgba(107,120,255,0.7)";
+  const ring = isSelected ? "0 0 0 3px rgba(107,120,255,0.25), 0 2px 8px rgba(0,0,0,0.5)" : "0 2px 6px rgba(0,0,0,0.4)";
 
   return L.divIcon({
     html: `<div style="
       width:${size}px;height:${size}px;
-      background:${bgColor};
-      border:2px solid ${borderColor};
-      border-radius:50% 50% 50% 4px;
-      transform:rotate(-45deg);
-      display:flex;align-items:center;justify-content:center;
-      box-shadow:${shadow};
-      backdrop-filter:blur(8px);
-    "><span style="transform:rotate(45deg);font-size:${isSelected ? 18 : 15}px;line-height:1;">${cat.emoji}</span></div>`,
+      background:${bg};
+      border-radius:50%;
+      box-shadow:${ring};
+    "></div>`,
     className: "",
     iconSize: [size, size],
-    iconAnchor: [size / 2, size],
+    iconAnchor: [size / 2, size / 2],
     popupAnchor: [0, -size],
   });
 }
 
 function createClusterIcon(cluster: L.MarkerCluster) {
   const count = cluster.getChildCount();
-  const size = count >= 100 ? 52 : count >= 10 ? 44 : 36;
-  const fontSize = count >= 100 ? 13 : count >= 10 ? 14 : 15;
+  const size = count >= 100 ? 44 : count >= 10 ? 36 : 28;
+  const fontSize = count >= 100 ? 12 : 13;
   return L.divIcon({
     html: `<div style="
       width:${size}px;height:${size}px;
-      background:rgba(14,18,48,0.92);
-      border:2px solid rgba(81,94,255,0.6);
+      background:rgba(10,14,36,0.9);
+      border:1px solid rgba(107,120,255,0.4);
       border-radius:50%;
       display:flex;align-items:center;justify-content:center;
-      box-shadow:0 0 0 4px rgba(81,94,255,0.15),0 4px 16px rgba(0,0,0,0.5);
       backdrop-filter:blur(8px);
+      box-shadow:0 2px 12px rgba(0,0,0,0.4);
     "><span style="
-      color:#fff;
+      color:#9ba5ff;
       font-size:${fontSize}px;
       font-weight:600;
       font-family:inherit;

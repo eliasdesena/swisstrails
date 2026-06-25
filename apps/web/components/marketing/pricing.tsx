@@ -39,7 +39,7 @@ export function Pricing() {
         {/* Pricing card */}
         <div className="max-w-lg mx-auto">
           <motion.div
-            className="relative card-solid rounded-3xl overflow-hidden border-gold-900/40"
+            className="relative card-solid rounded-2xl overflow-hidden border-gold-900/40"
             initial={{ opacity: 0, y: 40, scale: 0.97 }}
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
             viewport={{ once: true }}
@@ -50,9 +50,9 @@ export function Pricing() {
 
             <div className="p-8 lg:p-10">
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 bg-gold-950 border border-gold-800 rounded-full px-3 py-1.5 mb-6">
-                <Zap className="w-3 h-3 text-gold-400" />
-                <span className="text-gold-300 text-xs font-medium">Instant access</span>
+              <div className="inline-flex items-center gap-2 bg-gold-950/60 rounded-lg px-2.5 py-1 mb-6">
+                <Zap className="w-3 h-3 text-gold-500" />
+                <span className="text-gold-400 text-xs font-medium">Instant access</span>
               </div>
 
               {/* Price */}
@@ -72,8 +72,8 @@ export function Pricing() {
               <ul className="space-y-4 mb-10">
                 {PRICING.features.map((feature) => (
                   <li key={feature} className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-alpine-900 border border-alpine-700 flex items-center justify-center flex-shrink-0">
-                      <Check className="w-2.5 h-2.5 text-alpine-400" />
+                    <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-3.5 h-3.5 text-alpine-500" />
                     </div>
                     <span className="t-sm text-fg-muted">{feature}</span>
                   </li>
@@ -104,21 +104,9 @@ export function Pricing() {
 
           {/* Social proof under card */}
           <Reveal delay={0.3}>
-            <div className="mt-8 flex items-center justify-center gap-4">
-              <div className="flex -space-x-2">
-                {["bg-alpine-700", "bg-gold-700", "bg-stone-600", "bg-trail-700"].map((c, i) => (
-                  <div
-                    key={i}
-                    className={`w-7 h-7 rounded-full ${c} border-2 border-trail-950 text-xs flex items-center justify-center font-medium`}
-                  >
-                    {["L", "N", "J", "T"][i]}
-                  </div>
-                ))}
-              </div>
-              <p className="text-fg-subtle text-sm">
-                <span className="text-fg">3,200+ explorers</span> already inside
-              </p>
-            </div>
+            <p className="mt-6 text-center text-stone-600 text-sm">
+              <span className="text-stone-400">3,200+</span> explorers already inside
+            </p>
           </Reveal>
         </div>
       </div>

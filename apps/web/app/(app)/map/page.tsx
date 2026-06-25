@@ -55,15 +55,15 @@ export default function MapPage() {
       {/* Search / control bar */}
       <div className="flex-shrink-0 flex items-center gap-2 px-3 py-2 border-b border-white/[0.06] bg-trail-950/80 backdrop-blur-xl z-[1100]">
         <div className="relative flex-1 min-w-0">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-fg-subtle pointer-events-none" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-600 pointer-events-none" />
           <input
             ref={searchRef}
             type="search"
-            placeholder="Search 381 locations…"
+            placeholder="Search locations…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-9 bg-trail-800 border border-white/[0.07] rounded-xl text-sm text-fg placeholder:text-fg-subtle outline-none transition-colors focus:border-alpine-600/60 focus:bg-trail-700"
-            style={{ paddingLeft: "2.25rem", paddingRight: searchQuery ? "2.25rem" : "0.75rem" }}
+            className="w-full h-8 bg-white/[0.04] rounded-lg text-sm text-fg placeholder:text-stone-600 outline-none transition-colors focus:bg-white/[0.07]"
+            style={{ paddingLeft: "2.25rem", paddingRight: searchQuery ? "2rem" : "0.75rem" }}
           />
           <AnimatePresence>
             {searchQuery && (
@@ -81,26 +81,25 @@ export default function MapPage() {
           </AnimatePresence>
         </div>
 
-        <motion.button
+        <button
           className={cn(
-            "relative flex items-center gap-1.5 h-9 px-3 rounded-xl border text-sm font-medium transition-colors flex-shrink-0",
-            showFilters || activeFilterCount > 0
-              ? "bg-alpine-900 border-alpine-700 text-alpine-300"
-              : "bg-trail-800 border-white/[0.07] text-fg-muted hover:text-fg hover:border-white/[0.12]"
+            "flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors flex-shrink-0",
+            activeFilterCount > 0
+              ? "bg-alpine-900/50 text-alpine-300"
+              : "text-stone-500 hover:text-stone-300"
           )}
           onClick={() => setShowFilters((v) => !v)}
-          whileTap={{ scale: 0.97 }}
         >
           <SlidersHorizontal className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Filters</span>
           {activeFilterCount > 0 && (
-            <span className="flex items-center justify-center w-4 h-4 text-[10px] font-bold bg-alpine-500 text-white rounded-full">
+            <span className="text-[10px] font-bold text-alpine-400">
               {activeFilterCount}
             </span>
           )}
-        </motion.button>
+        </button>
 
-        <div className="flex h-9 bg-trail-800 border border-white/[0.07] rounded-xl overflow-hidden flex-shrink-0">
+        <div className="flex h-8 bg-white/[0.04] rounded-lg overflow-hidden flex-shrink-0">
           {(
             [
               { v: "map" as const, icon: Map, label: "Map" },
@@ -112,10 +111,10 @@ export default function MapPage() {
               onClick={() => setView(v)}
               title={label}
               className={cn(
-                "w-9 flex items-center justify-center transition-colors",
+                "w-8 flex items-center justify-center transition-colors",
                 view === v
-                  ? "bg-alpine-900 text-alpine-300"
-                  : "text-fg-subtle hover:text-fg hover:bg-trail-700"
+                  ? "bg-white/[0.08] text-fg"
+                  : "text-stone-600 hover:text-stone-400"
               )}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -157,9 +156,9 @@ export default function MapPage() {
         <div className={cn("absolute inset-0", view !== "map" && "pointer-events-none invisible")}>
           <MapView locations={filteredLocations} />
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1100] pointer-events-none">
-            <div className="bg-trail-900/90 backdrop-blur-xl border border-white/[0.1] rounded-full px-4 py-1.5 shadow-lg">
-              <p className="text-fg-muted text-xs whitespace-nowrap">
-                <span className="text-fg font-semibold">{filteredLocations.length}</span>
+            <div className="bg-trail-900/90 backdrop-blur-xl rounded-lg px-4 py-1.5">
+              <p className="text-stone-500 text-xs whitespace-nowrap">
+                <span className="text-stone-300 font-medium">{filteredLocations.length}</span>
                 {filteredLocations.length < PLACEHOLDER_LOCATIONS.length && (
                   <span> of {PLACEHOLDER_LOCATIONS.length}</span>
                 )}{" "}

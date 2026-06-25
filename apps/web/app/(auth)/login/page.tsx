@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, ArrowRight } from "lucide-react";
+import { Mail, ArrowRight, MailOpen } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -56,7 +56,7 @@ export default function LoginPage() {
         {/* Mock mode demo entry */}
         {IS_MOCK && (
           <motion.div
-            className="mb-4 p-4 rounded-2xl border border-alpine-700/50 bg-alpine-900/20"
+            className="mb-4 p-4 rounded-xl bg-alpine-900/20"
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
@@ -77,11 +77,13 @@ export default function LoginPage() {
 
         {step === "email-sent" ? (
           <motion.div
-            className="card-solid rounded-2xl p-8 text-center"
+            className="card-solid rounded-xl p-8 text-center"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
           >
-            <div className="text-4xl mb-4">📬</div>
+            <div className="w-10 h-10 rounded-lg bg-white/[0.04] flex items-center justify-center mx-auto mb-4">
+              <MailOpen className="w-5 h-5 text-stone-500" />
+            </div>
             <h2 className="t-h3 text-fg mb-2">Check your email</h2>
             <p className="text-fg-muted text-sm mb-6">
               We sent a sign-in link to{" "}
@@ -98,7 +100,7 @@ export default function LoginPage() {
             </p>
           </motion.div>
         ) : (
-          <div className="card-solid rounded-2xl p-8 space-y-4">
+          <div className="card-solid rounded-xl p-8 space-y-4">
             {/* Google */}
             <Button
               variant="outline"
