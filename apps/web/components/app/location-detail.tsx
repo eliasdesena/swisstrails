@@ -63,8 +63,11 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
             className="w-9 h-9 bg-trail-950/70 backdrop-blur-sm rounded-full border border-stone-700/50 flex items-center justify-center text-fg-muted hover:text-fg transition-colors"
             onClick={() => {
               const url = `https://swiss-trails.com/location/${location.slug}`;
-              navigator.share?.({ title: location.name, url }) ??
-                navigator.clipboard.writeText(url);
+              if (navigator.share) {
+                void navigator.share({ title: location.name, url });
+              } else {
+                void navigator.clipboard.writeText(url);
+              }
             }}
           >
             <Share2 className="w-4 h-4" />

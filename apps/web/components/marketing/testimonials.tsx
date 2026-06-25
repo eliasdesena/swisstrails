@@ -1,8 +1,8 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
-import { useRef, useState } from "react";
-import { Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion } from "framer-motion";
+import { useState } from "react";
+import { Star } from "lucide-react";
 import { Reveal } from "@/components/shared/reveal";
 import { TESTIMONIALS } from "@/data/testimonials";
 import { cn } from "@/lib/utils";

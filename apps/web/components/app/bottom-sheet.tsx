@@ -89,7 +89,7 @@ export function BottomSheet() {
     y.set(next);
   }
 
-  function onUp(_e: React.PointerEvent) {
+  function onUp() {
     if (!dragging.current) return;
     dragging.current = false;
 

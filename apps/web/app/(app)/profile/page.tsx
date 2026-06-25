@@ -1,6 +1,6 @@
 "use client";
 
-import { User, Mail, MapPin, Heart, Settings, LogOut, Shield, ChevronRight } from "lucide-react";
+import { User, MapPin, Heart, Settings, LogOut, Shield, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -79,7 +79,7 @@ export default function ProfilePage() {
         {/* Menu */}
         <Reveal delay={0.2}>
           <div className="card-solid rounded-2xl overflow-hidden mb-6">
-            {MENU_ITEMS.map((item, i) => (
+            {MENU_ITEMS.map((item) => (
               <motion.a
                 key={item.label}
                 href={item.href}

@@ -6,15 +6,6 @@ import { Reveal } from "@/components/shared/reveal";
 import { Button } from "@/components/ui/button";
 import { PRICING } from "@/data/categories";
 
-const ICON_MAP = {
-  "Instant access to all 50+ locations": Zap,
-  "Detailed descriptions, tips & coordinates": Star,
-  "New locations added every month": RefreshCw,
-  "Works on all devices — mobile & desktop": Smartphone,
-  "Save favourites & plan adventures": Check,
-  "No subscription. Ever.": Shield,
-  "Access for life": Check,
-};
 
 export function Pricing() {
   return (

@@ -13,7 +13,7 @@ import "leaflet.markercluster";
 
 // Patch HMR re-mount issue in dev
 if (process.env.NODE_ENV === "development" && typeof window !== "undefined") {
-  const proto = L.Map.prototype as unknown as Record<string, Function>;
+  const proto = L.Map.prototype as unknown as Record<string, (...args: unknown[]) => unknown>;
   if (!proto.__patched_initContainer) {
     const orig = proto._initContainer;
     proto._initContainer = function (id: HTMLElement | string) {

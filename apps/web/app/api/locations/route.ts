@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
 import { PLACEHOLDER_LOCATIONS } from "@/data/locations";
 
 export async function GET(req: NextRequest) {

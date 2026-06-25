@@ -2,13 +2,11 @@
 
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { LocationCard } from "@/components/app/location-card";
 import { useMapStore } from "@/store/map-store";
-import { cn, categoryConfig } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { PLACEHOLDER_LOCATIONS } from "@/data/locations";
 import { CATEGORIES } from "@/data/categories";
 import type { Location } from "@/types";

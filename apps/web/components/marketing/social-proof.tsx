@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { SOCIAL_PROOF_STATS } from "@/data/testimonials";
+
 import { Shield, Zap, Star, RefreshCw } from "lucide-react";
 
 const MARQUEE_ITEMS = [

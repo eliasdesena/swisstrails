@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 
 export function MockBanner() {
   if (process.env.NEXT_PUBLIC_MOCK_MODE !== "true") return null;

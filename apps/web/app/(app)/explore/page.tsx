@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useState } from "react";
-import { Search, Map, List, SlidersHorizontal } from "lucide-react";
+import { Search, Map, List } from "lucide-react";
 import { motion } from "framer-motion";
 import { BottomSheet } from "@/components/app/bottom-sheet";
 import { SearchPanel } from "@/components/app/search-panel";
