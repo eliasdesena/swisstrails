@@ -176,7 +176,7 @@ export function MapView({ locations, isSatellite = true }: MapViewProps) {
         maxZoom={20}
       />
 
-      <ZoomControl position="bottomright" />
+      <ZoomControl position="bottomleft" />
       <ClusterLayer locations={locations} />
       <SelectedMarker />
     </MapContainer>
