@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, MapPin, ArrowRight, Clock, Mountain, Navigation, Calendar } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMapStore } from "@/store/map-store";
 import { categoryConfig, regionConfig, cn } from "@/lib/utils";
+import { OpenInSheet } from "@/components/app/open-in-sheet";
 import { PLACEHOLDER_LOCATIONS } from "@/data/locations";
 import type { Location, Difficulty } from "@/types";
 
@@ -42,6 +43,7 @@ export function LocationDetailSheet({
   const router = useRouter();
   const { openBottomSheet } = useMapStore();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [openInSheet, setOpenInSheet] = useState(false);
 
   // TODO: Replace with visual similarity engine — currently picks same-category locations
   // using a deterministic shuffle seeded by the location ID hash to keep renders stable.
@@ -244,10 +246,19 @@ export function LocationDetailSheet({
             </div>
 
             {/* Sticky footer CTA — always visible above the fold + home indicator */}
-            <div className="flex-shrink-0 border-t border-white/[0.06] bg-trail-950/95 px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+            <div className="flex-shrink-0 border-t border-white/[0.06] bg-trail-950/95 px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2">
+              {/* Get directions / Open in… — opens the deep-link sheet */}
+              <button
+                onClick={() => setOpenInSheet(true)}
+                className="flex items-center justify-center gap-2 px-4 min-h-[44px] py-3.5 bg-white/[0.05] hover:bg-white/[0.08] active:bg-white/[0.1] text-stone-200 text-sm font-medium rounded-lg transition-colors flex-shrink-0"
+              >
+                <Navigation className="w-4 h-4" />
+                Directions
+              </button>
+              {/* In-app navigation to the map */}
               <button
                 onClick={viewOnMap}
-                className="w-full flex items-center justify-center gap-2 py-3.5 bg-alpine-600 hover:bg-alpine-500 active:bg-alpine-700 text-white text-sm font-medium rounded-lg transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 min-h-[44px] py-3.5 bg-alpine-600 hover:bg-alpine-500 active:bg-alpine-700 text-white text-sm font-medium rounded-lg transition-colors"
               >
                 <MapPin className="w-4 h-4" />
                 View on Map
@@ -255,6 +266,12 @@ export function LocationDetailSheet({
               </button>
             </div>
           </motion.div>
+
+          {/* Open in… sheet (deep links) */}
+          <OpenInSheet
+            location={openInSheet ? location : null}
+            onClose={() => setOpenInSheet(false)}
+          />
         </>
       )}
     </AnimatePresence>

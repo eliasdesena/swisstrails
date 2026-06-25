@@ -3,7 +3,7 @@
 import {
   Clock, MapPin, Navigation, Heart, Share2, Mountain,
   ChevronLeft, Camera, X, Bus, Car, Lightbulb, Package,
-  Waves, Sun, Leaf, Snowflake
+  Waves, Sun, Leaf, Snowflake, MoreHorizontal
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
@@ -16,9 +16,9 @@ import {
   categoryConfig,
   seasonConfig,
   formatDuration,
-  formatVisitDuration,
-  getMapLink,
 } from "@/lib/utils";
+import { platformDirections } from "@/lib/deep-links";
+import { OpenInSheet } from "@/components/app/open-in-sheet";
 import type { Location } from "@/types";
 
 interface LocationDetailProps {
@@ -43,6 +43,7 @@ const DIFF_COLOR: Record<string, string> = {
 
 export function LocationDetail({ location, onClose }: LocationDetailProps) {
   const [activeGalleryIndex, setActiveGalleryIndex] = useState<number | null>(null);
+  const [openInSheet, setOpenInSheet] = useState(false);
   const { isFavorite, toggleFavorite } = useFavoritesStore();
   const fav = isFavorite(location.id);
   const diff = difficultyConfig[location.difficulty];
@@ -297,7 +298,7 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
       <div className="flex-shrink-0 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2">
         <button
           className={cn(
-            "flex-1 flex items-center justify-center gap-2 h-11 text-sm rounded-lg bg-white/[0.04] transition-colors",
+            "flex items-center justify-center gap-2 h-11 px-4 text-sm rounded-lg bg-white/[0.04] transition-colors flex-shrink-0",
             fav ? "text-red-400 bg-red-950/30" : "text-stone-400 hover:text-fg"
           )}
           onClick={() => toggleFavorite(location.id)}
@@ -305,14 +306,10 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
           <Heart className={cn("w-4 h-4", fav && "fill-red-400")} />
           {fav ? "Saved" : "Save"}
         </button>
-        <Button
-          variant="alpine"
-          size="lg"
-          className="flex-1"
-          asChild
-        >
+        {/* One-tap platform-default directions (Apple Maps on iOS, Google elsewhere) */}
+        <Button variant="alpine" size="lg" className="flex-1" asChild>
           <a
-            href={getMapLink(
+            href={platformDirections(
               location.coordinates.lat,
               location.coordinates.lng,
               location.name
@@ -321,10 +318,24 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
             rel="noopener noreferrer"
           >
             <Navigation className="w-4 h-4" />
-            Open in Maps
+            Get directions
           </a>
         </Button>
+        {/* Open the full "Open in…" sheet for more apps */}
+        <button
+          aria-label="More apps"
+          onClick={() => setOpenInSheet(true)}
+          className="w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-lg bg-white/[0.04] text-stone-400 hover:text-fg active:scale-95 transition-colors"
+        >
+          <MoreHorizontal className="w-5 h-5" />
+        </button>
       </div>
+
+      {/* Open in… sheet */}
+      <OpenInSheet
+        location={openInSheet ? location : null}
+        onClose={() => setOpenInSheet(false)}
+      />
 
       {/* Gallery lightbox */}
       <AnimatePresence>

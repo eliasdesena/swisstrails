@@ -3,8 +3,9 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { PLACEHOLDER_LOCATIONS } from "@/data/locations";
-import { categoryConfig, difficultyConfig, regionConfig, formatDuration, getMapLink } from "@/lib/utils";
-import { MapPin, Clock, Mountain, ArrowLeft, Navigation } from "lucide-react";
+import { categoryConfig, difficultyConfig, regionConfig, formatDuration } from "@/lib/utils";
+import { DirectionsActions } from "@/components/app/directions-actions";
+import { MapPin, Clock, Mountain, ArrowLeft } from "lucide-react";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -47,7 +48,6 @@ export default async function LocationPage({ params }: Props) {
   const cat = categoryConfig[location.category];
   const diff = difficultyConfig[location.difficulty];
   const region = regionConfig[location.region];
-  const mapsUrl = getMapLink(location.coordinates.lat, location.coordinates.lng, location.name);
 
   const DIFF_COLOR: Record<string, string> = {
     easy: "text-emerald-400",
@@ -167,18 +167,10 @@ export default async function LocationPage({ params }: Props) {
 
         {/* CTA row */}
         <div className="pt-4 flex gap-3">
-          <a
-            href={mapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center gap-2 h-11 rounded-lg bg-alpine-600 hover:bg-alpine-500 text-white font-medium text-sm transition-colors"
-          >
-            <Navigation className="w-4 h-4" />
-            Open in Maps
-          </a>
+          <DirectionsActions location={location} />
           <Link
             href="/explore"
-            className="flex-1 flex items-center justify-center gap-2 h-11 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-stone-300 font-medium text-sm transition-colors"
+            className="flex items-center justify-center gap-2 h-11 px-4 flex-shrink-0 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-stone-300 font-medium text-sm transition-colors"
           >
             Explore all 500+
           </Link>

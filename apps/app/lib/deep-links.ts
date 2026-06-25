@@ -1,0 +1,129 @@
+/* ─────────────────────────────────────────────
+   DEEP-LINK HELPERS — "Open in… / Get directions"
+
+   Pure, client-side URL/Blob builders. No network
+   calls, no API keys. Every function takes plain
+   (lat, lng, name) args so it's trivial to test.
+───────────────────────────────────────────── */
+
+/** Google Maps turn-by-turn directions to the destination (not just a dropped pin). */
+export function googleMapsDirections(lat: number, lng: number): string {
+  return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+}
+
+/** Apple Maps directions. `daddr` = destination address, `q` = label. */
+export function appleMapsDirections(lat: number, lng: number, name: string): string {
+  return `https://maps.apple.com/?daddr=${lat},${lng}&q=${encodeURIComponent(name)}`;
+}
+
+/** Native `geo:` URI — opens the device's default GPS/maps app on Android. */
+export function geoUri(lat: number, lng: number, name: string): string {
+  return `geo:${lat},${lng}?q=${lat},${lng}(${encodeURIComponent(name)})`;
+}
+
+/** Komoot — plan a route in the area around the destination. */
+export function komootPlan(lat: number, lng: number): string {
+  return `https://www.komoot.com/plan/@${lat},${lng},14z`;
+}
+
+/**
+ * Convert WGS84 (lat,lng in degrees) → Swiss LV95 (E,N in metres).
+ * swisstopo approximate ("Näherungslösung") formula, accurate to ~1 m.
+ */
+export function wgs84ToLv95(lat: number, lng: number): { E: number; N: number } {
+  // Auxiliary values: arc-seconds relative to the Bern reference, / 10000.
+  const phi = (lat * 3600 - 169028.66) / 10000;
+  const lam = (lng * 3600 - 26782.5) / 10000;
+
+  const E =
+    2600072.37 +
+    211455.93 * lam -
+    10938.51 * lam * phi -
+    0.36 * lam * phi * phi -
+    44.54 * lam ** 3;
+
+  const N =
+    1200147.07 +
+    308807.95 * phi +
+    3745.25 * lam ** 2 +
+    76.63 * phi ** 2 -
+    194.56 * lam ** 2 * phi +
+    119.79 * phi ** 3;
+
+  return { E, N };
+}
+
+/**
+ * SchweizMobil / SwitzerlandMobility — the Swiss national hiking map.
+ * Uses LV95 coordinates, so we convert first.
+ */
+export function switzerlandMobilityMap(lat: number, lng: number): string {
+  const { E, N } = wgs84ToLv95(lat, lng);
+  return `https://map.schweizmobil.ch/?lang=en&bgLayer=pk&E=${Math.round(E)}&N=${Math.round(N)}&zoom=7`;
+}
+
+/**
+ * SBB public-transport journey planner, pointed at the destination coords.
+ * Only surface this when a location has `publicTransport: true`.
+ */
+export function sbbDirections(lat: number, lng: number): string {
+  return `https://www.sbb.ch/en?nach=${lat},${lng}`;
+}
+
+/** `"LAT, LNG"` — handy for copy-to-clipboard. */
+export function formatCoordinates(lat: number, lng: number): string {
+  return `${lat}, ${lng}`;
+}
+
+/** Build a minimal, valid GPX 1.1 document with a single named waypoint. */
+export function buildGpxWaypoint(lat: number, lng: number, name: string): string {
+  const esc = (s: string) =>
+    s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&apos;");
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Swiss Trails" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+  <wpt lat="${lat}" lon="${lng}">
+    <name>${esc(name)}</name>
+  </wpt>
+</gpx>
+`;
+}
+
+/**
+ * Trigger a client-side download of a GPX waypoint file. No network.
+ * Works with Garmin Connect, Komoot import, OsmAnd, and any GPS app.
+ */
+export function downloadGpx(lat: number, lng: number, name: string, slug: string): void {
+  if (typeof document === "undefined") return;
+  const gpx = buildGpxWaypoint(lat, lng, name);
+  const blob = new Blob([gpx], { type: "application/gpx+xml" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${slug}.gpx`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/** iOS detection so the one-tap default can use Apple Maps on Apple devices. */
+export function isIOS(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return /iPad|iPhone|iPod/.test(navigator.userAgent);
+}
+
+/**
+ * Platform-default "Get directions" URL:
+ * Apple Maps on iOS, Google Maps everywhere else.
+ */
+export function platformDirections(lat: number, lng: number, name: string): string {
+  return isIOS()
+    ? appleMapsDirections(lat, lng, name)
+    : googleMapsDirections(lat, lng);
+}
