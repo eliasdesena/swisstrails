@@ -1,37 +1,23 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { useMemo, useRef, useState, useEffect } from "react";
-import { Search, Map, LayoutGrid, SlidersHorizontal, X } from "lucide-react";
+import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BottomSheet } from "@/components/app/bottom-sheet";
-import { LocationGrid } from "@/components/app/location-grid";
-import { FilterDrawer } from "@/components/app/filter-drawer";
+import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useMapStore } from "@/store/map-store";
 import { PLACEHOLDER_LOCATIONS } from "@/data/locations";
 import { filterLocations, countActiveFilters } from "@/lib/filters";
-import { cn } from "@/lib/utils";
+import { FilterDrawer } from "@/components/app/filter-drawer";
+import { LocationDetailSheet } from "@/components/app/location-detail-sheet";
+import { categoryConfig, regionConfig, cn } from "@/lib/utils";
+import type { Location } from "@/types";
 
-const MapView = dynamic(
-  () => import("@/components/app/map-view").then((m) => m.MapView),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="w-full h-full flex items-center justify-center bg-trail-900">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-2 border-alpine-600 border-t-alpine-400 rounded-full animate-spin" />
-          <p className="text-fg-subtle text-sm">Loading map…</p>
-        </div>
-      </div>
-    ),
-  }
-);
+// Aspect ratios that cycle across cards to create Pinterest-like height variation
+const ASPECT_RATIOS = ["3/4", "4/5", "2/3", "4/5", "3/4", "1/1", "4/5", "3/5"];
 
 export default function ExplorePage() {
   const { searchQuery, setSearchQuery, activeFilters, clearFilters } = useMapStore();
-  const [view, setView] = useState<"map" | "list">("map");
   const [showFilters, setShowFilters] = useState(false);
-  const searchRef = useRef<HTMLInputElement>(null);
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
 
   const filteredLocations = useMemo(
     () => filterLocations(PLACEHOLDER_LOCATIONS, searchQuery, activeFilters),
@@ -43,29 +29,18 @@ export default function ExplorePage() {
     [activeFilters]
   );
 
-  // Reset page when filters change (handled inside LocationGrid via key)
-  const filterKey = `${searchQuery}-${JSON.stringify(activeFilters)}`;
-
-  // Focus search input on mount on desktop
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)");
-    if (mq.matches) searchRef.current?.focus();
-  }, []);
-
   return (
     <div className="relative w-full h-full flex flex-col">
-      {/* ── Top search / control bar ─────────────────────────────────── */}
+      {/* Search bar */}
       <div className="flex-shrink-0 flex items-center gap-2 px-3 py-2 border-b border-white/[0.06] bg-trail-950/80 backdrop-blur-xl z-[1100]">
-        {/* Search input */}
         <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-fg-subtle pointer-events-none" />
           <input
-            ref={searchRef}
             type="search"
             placeholder="Search 381 locations…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-9 bg-trail-800 border border-white/[0.07] rounded-xl text-sm text-fg placeholder:text-fg-subtle pl-8.5 pr-8 outline-none transition-colors focus:border-alpine-600/60 focus:bg-trail-700"
+            className="w-full h-9 bg-trail-800 border border-white/[0.07] rounded-xl text-sm text-fg placeholder:text-fg-subtle outline-none transition-colors focus:border-alpine-600/60 focus:bg-trail-700"
             style={{ paddingLeft: "2.25rem", paddingRight: searchQuery ? "2.25rem" : "0.75rem" }}
           />
           <AnimatePresence>
@@ -84,16 +59,14 @@ export default function ExplorePage() {
           </AnimatePresence>
         </div>
 
-        {/* Filter button */}
-        <motion.button
+        <button
+          onClick={() => setShowFilters((v) => !v)}
           className={cn(
             "relative flex items-center gap-1.5 h-9 px-3 rounded-xl border text-sm font-medium transition-colors flex-shrink-0",
             showFilters || activeFilterCount > 0
               ? "bg-alpine-900 border-alpine-700 text-alpine-300"
               : "bg-trail-800 border-white/[0.07] text-fg-muted hover:text-fg hover:border-white/[0.12]"
           )}
-          onClick={() => setShowFilters((v) => !v)}
-          whileTap={{ scale: 0.97 }}
         >
           <SlidersHorizontal className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Filters</span>
@@ -102,112 +75,154 @@ export default function ExplorePage() {
               {activeFilterCount}
             </span>
           )}
-        </motion.button>
-
-        {/* View toggle */}
-        <div className="flex h-9 bg-trail-800 border border-white/[0.07] rounded-xl overflow-hidden flex-shrink-0">
-          {([
-            { v: "map" as const, icon: Map, label: "Map" },
-            { v: "list" as const, icon: LayoutGrid, label: "List" },
-          ] as const).map(({ v, icon: Icon, label }) => (
-            <button
-              key={v}
-              onClick={() => setView(v)}
-              title={label}
-              className={cn(
-                "w-9 flex items-center justify-center transition-colors",
-                view === v
-                  ? "bg-alpine-900 text-alpine-300"
-                  : "text-fg-subtle hover:text-fg hover:bg-trail-700"
-              )}
-            >
-              <Icon className="w-3.5 h-3.5" />
-            </button>
-          ))}
-        </div>
+        </button>
       </div>
 
-      {/* ── Active filter chips (shown below search bar when filters active) */}
+      {/* Active filter strip */}
       <AnimatePresence>
         {(activeFilterCount > 0 || searchQuery) && (
           <motion.div
-            className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 border-b border-white/[0.04] overflow-x-auto z-[1099]"
+            className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 border-b border-white/[0.04]"
             style={{ scrollbarWidth: "none" }}
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            <span className="text-fg-subtle text-xs flex-shrink-0">
+            <span className="text-fg-subtle text-xs">
               {filteredLocations.length} result{filteredLocations.length !== 1 ? "s" : ""}
             </span>
-            {(activeFilterCount > 0 || searchQuery) && (
-              <>
-                <span className="text-white/20 text-xs">·</span>
-                <button
-                  onClick={() => { clearFilters(); setSearchQuery(""); }}
-                  className="text-xs text-fg-subtle hover:text-fg transition-colors flex-shrink-0"
-                >
-                  Clear all
-                </button>
-              </>
-            )}
+            <span className="text-white/20 text-xs">·</span>
+            <button
+              onClick={() => {
+                clearFilters();
+                setSearchQuery("");
+              }}
+              className="text-xs text-fg-subtle hover:text-fg transition-colors"
+            >
+              Clear all
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* ── Content area ─────────────────────────────────────────────── */}
-      <div className="flex-1 relative overflow-hidden">
-        {/* Map view */}
-        <div className={cn("absolute inset-0", view !== "map" && "pointer-events-none invisible")}>
-          <MapView locations={filteredLocations} />
+      {/* Masonry wall */}
+      <div className="flex-1 overflow-y-auto overscroll-contain">
+        {filteredLocations.length === 0 ? (
+          <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-trail-800 border border-white/[0.06] flex items-center justify-center mb-4">
+              <span className="text-2xl">🏔</span>
+            </div>
+            <p className="text-fg text-sm font-semibold mb-1">No locations found</p>
+            <p className="text-fg-subtle text-xs">
+              Try a different search or{" "}
+              <button
+                onClick={() => setShowFilters(true)}
+                className="text-alpine-400 hover:text-alpine-300 underline underline-offset-2 transition-colors"
+              >
+                adjust filters
+              </button>
+            </p>
+          </div>
+        ) : (
+          /* Two-column masonry with offset second column for Pinterest rhythm */
+          <div className="flex gap-1.5 px-1.5 pt-1.5 pb-20 lg:max-w-4xl lg:mx-auto lg:px-4 lg:pt-4 lg:gap-2 lg:pb-8">
+            {/* Column 1 */}
+            <div className="flex-1 flex flex-col gap-1.5 lg:gap-2">
+              {filteredLocations
+                .filter((_, i) => i % 2 === 0)
+                .map((loc, i) => (
+                  <MasonryCard
+                    key={loc.id}
+                    location={loc}
+                    aspectRatio={ASPECT_RATIOS[(i * 2) % ASPECT_RATIOS.length]}
+                    onClick={() => setSelectedLocation(loc)}
+                    animDelay={Math.min(i * 0.04, 0.32)}
+                  />
+                ))}
+            </div>
 
-          {/* Location count pill */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1100] pointer-events-none">
-            <div className="bg-trail-900/90 backdrop-blur-xl border border-white/[0.1] rounded-full px-4 py-1.5 shadow-lg">
-              <p className="text-fg-muted text-xs whitespace-nowrap">
-                <span className="text-fg font-semibold">{filteredLocations.length}</span>
-                {filteredLocations.length < PLACEHOLDER_LOCATIONS.length && (
-                  <span> of {PLACEHOLDER_LOCATIONS.length}</span>
-                )}{" "}
-                locations
-              </p>
+            {/* Column 2 — shifted down slightly to break the symmetry */}
+            <div className="flex-1 flex flex-col gap-1.5 lg:gap-2 mt-10">
+              {filteredLocations
+                .filter((_, i) => i % 2 === 1)
+                .map((loc, i) => (
+                  <MasonryCard
+                    key={loc.id}
+                    location={loc}
+                    aspectRatio={ASPECT_RATIOS[(i * 2 + 1) % ASPECT_RATIOS.length]}
+                    onClick={() => setSelectedLocation(loc)}
+                    animDelay={Math.min(i * 0.04 + 0.06, 0.36)}
+                  />
+                ))}
             </div>
           </div>
-        </div>
-
-        {/* List view */}
-        <AnimatePresence mode="wait">
-          {view === "list" && (
-            <motion.div
-              key="list"
-              className="absolute inset-0"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.18 }}
-            >
-              <LocationGrid
-                key={filterKey}
-                locations={filteredLocations}
-                totalCount={PLACEHOLDER_LOCATIONS.length}
-                activeFilterCount={activeFilterCount}
-                onOpenFilters={() => setShowFilters(true)}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        )}
       </div>
 
-      {/* ── Filter drawer ─────────────────────────────────────────────── */}
+      {/* Filter drawer */}
       <FilterDrawer
         isOpen={showFilters}
         onClose={() => setShowFilters(false)}
         resultCount={filteredLocations.length}
       />
 
-      {/* ── Location detail bottom sheet ──────────────────────────────── */}
-      <BottomSheet />
+      {/* Location detail sheet */}
+      <LocationDetailSheet
+        location={selectedLocation}
+        onClose={() => setSelectedLocation(null)}
+        onSelectSimilar={(loc) => setSelectedLocation(loc)}
+      />
     </div>
+  );
+}
+
+interface MasonryCardProps {
+  location: Location;
+  aspectRatio: string;
+  onClick: () => void;
+  animDelay: number;
+}
+
+function MasonryCard({ location, aspectRatio, onClick, animDelay }: MasonryCardProps) {
+  const cat = categoryConfig[location.category];
+  const [imgError, setImgError] = useState(false);
+
+  return (
+    <motion.button
+      className="relative w-full rounded-xl overflow-hidden bg-trail-800 block"
+      style={{ aspectRatio }}
+      onClick={onClick}
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.38, delay: animDelay, ease: [0.16, 1, 0.3, 1] }}
+      whileTap={{ scale: 0.96 }}
+    >
+      {!imgError ? (
+        <img
+          src={location.heroImage.url}
+          alt={location.name}
+          className="w-full h-full object-cover"
+          loading="lazy"
+          onError={() => setImgError(true)}
+        />
+      ) : (
+        /* Gradient fallback if image fails */
+        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-trail-800 to-trail-900">
+          <span className="text-5xl opacity-40">{cat.emoji}</span>
+        </div>
+      )}
+
+      {/* Bottom gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+
+      {/* Card text */}
+      <div className="absolute bottom-0 left-0 right-0 p-2.5 lg:p-3 text-left">
+        <p className="text-white text-xs font-semibold leading-tight line-clamp-2">{location.name}</p>
+        <p className="text-white/55 text-[10px] mt-0.5">
+          {cat.emoji} {regionConfig[location.region].label}
+        </p>
+      </div>
+    </motion.button>
   );
 }

@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Map, Heart, User } from "lucide-react";
+import { Map, Heart, User, Compass } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Logo } from "@/components/brand/logo";
 
 const NAV_ITEMS = [
-  { href: "/explore", icon: Map, label: "Explore" },
+  { href: "/explore", icon: Compass, label: "Explore" },
+  { href: "/map", icon: Map, label: "Map" },
   { href: "/favorites", icon: Heart, label: "Favourites" },
   { href: "/profile", icon: User, label: "Profile" },
 ];
