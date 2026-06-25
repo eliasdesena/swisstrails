@@ -4,9 +4,12 @@ import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useMapStore } from "@/store/map-store";
+import { useGeoStore } from "@/store/geo-store";
 import { PLACEHOLDER_LOCATIONS } from "@/data/locations";
 import { filterLocations, countActiveFilters } from "@/lib/filters";
+import { sortLocations, type SortMode } from "@/lib/sort";
 import { FilterDrawer } from "@/components/app/filter-drawer";
+import { SortControl } from "@/components/app/sort-control";
 import { LocationDetailSheet } from "@/components/app/location-detail-sheet";
 import { categoryConfig, regionConfig, cn } from "@/lib/utils";
 import type { Location } from "@/types";
@@ -15,12 +18,19 @@ const ASPECT_RATIOS = ["3/4", "4/5", "2/3", "4/5", "3/4", "1/1", "4/5", "3/5"];
 
 export default function ExplorePage() {
   const { searchQuery, setSearchQuery, activeFilters, clearFilters } = useMapStore();
+  const userPosition = useGeoStore((s) => s.position);
   const [showFilters, setShowFilters] = useState(false);
+  const [sortMode, setSortMode] = useState<SortMode>("featured");
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
 
   const filteredLocations = useMemo(
-    () => filterLocations(PLACEHOLDER_LOCATIONS, searchQuery, activeFilters),
-    [searchQuery, activeFilters]
+    () =>
+      sortLocations(
+        filterLocations(PLACEHOLDER_LOCATIONS, searchQuery, activeFilters),
+        sortMode,
+        userPosition
+      ),
+    [searchQuery, activeFilters, sortMode, userPosition]
   );
 
   const activeFilterCount = useMemo(
@@ -77,6 +87,11 @@ export default function ExplorePage() {
             </span>
           )}
         </button>
+      </div>
+
+      {/* Sort strip */}
+      <div className="flex-shrink-0 px-3 pb-2 bg-trail-950/90 backdrop-blur-xl z-10">
+        <SortControl value={sortMode} onChange={setSortMode} />
       </div>
 
       {/* Active filter strip */}

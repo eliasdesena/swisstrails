@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, MapPin, ArrowRight, Clock, Mountain, Navigation, Calendar } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMapStore } from "@/store/map-store";
+import { useGeoStore } from "@/store/geo-store";
+import { distanceKm as haversineKm, formatDistance } from "@/lib/distance";
 import { categoryConfig, regionConfig, cn } from "@/lib/utils";
 import { OpenInSheet } from "@/components/app/open-in-sheet";
 import { PLACEHOLDER_LOCATIONS } from "@/data/locations";
@@ -42,8 +44,15 @@ export function LocationDetailSheet({
 }: LocationDetailSheetProps) {
   const router = useRouter();
   const { openBottomSheet } = useMapStore();
+  const userPosition = useGeoStore((s) => s.position);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [openInSheet, setOpenInSheet] = useState(false);
+
+  // Real straight-line distance from the user, when we know their position.
+  const awayKm =
+    location && userPosition
+      ? formatDistance(haversineKm(userPosition, location.coordinates))
+      : null;
 
   // TODO: Replace with visual similarity engine — currently picks same-category locations
   // using a deterministic shuffle seeded by the location ID hash to keep renders stable.
@@ -150,10 +159,10 @@ export function LocationDetailSheet({
                       {location.elevation}m
                     </span>
                   )}
-                  {location.distanceKm != null && (
+                  {awayKm && (
                     <span className="flex items-center gap-1.5">
                       <Navigation className="w-3 h-3" />
-                      {location.distanceKm}km
+                      {awayKm} away
                     </span>
                   )}
                   <span className="flex items-center gap-1.5">

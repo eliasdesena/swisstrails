@@ -1,9 +1,11 @@
 "use client";
 
-import { Heart, Clock, TrendingUp } from "lucide-react";
+import { Heart, Clock, TrendingUp, MapPin } from "lucide-react";
 import Image from "next/image";
 import { cn, difficultyConfig, categoryConfig, formatDuration } from "@/lib/utils";
 import { useFavoritesStore } from "@/store/favorites-store";
+import { useGeoStore } from "@/store/geo-store";
+import { distanceKm, formatDistance } from "@/lib/distance";
 import type { Location } from "@/types";
 
 interface LocationCardProps {
@@ -20,9 +22,16 @@ export function LocationCard({
   compact = false,
 }: LocationCardProps) {
   const { isFavorite, toggleFavorite } = useFavoritesStore();
+  const userPosition = useGeoStore((s) => s.position);
   const fav = isFavorite(location.id);
   const diff = difficultyConfig[location.difficulty];
   const cat = categoryConfig[location.category];
+
+  // Real, honest distance when we know where the user is; otherwise fall back
+  // to the static travel-time estimate (relabelled "~X by car", no "away").
+  const awayKm = userPosition
+    ? formatDistance(distanceKm(userPosition, location.coordinates))
+    : null;
 
   return (
     <div
@@ -53,7 +62,8 @@ export function LocationCard({
           <div className="flex-1 min-w-0 px-3 py-2.5 bg-trail-900">
             <p className="text-fg text-sm font-medium truncate">{location.name}</p>
             <p className="text-fg-muted text-xs mt-0.5 truncate">
-              {cat.label} · {formatDuration(location.travelTimeMinutes)}
+              {cat.label} ·{" "}
+              {awayKm ? `${awayKm} away` : `~${formatDuration(location.travelTimeMinutes)} by car`}
             </p>
             <div className="flex items-center gap-2 mt-1.5">
               <span className={cn("text-xs font-medium", diff.color)}>
@@ -136,10 +146,17 @@ export function LocationCard({
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 text-xs text-fg-muted">
-                <span className="flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  {formatDuration(location.travelTimeMinutes)}
-                </span>
+                {awayKm ? (
+                  <span className="flex items-center gap-1">
+                    <MapPin className="w-3 h-3" />
+                    {awayKm} away
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    ~{formatDuration(location.travelTimeMinutes)} by car
+                  </span>
+                )}
                 <span className={cn("font-medium", diff.color)}>{diff.label}</span>
               </div>
               {location.saveCount > 0 && (

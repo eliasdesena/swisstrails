@@ -10,6 +10,8 @@ import Image from "next/image";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useFavoritesStore } from "@/store/favorites-store";
+import { useGeoStore } from "@/store/geo-store";
+import { distanceKm, formatDistance } from "@/lib/distance";
 import {
   cn,
   difficultyConfig,
@@ -45,9 +47,14 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
   const [activeGalleryIndex, setActiveGalleryIndex] = useState<number | null>(null);
   const [openInSheet, setOpenInSheet] = useState(false);
   const { isFavorite, toggleFavorite } = useFavoritesStore();
+  const userPosition = useGeoStore((s) => s.position);
   const fav = isFavorite(location.id);
   const diff = difficultyConfig[location.difficulty];
   const cat = categoryConfig[location.category];
+
+  const awayKm = userPosition
+    ? formatDistance(distanceKm(userPosition, location.coordinates))
+    : null;
 
   return (
     <div className="flex flex-col h-full">
@@ -124,10 +131,17 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
             <span className={cn("font-medium", DIFF_COLOR[location.difficulty])}>
               {diff.label}
             </span>
-            <span className="flex items-center gap-1.5">
-              <Clock className="w-3 h-3" />
-              {formatDuration(location.travelTimeMinutes)} away
-            </span>
+            {awayKm ? (
+              <span className="flex items-center gap-1.5">
+                <Navigation className="w-3 h-3" />
+                {awayKm} away
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5">
+                <Clock className="w-3 h-3" />
+                ~{formatDuration(location.travelTimeMinutes)} by car
+              </span>
+            )}
             {location.elevation && (
               <span className="flex items-center gap-1.5">
                 <Mountain className="w-3 h-3" />

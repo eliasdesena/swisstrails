@@ -8,8 +8,11 @@ import { BottomSheet } from "@/components/app/bottom-sheet";
 import { LocationGrid } from "@/components/app/location-grid";
 import { FilterDrawer } from "@/components/app/filter-drawer";
 import { useMapStore } from "@/store/map-store";
+import { useGeoStore } from "@/store/geo-store";
 import { PLACEHOLDER_LOCATIONS } from "@/data/locations";
 import { filterLocations, countActiveFilters } from "@/lib/filters";
+import { sortLocations, type SortMode } from "@/lib/sort";
+import { SortControl } from "@/components/app/sort-control";
 import { cn } from "@/lib/utils";
 
 const MapView = dynamic(
@@ -26,8 +29,10 @@ const MapView = dynamic(
 
 export default function MapPage() {
   const { searchQuery, setSearchQuery, activeFilters, clearFilters } = useMapStore();
+  const userPosition = useGeoStore((s) => s.position);
   const [view, setView] = useState<"map" | "list">("map");
   const [showFilters, setShowFilters] = useState(false);
+  const [sortMode, setSortMode] = useState<SortMode>("featured");
   const [isSatellite, setIsSatellite] = useState(true);
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -36,12 +41,18 @@ export default function MapPage() {
     [searchQuery, activeFilters]
   );
 
+  // List view honours the sort control; the map keeps marker order stable.
+  const sortedLocations = useMemo(
+    () => sortLocations(filteredLocations, sortMode, userPosition),
+    [filteredLocations, sortMode, userPosition]
+  );
+
   const activeFilterCount = useMemo(
     () => countActiveFilters(activeFilters),
     [activeFilters]
   );
 
-  const filterKey = `${searchQuery}-${JSON.stringify(activeFilters)}`;
+  const filterKey = `${searchQuery}-${JSON.stringify(activeFilters)}-${sortMode}-${userPosition ? "geo" : "nogeo"}`;
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1024px)");
@@ -185,19 +196,25 @@ export default function MapPage() {
           {view === "list" && (
             <motion.div
               key="list"
-              className="absolute inset-0"
+              className="absolute inset-0 flex flex-col"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
-              <LocationGrid
-                key={filterKey}
-                locations={filteredLocations}
-                totalCount={PLACEHOLDER_LOCATIONS.length}
-                activeFilterCount={activeFilterCount}
-                onOpenFilters={() => setShowFilters(true)}
-              />
+              {/* Sort strip — list view only */}
+              <div className="flex-shrink-0 px-4 pt-3 max-w-5xl mx-auto w-full">
+                <SortControl value={sortMode} onChange={setSortMode} />
+              </div>
+              <div className="flex-1 min-h-0">
+                <LocationGrid
+                  key={filterKey}
+                  locations={sortedLocations}
+                  totalCount={PLACEHOLDER_LOCATIONS.length}
+                  activeFilterCount={activeFilterCount}
+                  onOpenFilters={() => setShowFilters(true)}
+                />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

@@ -102,7 +102,7 @@ export default async function LocationPage({ params }: Props) {
           <span className={`font-medium ${DIFF_COLOR[location.difficulty]}`}>{diff.label}</span>
           <span className="flex items-center gap-1.5 text-stone-400">
             <Clock className="w-3.5 h-3.5" />
-            {formatDuration(location.travelTimeMinutes)} drive
+            ~{formatDuration(location.travelTimeMinutes)} by car
           </span>
           {location.elevation && (
             <span className="flex items-center gap-1.5 text-stone-400">
