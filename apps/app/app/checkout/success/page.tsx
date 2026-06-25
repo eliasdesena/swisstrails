@@ -9,6 +9,9 @@ import { Logo } from "@/components/brand/logo";
 
 function useConfetti() {
   useEffect(() => {
+    // Honor reduced-motion — skip the celebratory animation entirely.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
     let frame = 0;
     const canvas = document.createElement("canvas");
     canvas.style.cssText =
@@ -116,7 +119,7 @@ export default function CheckoutSuccessPage() {
           </h1>
 
           <p className="t-body text-fg-muted max-w-sm mx-auto mb-10">
-            Your adventure starts now. 50+ hidden locations across Switzerland
+            Your adventure starts now. 500+ hidden locations across Switzerland
             are waiting for you. Go find something extraordinary.
           </p>
 
@@ -134,7 +137,7 @@ export default function CheckoutSuccessPage() {
             </Button>
           </div>
 
-          <p className="text-fg-subtle text-xs mt-8">
+          <p className="text-fg-muted text-xs mt-8">
             Your access has been activated. Check your email for a confirmation.
           </p>
         </motion.div>

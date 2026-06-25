@@ -69,7 +69,7 @@ export default function LoginPage() {
                 Enter as Demo User →
               </Link>
             </Button>
-            <p className="text-fg-subtle text-xs text-center mt-2">
+            <p className="text-fg-muted text-xs text-center mt-2">
               No login required · full app access
             </p>
           </motion.div>
@@ -89,7 +89,7 @@ export default function LoginPage() {
               We sent a sign-in link to{" "}
               <span className="text-fg font-medium">{email}</span>
             </p>
-            <p className="text-fg-subtle text-xs">
+            <p className="text-fg-muted text-xs">
               Didn&apos;t receive it?{" "}
               <button
                 className="text-alpine-400 hover:underline"
@@ -120,7 +120,7 @@ export default function LoginPage() {
 
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-stone-800" />
-              <span className="text-fg-subtle text-xs">or</span>
+              <span className="text-fg-muted text-xs">or</span>
               <div className="flex-1 h-px bg-stone-800" />
             </div>
 
@@ -145,20 +145,20 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            <p className="text-fg-subtle text-xs text-center">
+            <p className="text-fg-muted text-xs text-center">
               We&apos;ll send you a magic link — no password needed
             </p>
           </div>
         )}
 
         <div className="mt-6 text-center space-y-2">
-          <p className="text-fg-subtle text-xs">
+          <p className="text-fg-muted text-xs">
             Don&apos;t have access?{" "}
             <Link href="/#pricing" className="text-alpine-400 hover:underline">
               Get Swiss Trails — CHF 29
             </Link>
           </p>
-          <Link href="/" className="text-fg-subtle hover:text-fg text-xs transition-colors">
+          <Link href="/" className="text-fg-muted hover:text-fg text-xs transition-colors py-1 inline-block">
             ← Back to website
           </Link>
         </div>

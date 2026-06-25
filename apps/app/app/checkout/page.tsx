@@ -95,10 +95,12 @@ export default function CheckoutPage() {
               </label>
               <input
                 type="email"
+                inputMode="email"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full h-11 bg-trail-800 border border-stone-800 rounded-xl text-sm text-fg placeholder:text-fg-subtle px-4 outline-none transition-all focus:border-alpine-600 focus:ring-2 focus:ring-alpine-900/50"
+                className="w-full h-11 bg-trail-800 border border-stone-800 rounded-xl text-base text-fg placeholder:text-fg-muted px-4 outline-none transition-[border-color,box-shadow] focus:border-alpine-600 focus:ring-2 focus:ring-alpine-900/50"
               />
             </div>
 
@@ -115,8 +117,8 @@ export default function CheckoutPage() {
             </Button>
 
             <div className="mt-4 flex items-center justify-center gap-2">
-              <Shield className="w-3.5 h-3.5 text-fg-subtle" />
-              <p className="text-fg-subtle text-xs">
+              <Shield className="w-3.5 h-3.5 text-fg-muted" />
+              <p className="text-fg-muted text-xs">
                 Secured by Stripe · Visit 3 spots or get refunded
               </p>
             </div>

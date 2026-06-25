@@ -18,18 +18,60 @@ export default function AdminLocationsPage() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/admin" className="text-fg-subtle hover:text-fg text-sm transition-colors">
+            <Link href="/admin" className="text-fg-muted hover:text-fg text-sm transition-colors">
               ← Dashboard
             </Link>
-            <Button variant="alpine" size="sm">
+            <Button variant="alpine" size="md">
               <Plus className="w-4 h-4" />
-              Add Location
+              <span className="hidden sm:inline">Add Location</span>
+              <span className="sm:hidden">Add</span>
             </Button>
           </div>
         </div>
 
-        {/* Locations table */}
-        <div className="card-solid rounded-2xl overflow-hidden">
+        {/* Mobile card list */}
+        <div className="lg:hidden space-y-3">
+          {PLACEHOLDER_LOCATIONS.map((loc) => {
+            const cat = categoryConfig[loc.category];
+            const diff = difficultyConfig[loc.difficulty];
+            return (
+              <div key={loc.id} className="card-solid rounded-xl p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-fg text-sm font-medium truncate">{loc.name}</p>
+                    <p className="text-fg-subtle text-xs mt-0.5 truncate">{loc.slug}</p>
+                  </div>
+                  {loc.isFeatured ? (
+                    <Badge variant="alpine" size="sm">Featured</Badge>
+                  ) : loc.isNew ? (
+                    <Badge variant="gold" size="sm">New</Badge>
+                  ) : (
+                    <Badge variant="default" size="sm">Active</Badge>
+                  )}
+                </div>
+                <div className="flex items-center gap-3 mt-2 text-xs">
+                  <span className="text-fg-muted">{cat.emoji} {cat.label}</span>
+                  <span className="text-fg-muted capitalize">{loc.region}</span>
+                  <span className={`font-medium ${diff.color}`}>{diff.label}</span>
+                </div>
+                <div className="flex items-center gap-2 mt-4">
+                  <button aria-label="View" className="flex-1 h-11 rounded-lg bg-trail-700 border border-stone-700 flex items-center justify-center text-fg-muted hover:text-fg transition-colors">
+                    <Eye className="w-4 h-4" />
+                  </button>
+                  <button aria-label="Edit" className="flex-1 h-11 rounded-lg bg-trail-700 border border-stone-700 flex items-center justify-center text-fg-muted hover:text-fg transition-colors">
+                    <Edit className="w-4 h-4" />
+                  </button>
+                  <button aria-label="Delete" className="flex-1 h-11 rounded-lg bg-red-950 border border-red-900 flex items-center justify-center text-red-400 hover:text-red-300 transition-colors">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Locations table — desktop */}
+        <div className="card-solid rounded-2xl overflow-hidden hidden lg:block">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
