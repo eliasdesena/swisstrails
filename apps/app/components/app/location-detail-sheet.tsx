@@ -9,6 +9,7 @@ import { useGeoStore } from "@/store/geo-store";
 import { distanceKm as haversineKm, formatDistance } from "@/lib/distance";
 import { categoryConfig, regionConfig, cn } from "@/lib/utils";
 import { OpenInSheet } from "@/components/app/open-in-sheet";
+import { WeatherWidget } from "@/components/app/weather-widget";
 import { PLACEHOLDER_LOCATIONS } from "@/data/locations";
 import type { Location, Difficulty } from "@/types";
 
@@ -200,6 +201,12 @@ export function LocationDetailSheet({
                     </ul>
                   </div>
                 )}
+
+                {/* Weather */}
+                <WeatherWidget
+                  lat={location.coordinates.lat}
+                  lng={location.coordinates.lng}
+                />
 
                 {/* Tags */}
                 {location.tags.length > 0 && (

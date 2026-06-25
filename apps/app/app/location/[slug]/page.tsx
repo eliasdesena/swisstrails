@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { PLACEHOLDER_LOCATIONS } from "@/data/locations";
 import { categoryConfig, difficultyConfig, regionConfig, formatDuration } from "@/lib/utils";
 import { DirectionsActions } from "@/components/app/directions-actions";
+import { WeatherWidget } from "@/components/app/weather-widget";
 import { MapPin, Clock, Mountain, ArrowLeft } from "lucide-react";
 
 interface Props {
@@ -120,6 +121,12 @@ export default async function LocationPage({ params }: Props) {
         {location.description && (
           <p className="text-stone-300 leading-relaxed">{location.description}</p>
         )}
+
+        {/* Weather (client island) */}
+        <WeatherWidget
+          lat={location.coordinates.lat}
+          lng={location.coordinates.lng}
+        />
 
         {/* Highlights */}
         {location.highlights.length > 0 && (

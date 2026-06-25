@@ -21,6 +21,7 @@ import {
 } from "@/lib/utils";
 import { platformDirections } from "@/lib/deep-links";
 import { OpenInSheet } from "@/components/app/open-in-sheet";
+import { WeatherWidget } from "@/components/app/weather-widget";
 import type { Location } from "@/types";
 
 interface LocationDetailProps {
@@ -196,6 +197,12 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
               })}
             </div>
           </div>
+
+          {/* Weather */}
+          <WeatherWidget
+            lat={location.coordinates.lat}
+            lng={location.coordinates.lng}
+          />
 
           {/* Tips */}
           {location.tips.length > 0 && (
