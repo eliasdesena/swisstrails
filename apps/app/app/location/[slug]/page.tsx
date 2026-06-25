@@ -71,10 +71,10 @@ export default async function LocationPage({ params }: Props) {
         <div className="absolute inset-0 bg-gradient-to-t from-trail-950 via-trail-950/30 to-black/20" />
 
         {/* Back */}
-        <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between">
+        <div className="absolute top-0 left-0 right-0 px-2 pt-[max(0.5rem,env(safe-area-inset-top))] flex items-center justify-between">
           <Link
             href="/"
-            className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors text-sm"
+            className="inline-flex items-center gap-1.5 h-11 px-2 text-white/80 hover:text-white transition-colors text-sm"
           >
             <ArrowLeft className="w-4 h-4" />
             Swiss Trails
@@ -124,7 +124,7 @@ export default async function LocationPage({ params }: Props) {
         {/* Highlights */}
         {location.highlights.length > 0 && (
           <div>
-            <p className="text-[10px] font-medium tracking-[0.14em] uppercase text-stone-600 mb-3">
+            <p className="text-[11px] font-medium tracking-[0.14em] uppercase text-fg-muted mb-3">
               Highlights
             </p>
             <ul className="space-y-2">
@@ -141,7 +141,7 @@ export default async function LocationPage({ params }: Props) {
         {/* Tips */}
         {location.tips.length > 0 && (
           <div>
-            <p className="text-[10px] font-medium tracking-[0.14em] uppercase text-stone-600 mb-3">
+            <p className="text-[11px] font-medium tracking-[0.14em] uppercase text-fg-muted mb-3">
               Tips
             </p>
             <ul className="space-y-2">
@@ -158,7 +158,7 @@ export default async function LocationPage({ params }: Props) {
         {/* Access */}
         {location.accessInfo && (
           <div>
-            <p className="text-[10px] font-medium tracking-[0.14em] uppercase text-stone-600 mb-2">
+            <p className="text-[11px] font-medium tracking-[0.14em] uppercase text-fg-muted mb-2">
               Getting there
             </p>
             <p className="text-stone-400 text-sm">{location.accessInfo}</p>
@@ -187,10 +187,10 @@ export default async function LocationPage({ params }: Props) {
         {/* Upsell */}
         <div className="rounded-xl bg-white/[0.03] p-5 text-center">
           <p className="text-fg text-sm font-medium mb-1">Want 500+ more locations like this?</p>
-          <p className="text-stone-500 text-xs mb-4">One payment. Lifetime access. Hidden lakes, secret viewpoints, night skies.</p>
+          <p className="text-fg-muted text-xs mb-4">One payment. Lifetime access. Hidden lakes, secret viewpoints, night skies.</p>
           <Link
-            href="/"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-alpine-600 hover:bg-alpine-500 text-white text-sm font-medium transition-colors"
+            href="/checkout"
+            className="inline-flex items-center justify-center gap-2 px-6 h-12 rounded-lg bg-gold-400 hover:bg-gold-300 active:bg-gold-500 text-trail-950 text-sm font-semibold transition-colors"
           >
             Get Swiss Trails — CHF 29
           </Link>
