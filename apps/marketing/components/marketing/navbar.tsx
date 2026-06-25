@@ -19,6 +19,12 @@ export function Navbar() {
     return unsub;
   }, [scrollY]);
 
+  // Lock body scroll while the mobile menu is open.
+  useEffect(() => {
+    document.body.style.overflow = isMenuOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [isMenuOpen]);
+
   const navLinks = [
     { label: "What's Inside", href: "#whats-inside" },
     { label: "How It Works", href: "#solution" },
@@ -77,9 +83,10 @@ export function Navbar() {
 
             {/* Mobile menu button */}
             <button
-              className="lg:hidden p-2 text-fg-muted hover:text-fg"
+              className="lg:hidden -mr-2 w-11 h-11 flex items-center justify-center text-fg-muted hover:text-fg"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="Toggle menu"
+              aria-expanded={isMenuOpen}
             >
               {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -109,7 +116,7 @@ export function Navbar() {
               <a
                 key={link.href}
                 href={link.href}
-                className="text-fg-muted hover:text-fg py-3 text-base transition-colors"
+                className="text-fg-muted hover:text-fg py-3 px-2 -mx-2 text-base transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 {link.label}
@@ -124,7 +131,7 @@ export function Navbar() {
             </Button>
             <a
               href={`${APP_URL}/login`}
-              className="text-center text-fg-muted text-sm py-2"
+              className="block text-center text-fg-muted hover:text-fg text-sm py-3 transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               Already have access? Log in

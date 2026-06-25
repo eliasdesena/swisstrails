@@ -44,14 +44,14 @@ export function Footer() {
                 wordmarkClassName="text-fg"
               />
             </Link>
-            <p className="text-fg-subtle text-xs max-w-xs">
+            <p className="text-fg-muted text-sm max-w-xs">
               Curated collection of Switzerland&apos;s most beautiful,
               underrated, and unforgettable locations.
             </p>
           </div>
 
           {/* Links */}
-          <div className="flex flex-wrap gap-x-8 gap-y-3">
+          <div className="flex flex-wrap gap-x-6 gap-y-1">
             {[
               { label: "About", href: "#" },
               { label: "Pricing", href: "#pricing" },
@@ -63,7 +63,7 @@ export function Footer() {
               <a
                 key={link.label}
                 href={link.href}
-                className="text-fg-subtle hover:text-fg text-sm transition-colors"
+                className="inline-flex items-center min-h-[44px] px-1 text-fg-muted hover:text-fg text-sm transition-colors"
               >
                 {link.label}
               </a>
@@ -72,10 +72,10 @@ export function Footer() {
         </div>
 
         <div className="mt-10 pt-8 flex flex-col lg:flex-row items-center justify-between gap-4">
-          <p className="text-fg-subtle text-xs">
+          <p className="text-fg-muted text-xs">
             © {currentYear} Swiss Trails. All rights reserved.
           </p>
-          <p className="text-fg-subtle text-xs">
+          <p className="text-fg-muted text-xs">
             Made in Switzerland
           </p>
         </div>

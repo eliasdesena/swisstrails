@@ -49,7 +49,7 @@ export function SocialProof() {
               <span className="text-2xl lg:text-3xl font-bold text-fg tracking-tight">
                 {stat.value}
               </span>
-              <span className="text-fg-subtle text-sm mt-1">{stat.label}</span>
+              <span className="text-fg-muted text-sm mt-1">{stat.label}</span>
             </motion.div>
           ))}
         </div>
@@ -63,7 +63,7 @@ export function SocialProof() {
               key={i}
               className="flex items-center gap-6 px-8 py-3 whitespace-nowrap flex-shrink-0"
             >
-              <span className="text-stone-600 text-sm tracking-wide">{item}</span>
+              <span className="text-stone-400 text-sm tracking-wide">{item}</span>
               <span className="w-px h-3 bg-stone-800 flex-shrink-0" />
             </div>
           ))}
@@ -76,7 +76,7 @@ export function SocialProof() {
           {TRUST_ITEMS.map(({ icon: Icon, label }) => (
             <div key={label} className="flex items-center gap-2">
               <Icon className="w-4 h-4 text-alpine-500" />
-              <span className="text-fg-subtle text-sm">{label}</span>
+              <span className="text-fg-muted text-sm">{label}</span>
             </div>
           ))}
         </div>

@@ -59,11 +59,11 @@ export function Pricing() {
               <div className="mb-8">
                 <div className="flex items-baseline gap-3">
                   <span className="text-fg-subtle text-xl">CHF</span>
-                  <span className="text-7xl font-bold text-fg tracking-tight leading-none">
+                  <span className="text-6xl lg:text-7xl font-bold text-fg tracking-tight leading-none">
                     {PRICING.amount}
                   </span>
                 </div>
-                <p className="text-fg-subtle text-sm mt-2">
+                <p className="text-fg-muted text-sm mt-2">
                   One-time payment · Access for life
                 </p>
               </div>
@@ -94,8 +94,8 @@ export function Pricing() {
 
               {/* Reassurance */}
               <div className="mt-5 flex items-center justify-center gap-2">
-                <Shield className="w-3.5 h-3.5 text-fg-subtle" />
-                <p className="text-center text-fg-subtle text-xs">
+                <Shield className="w-3.5 h-3.5 text-fg-muted" />
+                <p className="text-center text-fg-muted text-xs">
                   Secured by Stripe · Visit 3 spots, love it or get refunded
                 </p>
               </div>
@@ -104,8 +104,8 @@ export function Pricing() {
 
           {/* Social proof under card */}
           <Reveal delay={0.3}>
-            <p className="mt-6 text-center text-stone-600 text-sm">
-              <span className="text-stone-400">3,200+</span> explorers already inside
+            <p className="mt-6 text-center text-fg-muted text-sm">
+              <span className="text-stone-300">3,200+</span> explorers already inside
             </p>
           </Reveal>
         </div>

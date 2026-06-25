@@ -104,7 +104,7 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
         >
-          50 handpicked locations across Switzerland — hidden lakes, secret viewpoints,
+          500+ handpicked locations across Switzerland — hidden lakes, secret viewpoints,
           and weekends you&apos;ll remember forever. One payment. Lifetime access.
         </motion.p>
 
@@ -141,14 +141,14 @@ export function Hero() {
           transition={{ duration: 0.8, delay: 0.5 }}
         >
           <div className="flex items-center gap-2">
-            <span className="text-stone-500 text-sm">3,200+ explorers</span>
+            <span className="text-fg-muted text-sm">3,200+ explorers</span>
           </div>
-          <span className="text-stone-800">·</span>
+          <span className="text-stone-700">·</span>
           <div className="flex items-center gap-1.5">
             {[1, 2, 3, 4, 5].map((i) => (
               <Star key={i} className="w-3.5 h-3.5 fill-gold-400 text-gold-400" />
             ))}
-            <span className="text-fg-subtle text-sm ml-1">4.9 rating</span>
+            <span className="text-fg-muted text-sm ml-1">4.9 rating</span>
           </div>
         </motion.div>
       </motion.div>
@@ -192,7 +192,8 @@ export function Hero() {
         transition={{ delay: 1.5, duration: 0.8 }}
       >
         <button
-          className="flex flex-col items-center gap-2 text-stone-700 hover:text-stone-500 transition-colors cursor-pointer"
+          aria-label="Scroll down"
+          className="flex flex-col items-center gap-2 p-3 text-stone-500 hover:text-stone-300 transition-colors cursor-pointer"
           onClick={() =>
             document.getElementById("stats")?.scrollIntoView({ behavior: "smooth" })
           }

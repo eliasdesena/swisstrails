@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState } from "react";
 import { Star } from "lucide-react";
 import { Reveal } from "@/components/shared/reveal";
 import { TESTIMONIALS } from "@/data/testimonials";
@@ -10,22 +9,19 @@ import { cn } from "@/lib/utils";
 function TestimonialCard({
   testimonial,
   index,
-  isActive,
 }: {
   testimonial: (typeof TESTIMONIALS)[0];
   index: number;
-  isActive: boolean;
 }) {
   return (
     <motion.div
       className={cn(
-        "flex-shrink-0 w-full max-w-sm card-solid p-7 rounded-xl transition-all duration-500",
-        isActive ? "" : "opacity-50"
+        "flex-shrink-0 w-full card-solid p-6 lg:p-7 rounded-xl"
       )}
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.6, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.6, delay: Math.min(index * 0.08, 0.3), ease: [0.16, 1, 0.3, 1] }}
     >
       {/* Stars */}
       <div className="flex gap-1 mb-5">
@@ -49,7 +45,7 @@ function TestimonialCard({
         </div>
         <div>
           <p className="text-fg text-sm font-medium">{testimonial.name}</p>
-          <p className="text-fg-subtle text-xs">
+          <p className="text-fg-muted text-xs">
             {testimonial.city}
             {testimonial.age && `, ${testimonial.age}`}
           </p>
@@ -63,7 +59,7 @@ function TestimonialCard({
 
       {testimonial.locationVisited && (
         <div className="mt-4 pt-3">
-          <p className="text-fg-subtle text-xs">
+          <p className="text-fg-muted text-xs">
             Visited: <span className="text-fg-muted">{testimonial.locationVisited}</span>
           </p>
         </div>
@@ -73,8 +69,6 @@ function TestimonialCard({
 }
 
 export function Testimonials() {
-  const [activeIndex] = useState(1);
-
   return (
     <section id="testimonials" className="py-24 lg:py-36 bg-trail-900/30">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -100,12 +94,8 @@ export function Testimonials() {
         {/* Testimonial cards — horizontal scroll */}
         <div className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-none">
           {TESTIMONIALS.map((t, i) => (
-            <div key={t.id} className="snap-start flex-shrink-0 w-[320px]">
-              <TestimonialCard
-                testimonial={t}
-                index={i}
-                isActive={i === activeIndex}
-              />
+            <div key={t.id} className="snap-start flex-shrink-0 w-[82vw] max-w-[340px]">
+              <TestimonialCard testimonial={t} index={i} />
             </div>
           ))}
         </div>
@@ -120,17 +110,17 @@ export function Testimonials() {
                   <Star key={i} className="w-4 h-4 fill-gold-400 text-gold-400" />
                 ))}
               </div>
-              <p className="text-fg-subtle text-sm mt-1">Average rating</p>
+              <p className="text-fg-muted text-sm mt-1">Average rating</p>
             </div>
             <div className="hidden lg:block w-px h-16 bg-white/[0.07]" />
             <div className="text-center">
               <p className="text-5xl font-bold text-fg tracking-tight">3,200+</p>
-              <p className="text-fg-subtle text-sm mt-3">Explorers this year</p>
+              <p className="text-fg-muted text-sm mt-3">Explorers this year</p>
             </div>
             <div className="hidden lg:block w-px h-16 bg-white/[0.07]" />
             <div className="text-center">
               <p className="text-5xl font-bold text-fg tracking-tight">98%</p>
-              <p className="text-fg-subtle text-sm mt-3">Would recommend</p>
+              <p className="text-fg-muted text-sm mt-3">Would recommend</p>
             </div>
           </div>
         </Reveal>
