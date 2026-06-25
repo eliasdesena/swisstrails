@@ -8,7 +8,8 @@ import { cn } from "../../lib/utils";
 const buttonVariants = cva(
   [
     "inline-flex items-center justify-center gap-2 rounded-lg font-medium",
-    "transition-all duration-150 cursor-pointer select-none",
+    "transition-[transform,background-color,border-color,color,box-shadow] duration-150 cursor-pointer select-none",
+    "pointer-coarse:min-h-11",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-alpine-400 focus-visible:ring-offset-2 focus-visible:ring-offset-trail-950",
     "disabled:opacity-40 disabled:pointer-events-none",
     "whitespace-nowrap",

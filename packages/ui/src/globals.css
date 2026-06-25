@@ -114,6 +114,9 @@
     color: var(--color-fg);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
     scroll-behavior: smooth;
   }
 
@@ -122,6 +125,7 @@
     color: var(--color-fg);
     font-family: var(--font-body);
     overflow-x: hidden;
+    overscroll-behavior-y: none;
   }
 
   ::selection {
@@ -338,6 +342,17 @@
   .animate-float { animation: float 4s ease-in-out infinite; }
   .animate-float-delayed { animation: float 4s ease-in-out 1.5s infinite; }
 
+  @keyframes accordion-down {
+    from { height: 0; }
+    to   { height: var(--radix-accordion-content-height); }
+  }
+  @keyframes accordion-up {
+    from { height: var(--radix-accordion-content-height); }
+    to   { height: 0; }
+  }
+  .animate-accordion-down { animation: accordion-down 0.3s var(--ease-out-expo); }
+  .animate-accordion-up   { animation: accordion-up 0.3s var(--ease-out-expo); }
+
   .noise-overlay { position: relative; }
   .noise-overlay::after {
     content: "";
@@ -369,5 +384,16 @@
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
+  }
+}
+
+/* Respect users who prefer reduced motion — neutralizes marquee, float,
+   accordion, parallax, and any transition across both apps. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }

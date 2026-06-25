@@ -36,7 +36,7 @@ export function AppHeader() {
                 href={item.href}
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors duration-150 rounded",
-                  isActive ? "text-fg" : "text-fg-subtle hover:text-fg-muted"
+                  isActive ? "text-fg" : "text-fg-muted hover:text-fg"
                 )}
               >
                 <item.icon className={cn("w-3.5 h-3.5", isActive ? "text-alpine-400" : "")} />
@@ -54,26 +54,27 @@ export function AppHeader() {
       </header>
 
       {/* Bottom nav — mobile */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-trail-950/98 backdrop-blur-xl" style={{ boxShadow: "0 -1px 0 rgba(255,255,255,0.04)" }}>
-        <div className="flex items-center justify-around h-16 px-2">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-trail-950/98 backdrop-blur-xl pb-[env(safe-area-inset-bottom)]" style={{ boxShadow: "0 -1px 0 rgba(255,255,255,0.04)" }}>
+        <div className="flex items-stretch justify-around h-16 px-2">
           {NAV_ITEMS.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = pathname === item.href || (item.href === "/explore" && pathname === "/");
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex flex-col items-center gap-1 px-3 py-2 min-w-[56px]"
+                aria-current={isActive ? "page" : undefined}
+                className="flex flex-1 flex-col items-center justify-center gap-1 min-w-[56px]"
               >
                 <item.icon
                   className={cn(
                     "w-5 h-5 transition-colors duration-150",
-                    isActive ? "text-alpine-400" : "text-stone-600"
+                    isActive ? "text-alpine-400" : "text-fg-muted"
                   )}
                 />
                 <span
                   className={cn(
-                    "text-[10px] font-medium tracking-wide transition-colors duration-150",
-                    isActive ? "text-alpine-400" : "text-stone-600"
+                    "text-[11px] font-medium tracking-wide transition-colors duration-150",
+                    isActive ? "text-alpine-400" : "text-fg-muted"
                   )}
                 >
                   {item.label}

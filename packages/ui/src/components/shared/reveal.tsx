@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useReducedMotion } from "framer-motion";
 import { useRef } from "react";
 
 interface RevealProps {
@@ -24,6 +24,7 @@ export function Reveal({
 }: RevealProps) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once, amount });
+  const reduceMotion = useReducedMotion();
 
   const directionMap = {
     up: { y: 32, x: 0 },
@@ -33,23 +34,23 @@ export function Reveal({
     none: { y: 0, x: 0 },
   };
 
-  const initial = {
-    opacity: 0,
-    ...directionMap[direction],
-  };
+  // Reduced motion: render at the final state — no transform, never hidden.
+  const initial = reduceMotion
+    ? { opacity: 1, y: 0, x: 0 }
+    : { opacity: 0, ...directionMap[direction] };
 
   return (
     <motion.div
       ref={ref}
       initial={initial}
       animate={
-        isInView
+        reduceMotion || isInView
           ? { opacity: 1, y: 0, x: 0 }
           : initial
       }
       transition={{
-        duration,
-        delay,
+        duration: reduceMotion ? 0 : duration,
+        delay: reduceMotion ? 0 : delay,
         ease: [0.16, 1, 0.3, 1],
       }}
       className={className}
@@ -80,6 +81,7 @@ export function Stagger({
 }: StaggerProps) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once, amount });
+  const reduceMotion = useReducedMotion();
 
   const directionMap = {
     up: { y: 24, x: 0 },
@@ -89,20 +91,24 @@ export function Stagger({
     none: { y: 0, x: 0 },
   };
 
+  const hidden = reduceMotion
+    ? { opacity: 1, y: 0, x: 0 }
+    : { opacity: 0, ...directionMap[direction] };
+
   return (
     <div ref={ref} className={className}>
       {children.map((child, i) => (
         <motion.div
           key={i}
-          initial={{ opacity: 0, ...directionMap[direction] }}
+          initial={hidden}
           animate={
-            isInView
+            reduceMotion || isInView
               ? { opacity: 1, y: 0, x: 0 }
-              : { opacity: 0, ...directionMap[direction] }
+              : hidden
           }
           transition={{
-            duration: 0.6,
-            delay: initialDelay + i * staggerDelay,
+            duration: reduceMotion ? 0 : 0.6,
+            delay: reduceMotion ? 0 : initialDelay + i * staggerDelay,
             ease: [0.16, 1, 0.3, 1],
           }}
         >
