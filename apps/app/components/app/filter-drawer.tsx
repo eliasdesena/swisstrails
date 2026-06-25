@@ -77,7 +77,7 @@ export function FilterDrawer({ isOpen, onClose, resultCount }: FilterDrawerProps
           <motion.div
             className={cn(
               "fixed z-[1200] bg-trail-950 overflow-hidden",
-              "bottom-[64px] left-2 right-2 max-h-[72vh] rounded-xl",
+              "bottom-[calc(64px+env(safe-area-inset-bottom))] left-2 right-2 max-h-[72dvh] rounded-xl",
               "lg:bottom-auto lg:left-auto lg:top-[56px] lg:right-4 lg:w-72 lg:max-h-[calc(100vh-72px)] lg:rounded-xl"
             )}
             initial={{ opacity: 0, y: 8 }}
@@ -92,23 +92,24 @@ export function FilterDrawer({ isOpen, onClose, resultCount }: FilterDrawerProps
                   <div className="flex items-center gap-2.5">
                     <span className="text-fg text-sm font-semibold tracking-tight">Filters</span>
                     {totalActive > 0 && (
-                      <span className="text-xs text-stone-500">
+                      <span className="text-xs text-fg-muted">
                         {totalActive} active
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     {totalActive > 0 && (
                       <button
                         onClick={clearFilters}
-                        className="text-xs text-stone-500 hover:text-fg-muted transition-colors"
+                        className="text-xs text-fg-muted hover:text-fg transition-colors px-2 py-1"
                       >
                         Clear
                       </button>
                     )}
                     <button
                       onClick={onClose}
-                      className="text-stone-600 hover:text-fg-muted transition-colors"
+                      aria-label="Close filters"
+                      className="w-9 h-9 -mr-1.5 flex items-center justify-center text-fg-muted hover:text-fg transition-colors"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -117,7 +118,7 @@ export function FilterDrawer({ isOpen, onClose, resultCount }: FilterDrawerProps
 
                 {/* Category */}
                 <div className="mb-5">
-                  <p className="text-stone-600 text-[10px] font-medium tracking-[0.12em] uppercase mb-2.5">
+                  <p className="text-fg-muted text-[11px] font-medium tracking-[0.12em] uppercase mb-2.5">
                     Category
                   </p>
                   <div className="flex flex-wrap gap-x-0 gap-y-0">
@@ -132,8 +133,8 @@ export function FilterDrawer({ isOpen, onClose, resultCount }: FilterDrawerProps
                             })
                           }
                           className={cn(
-                            "flex items-center gap-2 px-2 py-1.5 text-xs transition-colors duration-100 w-1/2 text-left",
-                            on ? "text-fg" : "text-stone-600 hover:text-stone-400"
+                            "flex items-center gap-2 px-2 py-2.5 min-h-[44px] text-sm transition-colors duration-100 w-1/2 text-left",
+                            on ? "text-fg" : "text-stone-400 hover:text-fg"
                           )}
                         >
                           <Check
@@ -151,7 +152,7 @@ export function FilterDrawer({ isOpen, onClose, resultCount }: FilterDrawerProps
 
                 {/* Difficulty */}
                 <div className="mb-5">
-                  <p className="text-stone-600 text-[10px] font-medium tracking-[0.12em] uppercase mb-2.5">
+                  <p className="text-fg-muted text-[11px] font-medium tracking-[0.12em] uppercase mb-2.5">
                     Difficulty
                   </p>
                   <div className="flex flex-wrap gap-x-0 gap-y-0">
@@ -166,8 +167,8 @@ export function FilterDrawer({ isOpen, onClose, resultCount }: FilterDrawerProps
                             })
                           }
                           className={cn(
-                            "flex items-center gap-2 px-2 py-1.5 text-xs transition-colors duration-100 w-1/2 text-left",
-                            on ? DIFF_COLORS[id] : "text-stone-600 hover:text-stone-400"
+                            "flex items-center gap-2 px-2 py-2.5 min-h-[44px] text-sm transition-colors duration-100 w-1/2 text-left",
+                            on ? DIFF_COLORS[id] : "text-stone-400 hover:text-fg"
                           )}
                         >
                           <Check
@@ -185,7 +186,7 @@ export function FilterDrawer({ isOpen, onClose, resultCount }: FilterDrawerProps
 
                 {/* Region */}
                 <div className="mb-5">
-                  <p className="text-stone-600 text-[10px] font-medium tracking-[0.12em] uppercase mb-2.5">
+                  <p className="text-fg-muted text-[11px] font-medium tracking-[0.12em] uppercase mb-2.5">
                     Region
                   </p>
                   <div className="flex flex-wrap gap-x-0 gap-y-0">
@@ -200,8 +201,8 @@ export function FilterDrawer({ isOpen, onClose, resultCount }: FilterDrawerProps
                             })
                           }
                           className={cn(
-                            "flex items-center gap-2 px-2 py-1.5 text-xs transition-colors duration-100 w-1/2 text-left",
-                            on ? "text-fg" : "text-stone-600 hover:text-stone-400"
+                            "flex items-center gap-2 px-2 py-2.5 min-h-[44px] text-sm transition-colors duration-100 w-1/2 text-left",
+                            on ? "text-fg" : "text-stone-400 hover:text-fg"
                           )}
                         >
                           <Check
@@ -220,7 +221,7 @@ export function FilterDrawer({ isOpen, onClose, resultCount }: FilterDrawerProps
                 {/* CTA */}
                 <button
                   onClick={onClose}
-                  className="w-full py-2.5 bg-alpine-600 hover:bg-alpine-500 active:bg-alpine-700 text-white text-sm font-medium rounded-lg transition-colors"
+                  className="w-full py-3 bg-alpine-600 hover:bg-alpine-500 active:bg-alpine-700 text-white text-sm font-medium rounded-lg transition-colors"
                 >
                   Show {resultCount} result{resultCount !== 1 ? "s" : ""}
                 </button>

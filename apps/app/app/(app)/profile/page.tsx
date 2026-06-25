@@ -2,6 +2,7 @@
 
 import { User, MapPin, Heart, Settings, LogOut, Shield, ChevronRight, Star } from "lucide-react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/shared/reveal";
 import { useFavoritesStore } from "@/store/favorites-store";
@@ -12,24 +13,28 @@ const MENU_ITEMS = [
     label: "Explore the map",
     href: "/explore",
     description: "Discover new locations",
+    soon: false,
   },
   {
     icon: Heart,
     label: "Saved locations",
     href: "/favorites",
     description: "View your favourites",
+    soon: false,
   },
   {
     icon: Settings,
     label: "Account settings",
     href: "#",
     description: "Email, password, preferences",
+    soon: true,
   },
   {
     icon: Shield,
     label: "Privacy & data",
     href: "#",
     description: "Manage your data",
+    soon: true,
   },
 ];
 
@@ -47,7 +52,7 @@ export default function ProfilePage() {
             </div>
             <div className="flex-1 min-w-0">
               <h2 className="t-h4 text-fg truncate">Explorer</h2>
-              <p className="text-stone-500 text-sm truncate mt-0.5">
+              <p className="text-fg-muted text-sm truncate mt-0.5">
                 user@example.com
               </p>
             </div>
@@ -69,9 +74,9 @@ export default function ProfilePage() {
                 key={stat.label}
                 className="card-solid rounded-lg p-4 text-center"
               >
-                <stat.Icon className="w-4 h-4 text-stone-600 mx-auto mb-1.5" />
+                <stat.Icon className="w-4 h-4 text-fg-muted mx-auto mb-1.5" />
                 <p className="text-fg text-base font-semibold">{stat.value}</p>
-                <p className="text-stone-600 text-xs mt-0.5">{stat.label}</p>
+                <p className="text-fg-muted text-xs mt-0.5">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -80,23 +85,43 @@ export default function ProfilePage() {
         {/* Menu */}
         <Reveal delay={0.2}>
           <div className="card-solid rounded-xl overflow-hidden mb-6">
-            {MENU_ITEMS.map((item) => (
-              <motion.a
-                key={item.label}
-                href={item.href}
-                className="flex items-center gap-3 px-5 py-4 hover:bg-white/[0.03] transition-colors group"
-                whileTap={{ scale: 0.99 }}
-              >
-                <div className="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center flex-shrink-0">
-                  <item.icon className="w-3.5 h-3.5 text-stone-500 group-hover:text-stone-400 transition-colors" />
+            {MENU_ITEMS.map((item) => {
+              const inner = (
+                <>
+                  <div className="w-9 h-9 rounded-lg bg-white/[0.04] flex items-center justify-center flex-shrink-0">
+                    <item.icon className="w-4 h-4 text-fg-muted group-hover:text-fg transition-colors" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-fg text-sm font-medium">{item.label}</p>
+                    <p className="text-fg-muted text-xs mt-0.5">{item.description}</p>
+                  </div>
+                  {item.soon ? (
+                    <span className="text-[10px] font-medium uppercase tracking-wide text-fg-subtle bg-white/[0.04] px-2 py-1 rounded flex-shrink-0">
+                      Soon
+                    </span>
+                  ) : (
+                    <ChevronRight className="w-4 h-4 text-fg-subtle group-hover:text-fg-muted transition-colors flex-shrink-0" />
+                  )}
+                </>
+              );
+              return item.soon ? (
+                <div
+                  key={item.label}
+                  aria-disabled="true"
+                  className="flex items-center gap-3 px-5 min-h-[60px] py-3 opacity-70 cursor-default group"
+                >
+                  {inner}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-fg text-sm font-medium">{item.label}</p>
-                  <p className="text-stone-600 text-xs mt-0.5">{item.description}</p>
-                </div>
-                <ChevronRight className="w-3.5 h-3.5 text-stone-700 group-hover:text-stone-500 transition-colors flex-shrink-0" />
-              </motion.a>
-            ))}
+              ) : (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="flex items-center gap-3 px-5 min-h-[60px] py-3 hover:bg-white/[0.03] active:bg-white/[0.05] transition-colors group"
+                >
+                  {inner}
+                </Link>
+              );
+            })}
           </div>
         </Reveal>
 
@@ -109,7 +134,7 @@ export default function ProfilePage() {
               </div>
               <div>
                 <p className="text-fg text-sm font-medium">Full access active</p>
-                <p className="text-stone-600 text-xs">Lifetime · includes all future locations</p>
+                <p className="text-fg-muted text-xs">Lifetime · includes all future locations</p>
               </div>
             </div>
           </div>
@@ -117,7 +142,7 @@ export default function ProfilePage() {
 
         {/* Sign out */}
         <Reveal delay={0.35}>
-          <Button variant="ghost" className="w-full text-stone-600 hover:text-stone-400">
+          <Button variant="ghost" className="w-full text-fg-muted hover:text-fg">
             <LogOut className="w-4 h-4" />
             Sign out
           </Button>
