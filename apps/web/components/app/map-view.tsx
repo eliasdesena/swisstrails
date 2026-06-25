@@ -89,7 +89,7 @@ function MapController() {
   return null;
 }
 
-function ClusterLayer() {
+function ClusterLayer({ locations }: { locations: Location[] }) {
   const map = useMap();
   const { openBottomSheet } = useMapStore();
 
@@ -105,7 +105,7 @@ function ClusterLayer() {
       disableClusteringAtZoom: 13,
     });
 
-    PLACEHOLDER_LOCATIONS.forEach((loc) => {
+    locations.forEach((loc) => {
       const marker = L.marker([loc.coordinates.lat, loc.coordinates.lng], {
         icon: createLocationIcon(loc, false),
       });
@@ -118,12 +118,12 @@ function ClusterLayer() {
     return () => {
       map.removeLayer(group);
     };
-  }, [map, openBottomSheet]);
+  }, [map, openBottomSheet, locations]);
 
   return null;
 }
 
-// Selected marker rendered separately so it always shows above clusters
+// Selected marker rendered separately so it always floats above clusters
 function SelectedMarker() {
   const { selectedLocationId } = useMapStore();
   const location = PLACEHOLDER_LOCATIONS.find((l) => l.id === selectedLocationId);
@@ -137,7 +137,11 @@ function SelectedMarker() {
   );
 }
 
-export function MapView() {
+interface MapViewProps {
+  locations: Location[];
+}
+
+export function MapView({ locations }: MapViewProps) {
   const mapRef = useRef<L.Map | null>(null);
 
   useEffect(() => {
@@ -168,7 +172,7 @@ export function MapView() {
       />
 
       <ZoomControl position="topleft" />
-      <ClusterLayer />
+      <ClusterLayer locations={locations} />
       <SelectedMarker />
     </MapContainer>
   );
