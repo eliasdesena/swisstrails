@@ -52,7 +52,7 @@ export default function ProfilePage() {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="max-w-lg mx-auto p-4 lg:p-6">
+      <div className="max-w-lg mx-auto px-4 lg:px-6 pb-4 lg:pb-6 pt-[max(1rem,env(safe-area-inset-top))] lg:pt-6">
         {/* Profile header */}
         <Reveal>
           <div className="flex items-center gap-4 mb-8 p-5 card-solid rounded-xl">

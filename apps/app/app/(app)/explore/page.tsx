@@ -68,7 +68,7 @@ export default function ExplorePage() {
   return (
     <div className="relative w-full h-full flex flex-col">
       {/* Search bar — no border, bg shift handles separation */}
-      <div className="flex-shrink-0 flex items-center gap-2 px-3 py-2.5 bg-trail-950/90 backdrop-blur-xl z-20">
+      <div className="flex-shrink-0 flex items-center gap-2 px-3 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] lg:pt-2.5 bg-trail-950/90 backdrop-blur-xl z-20">
         <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-500 pointer-events-none" />
           <input

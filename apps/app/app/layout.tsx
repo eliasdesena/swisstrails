@@ -25,6 +25,14 @@ export const metadata: Metadata = {
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
   },
   manifest: "/site.webmanifest",
+  // "black-translucent" makes web content render behind the iOS status bar in
+  // a standalone PWA (combined with viewport-fit=cover) — so the map can reach
+  // the top edge. Top UI must respect env(safe-area-inset-top).
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Swiss Trails",
+  },
 };
 
 export const viewport: Viewport = {

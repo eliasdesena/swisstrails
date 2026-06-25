@@ -19,7 +19,7 @@ export default function FavoritesPage() {
   );
 
   return (
-    <div className="h-full overflow-y-auto p-4 lg:p-6">
+    <div className="h-full overflow-y-auto px-4 lg:px-6 pb-4 lg:pb-6 pt-[max(1rem,env(safe-area-inset-top))] lg:pt-6">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="mb-8">
