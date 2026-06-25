@@ -1,6 +1,6 @@
 "use client";
 
-import { User, MapPin, Heart, Settings, LogOut, Shield, ChevronRight, Star } from "lucide-react";
+import { User, MapPin, Heart, Settings, LogOut, Shield, ChevronRight, Star, Route } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,13 @@ const MENU_ITEMS = [
     label: "Saved locations",
     href: "/favorites",
     description: "View your favourites",
+    soon: false,
+  },
+  {
+    icon: Route,
+    label: "My trip",
+    href: "/trip",
+    description: "Plan your itinerary",
     soon: false,
   },
   {

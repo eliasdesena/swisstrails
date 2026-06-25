@@ -11,6 +11,7 @@ import { sortLocations, type SortMode } from "@/lib/sort";
 import { FilterDrawer } from "@/components/app/filter-drawer";
 import { SortControl } from "@/components/app/sort-control";
 import { LocationDetailSheet } from "@/components/app/location-detail-sheet";
+import { TripPill } from "@/components/app/trip-pill";
 import { categoryConfig, regionConfig, cn } from "@/lib/utils";
 import type { Location } from "@/types";
 
@@ -162,6 +163,9 @@ export default function ExplorePage() {
         onClose={() => setSelectedLocation(null)}
         onSelectSimilar={(loc) => setSelectedLocation(loc)}
       />
+
+      {/* Floating "Trip · N" pill — bottom-left, above the nav */}
+      <TripPill />
     </div>
   );
 }

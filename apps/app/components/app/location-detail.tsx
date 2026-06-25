@@ -3,7 +3,7 @@
 import {
   Clock, MapPin, Navigation, Heart, Share2, Mountain,
   ChevronLeft, Camera, X, Bus, Car, Lightbulb, Package,
-  Waves, Sun, Leaf, Snowflake, MoreHorizontal, CheckCircle2
+  Waves, Sun, Leaf, Snowflake, MoreHorizontal, CheckCircle2, Route, MapPinned
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
@@ -11,6 +11,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useFavoritesStore } from "@/store/favorites-store";
 import { useVisitedStore } from "@/store/visited-store";
+import { useTripStore } from "@/store/trip-store";
 import { useGeoStore } from "@/store/geo-store";
 import { distanceKm, formatDistance } from "@/lib/distance";
 import {
@@ -51,6 +52,8 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
   const { isFavorite, toggleFavorite } = useFavoritesStore();
   const visited = useVisitedStore((s) => s.visitedIds.has(location.id));
   const toggleVisited = useVisitedStore((s) => s.toggleVisited);
+  const inTrip = useTripStore((s) => s.tripIds.includes(location.id));
+  const toggleInTrip = useTripStore((s) => s.toggleInTrip);
   const userPosition = useGeoStore((s) => s.position);
   const fav = isFavorite(location.id);
   const diff = difficultyConfig[location.difficulty];
@@ -154,20 +157,35 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
             )}
           </div>
 
-          {/* Mark as visited */}
-          <button
-            aria-pressed={visited}
-            onClick={() => toggleVisited(location.id)}
-            className={cn(
-              "flex items-center justify-center gap-2 w-full h-11 px-4 text-sm font-medium rounded-lg border transition-colors active:scale-[0.99]",
-              visited
-                ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
-                : "bg-transparent border-white/10 text-stone-400 hover:text-fg hover:border-white/20"
-            )}
-          >
-            <CheckCircle2 className={cn("w-4 h-4", visited && "text-emerald-400")} />
-            {visited ? "Visited ✓" : "Mark as visited"}
-          </button>
+          {/* Secondary actions — Visited / Add to trip */}
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              aria-pressed={visited}
+              onClick={() => toggleVisited(location.id)}
+              className={cn(
+                "flex items-center justify-center gap-2 h-11 px-3 text-sm font-medium rounded-lg border transition-colors active:scale-[0.99]",
+                visited
+                  ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
+                  : "bg-transparent border-white/10 text-stone-400 hover:text-fg hover:border-white/20"
+              )}
+            >
+              <CheckCircle2 className={cn("w-4 h-4", visited && "text-emerald-400")} />
+              {visited ? "Visited ✓" : "Visited"}
+            </button>
+            <button
+              aria-pressed={inTrip}
+              onClick={() => toggleInTrip(location.id)}
+              className={cn(
+                "flex items-center justify-center gap-2 h-11 px-3 text-sm font-medium rounded-lg border transition-colors active:scale-[0.99]",
+                inTrip
+                  ? "bg-alpine-500/15 border-alpine-500/40 text-alpine-300"
+                  : "bg-transparent border-white/10 text-stone-400 hover:text-fg hover:border-white/20"
+              )}
+            >
+              {inTrip ? <MapPinned className="w-4 h-4 text-alpine-400" /> : <Route className="w-4 h-4" />}
+              {inTrip ? "In trip ✓" : "Add to trip"}
+            </button>
+          </div>
 
           {/* Description */}
           {location.description && (

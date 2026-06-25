@@ -112,6 +112,87 @@ export function downloadGpx(lat: number, lng: number, name: string, slug: string
   URL.revokeObjectURL(url);
 }
 
+/* ─────────────────────────────────────────────
+   MULTI-STOP / ITINERARY HELPERS
+───────────────────────────────────────────── */
+
+/** A single ordered itinerary stop. */
+export interface RouteStop {
+  lat: number;
+  lng: number;
+  name: string;
+}
+
+/**
+ * Multi-waypoint Google Maps driving directions.
+ *
+ * The origin is omitted so Google uses the user's current location. The last
+ * stop becomes the `destination`; every stop before it is an ordered
+ * `waypoints` entry (pipe-separated). Returns "" for an empty list.
+ *
+ *   https://www.google.com/maps/dir/?api=1
+ *     &destination=<lastLat>,<lastLng>
+ *     &waypoints=<lat>,<lng>|<lat>,<lng>|…
+ *     &travelmode=driving
+ */
+export function googleMapsRoute(stops: RouteStop[]): string {
+  if (stops.length === 0) return "";
+  const last = stops[stops.length - 1];
+  const params = new URLSearchParams({ api: "1" });
+  params.set("destination", `${last.lat},${last.lng}`);
+  if (stops.length > 1) {
+    const waypoints = stops
+      .slice(0, -1)
+      .map((s) => `${s.lat},${s.lng}`)
+      .join("|");
+    params.set("waypoints", waypoints);
+  }
+  params.set("travelmode", "driving");
+  // Decode the `,` and `|` separators back to their literal form — Google's
+  // `api=1` directions endpoint expects `lat,lng` pairs joined by `|`.
+  const query = params.toString().replace(/%2C/g, ",").replace(/%7C/g, "|");
+  return `https://www.google.com/maps/dir/?${query}`;
+}
+
+/** Build a GPX 1.1 document containing an ordered list of named waypoints. */
+export function buildGpxRoute(stops: RouteStop[]): string {
+  const esc = (s: string) =>
+    s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&apos;");
+
+  const wpts = stops
+    .map(
+      (s) =>
+        `  <wpt lat="${s.lat}" lon="${s.lng}">\n    <name>${esc(s.name)}</name>\n  </wpt>`
+    )
+    .join("\n");
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Swiss Trails" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+${wpts}
+</gpx>
+`;
+}
+
+/** Trigger a client-side download of a multi-waypoint GPX file. No network. */
+export function downloadGpxRoute(stops: RouteStop[], filename = "swiss-trails-trip"): void {
+  if (typeof document === "undefined" || stops.length === 0) return;
+  const gpx = buildGpxRoute(stops);
+  const blob = new Blob([gpx], { type: "application/gpx+xml" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${filename}.gpx`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 /** iOS detection so the one-tap default can use Apple Maps on Apple devices. */
 export function isIOS(): boolean {
   if (typeof navigator === "undefined") return false;

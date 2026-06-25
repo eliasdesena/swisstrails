@@ -13,6 +13,7 @@ import { PLACEHOLDER_LOCATIONS } from "@/data/locations";
 import { filterLocations, countActiveFilters } from "@/lib/filters";
 import { sortLocations, type SortMode } from "@/lib/sort";
 import { SortControl } from "@/components/app/sort-control";
+import { TripPill } from "@/components/app/trip-pill";
 import { cn } from "@/lib/utils";
 
 const MapView = dynamic(
@@ -227,6 +228,10 @@ export default function MapPage() {
       />
 
       <BottomSheet />
+
+      {/* Floating "Trip · N" pill — bottom-left, above the nav, clear of the
+          satellite toggle (top-right) and the location count (bottom-center) */}
+      <TripPill />
     </div>
   );
 }
