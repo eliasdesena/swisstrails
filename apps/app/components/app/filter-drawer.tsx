@@ -1,11 +1,18 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Check } from "lucide-react";
+import { X } from "lucide-react";
 import { useMapStore } from "@/store/map-store";
 import { CATEGORIES } from "@/data/categories";
 import { cn } from "@/lib/utils";
+import { haptics } from "@/lib/haptics";
 import type { LocationCategory, Difficulty, Region } from "@/types";
+
+// Selectable filter chip — filled when active, so selection reads at a glance
+// (replacing the old flat half-width text rows with a faint check).
+const CHIP = "pressable inline-flex items-center rounded-full px-3.5 min-h-[40px] text-sm transition-colors";
+const CHIP_ON = "bg-alpine-900/50 text-alpine-300 ring-1 ring-inset ring-alpine-700/40";
+const CHIP_OFF = "bg-surface-1 text-fg-muted hover:text-fg";
 
 const DIFFICULTIES: { id: Difficulty; label: string }[] = [
   { id: "easy", label: "Easy" },
@@ -109,7 +116,7 @@ export function FilterDrawer({ isOpen, onClose, resultCount }: FilterDrawerProps
                     <button
                       onClick={onClose}
                       aria-label="Close filters"
-                      className="w-9 h-9 -mr-1.5 flex items-center justify-center text-fg-muted hover:text-fg transition-colors"
+                      className="icon-button -mr-2.5 text-fg-muted hover:text-fg"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -121,28 +128,20 @@ export function FilterDrawer({ isOpen, onClose, resultCount }: FilterDrawerProps
                   <p className="text-fg-muted text-[11px] font-medium tracking-[0.12em] uppercase mb-2.5">
                     Category
                   </p>
-                  <div className="flex flex-wrap gap-x-0 gap-y-0">
+                  <div className="flex flex-wrap gap-2">
                     {CATEGORIES.map((cat) => {
                       const on = activeFilters.categories.includes(cat.id as LocationCategory);
                       return (
                         <button
                           key={cat.id}
-                          onClick={() =>
+                          onClick={() => {
+                            haptics.tap();
                             setFilters({
                               categories: toggle(activeFilters.categories, cat.id as LocationCategory),
-                            })
-                          }
-                          className={cn(
-                            "flex items-center gap-2 px-2 py-2.5 min-h-[44px] text-sm transition-colors duration-100 w-1/2 text-left",
-                            on ? "text-fg" : "text-stone-400 hover:text-fg"
-                          )}
+                            });
+                          }}
+                          className={cn(CHIP, on ? CHIP_ON : CHIP_OFF)}
                         >
-                          <Check
-                            className={cn(
-                              "w-3 h-3 flex-shrink-0 transition-opacity",
-                              on ? "opacity-100 text-alpine-400" : "opacity-0"
-                            )}
-                          />
                           {cat.name}
                         </button>
                       );
@@ -155,28 +154,25 @@ export function FilterDrawer({ isOpen, onClose, resultCount }: FilterDrawerProps
                   <p className="text-fg-muted text-[11px] font-medium tracking-[0.12em] uppercase mb-2.5">
                     Difficulty
                   </p>
-                  <div className="flex flex-wrap gap-x-0 gap-y-0">
+                  <div className="flex flex-wrap gap-2">
                     {DIFFICULTIES.map(({ id, label }) => {
                       const on = activeFilters.difficulties.includes(id);
                       return (
                         <button
                           key={id}
-                          onClick={() =>
+                          onClick={() => {
+                            haptics.tap();
                             setFilters({
                               difficulties: toggle(activeFilters.difficulties, id),
-                            })
-                          }
+                            });
+                          }}
                           className={cn(
-                            "flex items-center gap-2 px-2 py-2.5 min-h-[44px] text-sm transition-colors duration-100 w-1/2 text-left",
-                            on ? DIFF_COLORS[id] : "text-stone-400 hover:text-fg"
+                            CHIP,
+                            on
+                              ? cn("bg-surface-3 ring-1 ring-inset ring-white/10", DIFF_COLORS[id])
+                              : CHIP_OFF
                           )}
                         >
-                          <Check
-                            className={cn(
-                              "w-3 h-3 flex-shrink-0 transition-opacity",
-                              on ? "opacity-100" : "opacity-0"
-                            )}
-                          />
                           {label}
                         </button>
                       );
@@ -189,28 +185,20 @@ export function FilterDrawer({ isOpen, onClose, resultCount }: FilterDrawerProps
                   <p className="text-fg-muted text-[11px] font-medium tracking-[0.12em] uppercase mb-2.5">
                     Region
                   </p>
-                  <div className="flex flex-wrap gap-x-0 gap-y-0">
+                  <div className="flex flex-wrap gap-2">
                     {REGIONS.map(({ id, label }) => {
                       const on = activeFilters.regions.includes(id);
                       return (
                         <button
                           key={id}
-                          onClick={() =>
+                          onClick={() => {
+                            haptics.tap();
                             setFilters({
                               regions: toggle(activeFilters.regions, id),
-                            })
-                          }
-                          className={cn(
-                            "flex items-center gap-2 px-2 py-2.5 min-h-[44px] text-sm transition-colors duration-100 w-1/2 text-left",
-                            on ? "text-fg" : "text-stone-400 hover:text-fg"
-                          )}
+                            });
+                          }}
+                          className={cn(CHIP, on ? CHIP_ON : CHIP_OFF)}
                         >
-                          <Check
-                            className={cn(
-                              "w-3 h-3 flex-shrink-0 transition-opacity",
-                              on ? "opacity-100 text-alpine-400" : "opacity-0"
-                            )}
-                          />
                           {label}
                         </button>
                       );

@@ -16,9 +16,13 @@ import { SortControl } from "@/components/app/sort-control";
 import { LocationDetailSheet } from "@/components/app/location-detail-sheet";
 import { TripPill } from "@/components/app/trip-pill";
 import { categoryConfig, regionConfig, cn } from "@/lib/utils";
+import { haptics } from "@/lib/haptics";
 import type { Location } from "@/types";
 
 const ASPECT_RATIOS = ["3/4", "4/5", "2/3", "4/5", "3/4", "1/1", "4/5", "3/5"];
+
+// Per-season key so a dismissed rail re-offers when the season changes.
+const SEASON_DISMISS_KEY = "swiss-trails-season-rail-dismissed";
 
 // How many spots to show in the "In season now" rail.
 const SEASON_RAIL_LIMIT = 12;
@@ -78,10 +82,22 @@ export default function ExplorePage() {
   const [visibleCount, setVisibleCount] = useState(MASONRY_PAGE);
 
   // Reset the window (and scroll to top) whenever the result set changes.
+  // behavior:"auto" overrides the global smooth-scroll so filtering doesn't
+  // animate a long rewind on every keystroke.
   useEffect(() => {
     setVisibleCount(MASONRY_PAGE);
-    scrollRef.current?.scrollTo({ top: 0 });
+    scrollRef.current?.scrollTo({ top: 0, behavior: "auto" });
   }, [filteredLocations]);
+
+  // Persist the in-season rail dismissal per season (re-offers next season).
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(SEASON_DISMISS_KEY) === season)
+        setSeasonRailDismissed(true);
+    } catch {
+      /* localStorage unavailable — leave the rail shown */
+    }
+  }, [season]);
 
   // Grow the window when the sentinel nears view. Rooted on the inner scroll
   // container since the document itself is locked on tab routes.
@@ -121,7 +137,7 @@ export default function ExplorePage() {
             {searchQuery && (
               <motion.button
                 aria-label="Clear search"
-                className="absolute right-1 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center text-stone-400 hover:text-fg transition-colors"
+                className="absolute right-0 top-1/2 -translate-y-1/2 icon-button text-stone-400 hover:text-fg"
                 onClick={() => setSearchQuery("")}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -135,10 +151,13 @@ export default function ExplorePage() {
         </div>
 
         <button
-          onClick={() => setShowFilters((v) => !v)}
+          onClick={() => {
+            haptics.tap();
+            setShowFilters((v) => !v);
+          }}
           aria-label="Filters"
           className={cn(
-            "flex items-center gap-1.5 h-11 px-3.5 rounded-lg text-sm font-medium transition-colors flex-shrink-0",
+            "pressable flex items-center gap-1.5 h-11 px-3.5 rounded-lg text-sm font-medium transition-colors flex-shrink-0",
             activeFilterCount > 0
               ? "bg-alpine-900/50 text-alpine-300"
               : "text-fg-muted hover:text-fg"
@@ -206,7 +225,15 @@ export default function ExplorePage() {
                     </span>
                   </p>
                   <button
-                    onClick={() => setSeasonRailDismissed(true)}
+                    onClick={() => {
+                      haptics.tap();
+                      setSeasonRailDismissed(true);
+                      try {
+                        localStorage.setItem(SEASON_DISMISS_KEY, season);
+                      } catch {
+                        /* non-fatal */
+                      }
+                    }}
                     aria-label="Dismiss in-season suggestions"
                     className="w-11 h-11 -mr-2 flex items-center justify-center text-stone-500 hover:text-fg transition-colors"
                   >
