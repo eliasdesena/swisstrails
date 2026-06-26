@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Navigation } from "lucide-react";
 import { OpenInSheet } from "@/components/app/open-in-sheet";
-import { platformDirections } from "@/lib/deep-links";
+import { openDirections } from "@/lib/deep-links";
 import type { Location } from "@/types";
 
 interface DirectionsActionsProps {
@@ -22,15 +22,14 @@ export function DirectionsActions({ location }: DirectionsActionsProps) {
   return (
     <>
       <div className="flex-1 flex gap-2 min-w-0">
-        <a
-          href={platformDirections(lat, lng, location.name)}
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          type="button"
+          onClick={() => openDirections(lat, lng, location.name)}
           className="flex-1 flex items-center justify-center gap-2 h-11 rounded-lg bg-alpine-600 hover:bg-alpine-500 text-white font-medium text-sm transition-colors"
         >
           <Navigation className="w-4 h-4" />
           Get directions
-        </a>
+        </button>
         <button
           type="button"
           onClick={() => setOpenInSheet(true)}

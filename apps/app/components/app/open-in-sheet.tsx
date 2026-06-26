@@ -17,12 +17,16 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import {
   googleMapsDirections,
-  appleMapsDirections,
+  googleMapsApp,
+  appleMapsApp,
   komootPlan,
   switzerlandMobilityMap,
   sbbDirections,
   downloadGpx,
   formatCoordinates,
+  openUrl,
+  isIOS,
+  isAndroid,
 } from "@/lib/deep-links";
 import type { Location } from "@/types";
 
@@ -167,12 +171,18 @@ export function OpenInSheet({ location, onClose }: OpenInSheetProps) {
               <Row
                 icon={Navigation}
                 label="Get directions — Google Maps"
-                href={googleMapsDirections(lat, lng)}
+                onClick={() =>
+                  openUrl(
+                    isIOS() || isAndroid()
+                      ? googleMapsApp(lat, lng)
+                      : googleMapsDirections(lat, lng)
+                  )
+                }
               />
               <Row
                 icon={Apple}
                 label="Get directions — Apple Maps"
-                href={appleMapsDirections(lat, lng, location.name)}
+                onClick={() => openUrl(appleMapsApp(lat, lng, location.name))}
               />
               <Row
                 icon={Mountain}

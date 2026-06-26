@@ -20,7 +20,7 @@ import {
   regionConfig,
   formatDuration,
 } from "@/lib/utils";
-import { platformDirections } from "@/lib/deep-links";
+import { openDirections } from "@/lib/deep-links";
 import { OpenInSheet } from "@/components/app/open-in-sheet";
 import { WeatherWidget } from "@/components/app/weather-widget";
 import { PhotoStrip } from "@/components/app/photo-strip";
@@ -339,16 +339,17 @@ export function LocationDetail({ location, onClose, scrollRef }: LocationDetailP
 
       {/* ── BOTTOM CTA — Get directions is the single primary action ── */}
       <div className="flex-shrink-0 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2 border-t border-white/[0.06]">
-        <Button variant="alpine" size="lg" className="flex-1" asChild>
-          <a
-            data-no-drag
-            href={platformDirections(location.coordinates.lat, location.coordinates.lng, location.name)}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Navigation className="w-4 h-4" />
-            Get directions
-          </a>
+        <Button
+          variant="alpine"
+          size="lg"
+          className="flex-1"
+          data-no-drag
+          onClick={() =>
+            openDirections(location.coordinates.lat, location.coordinates.lng, location.name)
+          }
+        >
+          <Navigation className="w-4 h-4" />
+          Get directions
         </Button>
         <button
           type="button"

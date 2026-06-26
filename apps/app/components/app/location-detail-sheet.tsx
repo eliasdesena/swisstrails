@@ -18,7 +18,7 @@ import {
   categoryConfig, regionConfig, difficultyConfig, seasonConfig,
   formatDuration, cn,
 } from "@/lib/utils";
-import { platformDirections } from "@/lib/deep-links";
+import { openDirections } from "@/lib/deep-links";
 import { OpenInSheet } from "@/components/app/open-in-sheet";
 import { WeatherWidget } from "@/components/app/weather-widget";
 import { PhotoStrip } from "@/components/app/photo-strip";
@@ -323,15 +323,16 @@ export function LocationDetailSheet({
 
             {/* Sticky footer — Get directions is the primary CTA; View on Map secondary. */}
             <div className="flex-shrink-0 border-t border-white/[0.06] bg-trail-950/95 px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2">
-              <a
-                href={platformDirections(location.coordinates.lat, location.coordinates.lng, location.name)}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                type="button"
+                onClick={() =>
+                  openDirections(location.coordinates.lat, location.coordinates.lng, location.name)
+                }
                 className="flex-1 flex items-center justify-center gap-2 min-h-[44px] py-3.5 bg-alpine-600 hover:bg-alpine-500 active:bg-alpine-700 text-white text-sm font-medium rounded-lg transition-colors"
               >
                 <Navigation className="w-4 h-4" />
                 Get directions
-              </a>
+              </button>
               <button
                 onClick={() => setOpenInSheet(true)}
                 aria-label="More apps"

@@ -199,9 +199,54 @@ export function isIOS(): boolean {
   return /iPad|iPhone|iPod/.test(navigator.userAgent);
 }
 
+/** Android detection (for the native `geo:` handoff). */
+export function isAndroid(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return /Android/.test(navigator.userAgent);
+}
+
+/** Apple Maps app via its native URL scheme — opens the Maps app, not a browser. */
+export function appleMapsApp(lat: number, lng: number, name: string): string {
+  return `maps://?daddr=${lat},${lng}&q=${encodeURIComponent(name)}`;
+}
+
+/** Google Maps app via its native URL scheme (opens the app when installed). */
+export function googleMapsApp(lat: number, lng: number): string {
+  return `comgooglemaps://?daddr=${lat},${lng}&directionsmode=driving`;
+}
+
 /**
- * Platform-default "Get directions" URL:
- * Apple Maps on iOS, Google Maps everywhere else.
+ * Open a URL in the right place. Native app schemes (`maps://`,
+ * `comgooglemaps://`, `geo:`) are handed to the OS via a same-window navigation
+ * so the actual app launches — no inset in-app browser. http(s) links (web-only
+ * services) open in a separate browser tab/instance.
+ */
+export function openUrl(url: string): void {
+  if (typeof window === "undefined") return;
+  if (/^https?:/i.test(url)) {
+    window.open(url, "_blank", "noopener,noreferrer");
+  } else {
+    window.location.href = url;
+  }
+}
+
+/**
+ * One-tap "Get directions" → the platform's native maps app directly:
+ * Apple Maps (`maps://`) on iOS, the default `geo:` handler on Android, and
+ * Google Maps (web) on desktop. Avoids the in-app browser popup.
+ */
+export function openDirections(lat: number, lng: number, name: string): void {
+  let url: string;
+  if (isIOS()) url = appleMapsApp(lat, lng, name);
+  else if (isAndroid()) url = geoUri(lat, lng, name);
+  else url = googleMapsDirections(lat, lng);
+  openUrl(url);
+}
+
+/**
+ * Platform-default "Get directions" URL (string form, for contexts that need an
+ * href). Prefer {@link openDirections} for click handlers — it uses native
+ * schemes and avoids the in-app browser.
  */
 export function platformDirections(lat: number, lng: number, name: string): string {
   return isIOS()
