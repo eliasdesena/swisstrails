@@ -54,7 +54,7 @@ export function AppHeader() {
       </header>
 
       {/* Bottom nav — mobile */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-trail-950/98 backdrop-blur-xl pb-2.5" style={{ boxShadow: "0 -1px 0 rgba(255,255,255,0.04)" }}>
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-trail-950/98 backdrop-blur-xl pb-[env(safe-area-inset-bottom)]" style={{ boxShadow: "0 -1px 0 rgba(255,255,255,0.04)" }}>
         <div className="flex items-stretch justify-around h-16 px-2">
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href || (item.href === "/explore" && pathname === "/");
