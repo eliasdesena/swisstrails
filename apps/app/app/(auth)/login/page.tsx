@@ -7,31 +7,44 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/brand/logo";
+import { haptics } from "@/lib/haptics";
 
 const IS_MOCK = process.env.NEXT_PUBLIC_MOCK_MODE === "true";
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState<string>();
   const [step, setStep] = useState<"init" | "email-sent">("init");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isEmailLoading, setIsEmailLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   async function handleEmailSignIn(e: React.FormEvent) {
     e.preventDefault();
-    if (!email) return;
-    setIsLoading(true);
+    const trimmed = email.trim();
+    if (!EMAIL_RE.test(trimmed)) {
+      setEmailError("Enter a valid email address");
+      haptics.warn();
+      return;
+    }
+    setEmailError(undefined);
+    haptics.tap();
+    setIsEmailLoading(true);
     await new Promise((r) => setTimeout(r, 1000));
-    setIsLoading(false);
+    setIsEmailLoading(false);
     setStep("email-sent");
   }
 
   async function handleGoogleSignIn() {
-    setIsLoading(true);
+    haptics.tap();
+    setIsGoogleLoading(true);
     await new Promise((r) => setTimeout(r, 500));
-    setIsLoading(false);
+    setIsGoogleLoading(false);
   }
 
   return (
-    <div className="min-h-screen bg-trail-950 flex items-center justify-center px-4">
+    <div className="min-h-dvh bg-trail-950 flex items-center justify-center px-4 py-[max(2rem,env(safe-area-inset-top))] pb-[max(2rem,env(safe-area-inset-bottom))]">
       <div className="absolute inset-0 hero-gradient pointer-events-none" />
 
       <motion.div
@@ -42,7 +55,7 @@ export default function LoginPage() {
       >
         {/* Logo */}
         <div className="text-center mb-10">
-          <Link href="/" className="inline-block mb-6">
+          <Link href="/" className="inline-block mb-6 pressable">
             <Logo
               iconClassName="text-alpine-500"
               wordmarkClassName="text-fg"
@@ -64,7 +77,13 @@ export default function LoginPage() {
             <p className="text-alpine-300 text-xs font-medium mb-3 text-center tracking-wide uppercase">
               Demo Mode
             </p>
-            <Button asChild variant="alpine" size="lg" className="w-full">
+            <Button
+              asChild
+              variant="alpine"
+              size="lg"
+              className="w-full"
+              onClick={() => haptics.tap()}
+            >
               <Link href="/explore">
                 Enter as Demo User →
               </Link>
@@ -81,19 +100,43 @@ export default function LoginPage() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
           >
-            <div className="w-10 h-10 rounded-lg bg-white/[0.04] flex items-center justify-center mx-auto mb-4">
-              <MailOpen className="w-5 h-5 text-stone-500" />
-            </div>
+            <motion.div
+              className="w-20 h-20 rounded-full bg-alpine-900 border-2 border-alpine-600 flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(81,94,255,0.3)]"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.1, type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <MailOpen className="w-9 h-9 text-alpine-300" strokeWidth={2} />
+            </motion.div>
             <h2 className="t-h3 text-fg mb-2">Check your email</h2>
             <p className="text-fg-muted text-sm mb-6">
               We sent a sign-in link to{" "}
-              <span className="text-fg font-medium">{email}</span>
+              <span className="text-fg font-medium">{email.trim()}</span>
             </p>
+
+            {IS_MOCK && (
+              <Button
+                asChild
+                variant="alpine"
+                size="lg"
+                className="w-full mb-4"
+                onClick={() => haptics.tap()}
+              >
+                <Link href="/explore">
+                  Continue to app
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </Button>
+            )}
+
             <p className="text-fg-muted text-xs">
               Didn&apos;t receive it?{" "}
               <button
-                className="text-alpine-400 hover:underline"
-                onClick={() => setStep("init")}
+                className="text-alpine-400 hover:underline pressable"
+                onClick={() => {
+                  haptics.tap();
+                  setStep("init");
+                }}
               >
                 Try again
               </button>
@@ -107,7 +150,8 @@ export default function LoginPage() {
               size="lg"
               className="w-full"
               onClick={handleGoogleSignIn}
-              loading={isLoading}
+              loading={isGoogleLoading}
+              disabled={isEmailLoading}
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -124,21 +168,28 @@ export default function LoginPage() {
               <div className="flex-1 h-px bg-stone-800" />
             </div>
 
-            <form onSubmit={handleEmailSignIn} className="space-y-3">
+            <form onSubmit={handleEmailSignIn} className="space-y-3" noValidate>
               <Input
                 type="email"
+                inputMode="email"
+                autoComplete="email"
                 placeholder="your@email.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (emailError) setEmailError(undefined);
+                }}
                 icon={<Mail className="w-4 h-4" />}
-                required
+                error={emailError}
+                aria-invalid={!!emailError}
               />
               <Button
                 type="submit"
                 variant="alpine"
                 size="lg"
                 className="w-full"
-                loading={isLoading}
+                loading={isEmailLoading}
+                disabled={isGoogleLoading}
               >
                 Continue with email
                 <ArrowRight className="w-4 h-4" />

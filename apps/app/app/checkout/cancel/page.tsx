@@ -5,11 +5,11 @@ import { Logo } from "@/components/brand/logo";
 
 export default function CheckoutCancelPage() {
   return (
-    <div className="min-h-screen bg-trail-950 flex items-center justify-center px-4">
+    <div className="min-h-dvh bg-trail-950 flex items-center justify-center px-4 py-[max(2rem,env(safe-area-inset-top))] pb-[max(2rem,env(safe-area-inset-bottom))]">
       <div className="absolute inset-0 hero-gradient pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-sm text-center">
-        <Link href="/" className="inline-block mb-8">
+        <Link href="/" className="inline-block mb-8 pressable">
           <Logo
             iconClassName="text-alpine-500"
             wordmarkClassName="text-fg"
@@ -17,7 +17,7 @@ export default function CheckoutCancelPage() {
           />
         </Link>
 
-        <div className="w-12 h-12 rounded-lg bg-white/[0.04] flex items-center justify-center mb-6 mx-auto">
+        <div className="w-12 h-12 rounded-lg bg-surface-1 flex items-center justify-center mb-6 mx-auto">
           <ArrowLeft className="w-5 h-5 text-stone-600" />
         </div>
         <h1 className="t-h2 text-fg mb-3">No worries</h1>

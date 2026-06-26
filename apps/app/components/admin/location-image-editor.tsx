@@ -4,11 +4,12 @@ import { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  X, ArrowUp, ArrowDown, Trash2, Star, Plus, RotateCcw, Upload, ImageOff,
+  X, ArrowUp, ArrowDown, Trash2, Star, Plus, RotateCcw, Upload, ImageOff, Undo2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { haptics } from "@/lib/haptics";
 import { useImageOverridesStore } from "@/store/image-overrides-store";
 import { resolveSourcedImages } from "@/lib/location-images";
 import { SUPABASE_IMAGES_ENABLED } from "@/lib/flags";
@@ -39,6 +40,8 @@ export function LocationImageEditor({ location, onClose }: LocationImageEditorPr
 
   const [url, setUrl] = useState("");
   const [alt, setAlt] = useState("");
+  // Snapshot of the last removed image so the destructive action is undoable.
+  const [lastRemoved, setLastRemoved] = useState<{ img: LocationImage; index: number } | null>(null);
 
   const sourced = resolveSourcedImages(location);
   const hasOverride = !!override && override.length > 0;
@@ -55,6 +58,7 @@ export function LocationImageEditor({ location, onClose }: LocationImageEditorPr
   function handleAdd() {
     const trimmed = url.trim();
     if (!trimmed) return;
+    haptics.tap();
     // Seed an override from sourced images first if we're still on defaults.
     ensureOverride();
     addImage(location.id, {
@@ -69,16 +73,32 @@ export function LocationImageEditor({ location, onClose }: LocationImageEditorPr
   function handleMove(index: number, dir: -1 | 1) {
     const target = index + dir;
     if (target < 0 || target >= images.length) return;
+    haptics.tap();
     ensureOverride();
     reorder(location.id, index, target);
   }
 
-  function handleRemove(img: LocationImage) {
+  function handleRemove(img: LocationImage, index: number) {
+    haptics.warn();
     ensureOverride();
+    setLastRemoved({ img, index });
     removeImage(location.id, img.url);
   }
 
+  function handleUndoRemove() {
+    if (!lastRemoved) return;
+    haptics.tap();
+    // Re-insert the removed image at its original position.
+    const current = useImageOverridesStore.getState().overrides[location.id] ?? images;
+    const next = [...current];
+    const clampedIndex = Math.min(lastRemoved.index, next.length);
+    next.splice(clampedIndex, 0, lastRemoved.img);
+    setOverride(location.id, next);
+    setLastRemoved(null);
+  }
+
   function handleSetPrimary(img: LocationImage) {
+    haptics.tap();
     ensureOverride();
     setPrimary(location.id, img.url);
   }
@@ -130,8 +150,11 @@ export function LocationImageEditor({ location, onClose }: LocationImageEditorPr
           <button
             type="button"
             aria-label="Close"
-            onClick={onClose}
-            className="w-11 h-11 -mr-2 flex-shrink-0 flex items-center justify-center rounded-full text-stone-400 hover:text-fg hover:bg-white/[0.06] transition-colors"
+            onClick={() => {
+              haptics.tap();
+              onClose();
+            }}
+            className="icon-button -mr-2 flex-shrink-0 rounded-full text-stone-400 hover:text-fg hover:bg-white/[0.06]"
           >
             <X className="w-5 h-5" />
           </button>
@@ -150,62 +173,66 @@ export function LocationImageEditor({ location, onClose }: LocationImageEditorPr
               {images.map((img, i) => (
                 <li
                   key={img.id || img.url}
-                  className="flex items-center gap-3 rounded-xl bg-white/[0.04] p-2"
+                  className="rounded-xl bg-surface-1 p-2"
                 >
-                  {/* Thumb */}
-                  <div className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-white/[0.04]">
-                    <Image
-                      src={img.url}
-                      alt={img.alt}
-                      fill
-                      className="object-cover"
-                      sizes="64px"
-                      unoptimized
-                    />
-                    {i === 0 && (
-                      <span className="absolute top-1 left-1 inline-flex items-center gap-0.5 text-[9px] font-semibold uppercase tracking-wide text-trail-950 bg-gold-400 rounded px-1 py-0.5">
-                        <Star className="w-2.5 h-2.5 fill-trail-950" />
-                        Hero
-                      </span>
-                    )}
+                  {/* Top: thumb + meta */}
+                  <div className="flex items-center gap-3">
+                    {/* Thumb */}
+                    <div className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-surface-1">
+                      <Image
+                        src={img.url}
+                        alt={img.alt}
+                        fill
+                        className="object-cover"
+                        sizes="64px"
+                        unoptimized
+                      />
+                      {i === 0 && (
+                        <span className="absolute top-1 left-1 inline-flex items-center gap-0.5 t-3xs font-semibold uppercase tracking-wide text-trail-950 bg-gold-400 rounded px-1 py-0.5">
+                          <Star className="w-2.5 h-2.5 fill-trail-950" />
+                          Hero
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Meta */}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-fg text-xs font-medium truncate">
+                        {img.alt || "(no alt)"}
+                      </p>
+                      <p className="text-fg-subtle t-2xs truncate mt-0.5">{img.url}</p>
+                    </div>
+
+                    {/* Controls — inline on ≥sm, where the row has room. */}
+                    <div className="hidden sm:flex items-center gap-1 flex-shrink-0">
+                      <IconBtn label="Move up" disabled={i === 0} onClick={() => handleMove(i, -1)}>
+                        <ArrowUp className="w-4 h-4" />
+                      </IconBtn>
+                      <IconBtn label="Move down" disabled={i === images.length - 1} onClick={() => handleMove(i, 1)}>
+                        <ArrowDown className="w-4 h-4" />
+                      </IconBtn>
+                      <IconBtn label="Set as primary" disabled={i === 0} onClick={() => handleSetPrimary(img)}>
+                        <Star className="w-4 h-4" />
+                      </IconBtn>
+                      <IconBtn label="Remove image" danger onClick={() => handleRemove(img, i)}>
+                        <Trash2 className="w-4 h-4" />
+                      </IconBtn>
+                    </div>
                   </div>
 
-                  {/* Meta */}
-                  <div className="min-w-0 flex-1">
-                    <p className="text-fg text-xs font-medium truncate">
-                      {img.alt || "(no alt)"}
-                    </p>
-                    <p className="text-fg-subtle text-[11px] truncate mt-0.5">{img.url}</p>
-                  </div>
-
-                  {/* Controls — ≥44px touch targets */}
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <IconBtn
-                      label="Move up"
-                      disabled={i === 0}
-                      onClick={() => handleMove(i, -1)}
-                    >
+                  {/* Controls — wrap to a second row on mobile so they don't
+                      crowd the thumbnail meta at ~360px. */}
+                  <div className="flex sm:hidden items-center justify-end gap-1 mt-1.5">
+                    <IconBtn label="Move up" disabled={i === 0} onClick={() => handleMove(i, -1)}>
                       <ArrowUp className="w-4 h-4" />
                     </IconBtn>
-                    <IconBtn
-                      label="Move down"
-                      disabled={i === images.length - 1}
-                      onClick={() => handleMove(i, 1)}
-                    >
+                    <IconBtn label="Move down" disabled={i === images.length - 1} onClick={() => handleMove(i, 1)}>
                       <ArrowDown className="w-4 h-4" />
                     </IconBtn>
-                    <IconBtn
-                      label="Set as primary"
-                      disabled={i === 0}
-                      onClick={() => handleSetPrimary(img)}
-                    >
+                    <IconBtn label="Set as primary" disabled={i === 0} onClick={() => handleSetPrimary(img)}>
                       <Star className="w-4 h-4" />
                     </IconBtn>
-                    <IconBtn
-                      label="Remove image"
-                      danger
-                      onClick={() => handleRemove(img)}
-                    >
+                    <IconBtn label="Remove image" danger onClick={() => handleRemove(img, i)}>
                       <Trash2 className="w-4 h-4" />
                     </IconBtn>
                   </div>
@@ -213,6 +240,33 @@ export function LocationImageEditor({ location, onClose }: LocationImageEditorPr
               ))}
             </ul>
           )}
+
+          {/* Undo affordance for the destructive remove */}
+          <AnimatePresence>
+            {lastRemoved && (
+              <motion.div
+                key="undo-removed"
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.18 }}
+                className="flex items-center justify-between gap-3 rounded-lg border border-white/[0.06] bg-surface-1 px-3 py-2"
+              >
+                <p className="text-fg-muted text-xs min-w-0 truncate">
+                  Removed{" "}
+                  <span className="text-fg">{lastRemoved.img.alt || "image"}</span>
+                </p>
+                <button
+                  type="button"
+                  onClick={handleUndoRemove}
+                  className="pressable flex-shrink-0 inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-alpine-300 hover:bg-white/[0.06] transition-colors"
+                >
+                  <Undo2 className="w-3.5 h-3.5" />
+                  Undo
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Add by URL */}
           <div className="rounded-xl border border-white/[0.06] p-3 space-y-2.5">
@@ -280,12 +334,23 @@ export function LocationImageEditor({ location, onClose }: LocationImageEditorPr
             size="lg"
             className="flex-1"
             disabled={!hasOverride}
-            onClick={() => clearOverride(location.id)}
+            onClick={() => {
+              haptics.warn();
+              clearOverride(location.id);
+            }}
           >
             <RotateCcw className="w-4 h-4" />
             Reset to sourced
           </Button>
-          <Button variant="alpine" size="lg" className="flex-1" onClick={onClose}>
+          <Button
+            variant="alpine"
+            size="lg"
+            className="flex-1"
+            onClick={() => {
+              haptics.tap();
+              onClose();
+            }}
+          >
             Done
           </Button>
         </div>
@@ -314,7 +379,7 @@ function IconBtn({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "w-11 h-11 flex items-center justify-center rounded-lg transition-colors active:scale-95",
+        "icon-button rounded-lg",
         "disabled:opacity-30 disabled:pointer-events-none",
         danger
           ? "text-red-400 hover:bg-red-500/10"

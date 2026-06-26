@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/brand/logo";
+import { haptics } from "@/lib/haptics";
 
 function useConfetti() {
   useEffect(() => {
@@ -78,7 +79,7 @@ export default function CheckoutSuccessPage() {
   useConfetti();
 
   return (
-    <div className="min-h-screen bg-trail-950 flex items-center justify-center px-4">
+    <div className="min-h-dvh bg-trail-950 flex items-center justify-center px-4 py-[max(2rem,env(safe-area-inset-top))] pb-[max(2rem,env(safe-area-inset-bottom))]">
       <div className="absolute inset-0 hero-gradient pointer-events-none" />
 
       <motion.div
@@ -124,7 +125,13 @@ export default function CheckoutSuccessPage() {
           </p>
 
           <div className="space-y-3">
-            <Button asChild variant="gold" size="xl" className="w-full">
+            <Button
+              asChild
+              variant="gold"
+              size="xl"
+              className="w-full"
+              onClick={() => haptics.success()}
+            >
               <Link href="/explore">
                 <Map className="w-4 h-4" />
                 Open The Map
@@ -132,7 +139,13 @@ export default function CheckoutSuccessPage() {
               </Link>
             </Button>
 
-            <Button asChild variant="ghost" size="md" className="w-full">
+            <Button
+              asChild
+              variant="ghost"
+              size="md"
+              className="w-full"
+              onClick={() => haptics.tap()}
+            >
               <Link href="/">Back to website</Link>
             </Button>
           </div>

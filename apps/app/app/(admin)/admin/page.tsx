@@ -14,11 +14,13 @@ const STATS = [
   { label: "Avg. Rating", value: "—", icon: Star, trend: "—" },
 ];
 
+// `ready` links route to live pages; the rest are not-yet-built and render as
+// visibly disabled cards so they can't masquerade as working affordances.
 const QUICK_LINKS = [
-  { label: "Add Location", href: "/admin/locations/new", icon: Plus },
-  { label: "Manage Locations", href: "/admin/locations", icon: Map },
-  { label: "View Users", href: "/admin/users", icon: Users },
-  { label: "Settings", href: "/admin/settings", icon: Settings },
+  { label: "Add Location", href: "/admin/locations/new", icon: Plus, ready: false },
+  { label: "Manage Locations", href: "/admin/locations", icon: Map, ready: true },
+  { label: "View Users", href: "/admin/users", icon: Users, ready: false },
+  { label: "Settings", href: "/admin/settings", icon: Settings, ready: false },
 ];
 
 export default function AdminPage() {
@@ -52,18 +54,37 @@ export default function AdminPage() {
 
         {/* Quick links */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {QUICK_LINKS.map((link) => (
-            <Link
-              key={link.label}
-              href={link.href}
-              className="card-solid rounded-xl p-5 hover:border-stone-700 transition-colors group"
-            >
-              <div className="w-10 h-10 rounded-xl bg-trail-800 border border-stone-800 group-hover:border-stone-700 flex items-center justify-center mb-3 transition-colors">
-                <link.icon className="w-4 h-4 text-fg-muted group-hover:text-fg transition-colors" />
+          {QUICK_LINKS.map((link) =>
+            link.ready ? (
+              <Link
+                key={link.label}
+                href={link.href}
+                className="pressable card-solid rounded-xl p-5 hover:border-stone-700 transition-colors group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-trail-800 border border-stone-800 group-hover:border-stone-700 flex items-center justify-center mb-3 transition-colors">
+                  <link.icon className="w-4 h-4 text-fg-muted group-hover:text-fg transition-colors" />
+                </div>
+                <p className="text-fg text-sm font-medium">{link.label}</p>
+              </Link>
+            ) : (
+              <div
+                key={link.label}
+                aria-disabled="true"
+                title="Coming soon"
+                className="card-solid rounded-xl p-5 opacity-50 cursor-not-allowed"
+              >
+                <div className="w-10 h-10 rounded-xl bg-trail-800 border border-stone-800 flex items-center justify-center mb-3">
+                  <link.icon className="w-4 h-4 text-fg-muted" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <p className="text-fg text-sm font-medium">{link.label}</p>
+                  <span className="t-3xs font-medium uppercase tracking-wide text-fg-subtle bg-surface-1 px-1.5 py-0.5 rounded">
+                    Soon
+                  </span>
+                </div>
               </div>
-              <p className="text-fg text-sm font-medium">{link.label}</p>
-            </Link>
-          ))}
+            )
+          )}
         </div>
 
         <p className="text-fg-subtle text-xs text-center mt-16">

@@ -1,37 +1,62 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Shield, Zap } from "lucide-react";
+import { Check, Shield, Zap, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/brand/logo";
 import { PRICING } from "@/data/categories";
+import { haptics } from "@/lib/haptics";
 
 const IS_MOCK = process.env.NEXT_PUBLIC_MOCK_MODE === "true";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function CheckoutPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState<string>();
+  const [formError, setFormError] = useState<string>();
+
+  const emailValid = EMAIL_RE.test(email.trim());
 
   async function handleCheckout() {
-    if (!email) return;
+    const trimmed = email.trim();
+    if (!EMAIL_RE.test(trimmed)) {
+      setEmailError("Enter a valid email address");
+      haptics.warn();
+      return;
+    }
+    setEmailError(undefined);
+    setFormError(undefined);
+    haptics.tap();
     setIsLoading(true);
     try {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: trimmed }),
       });
+      if (!res.ok) throw new Error("checkout-failed");
       const { url } = await res.json();
-      if (url) window.location.href = url;
+      if (url) {
+        window.location.href = url;
+        return; // keep the spinner during navigation
+      }
+      throw new Error("no-url");
     } catch {
+      haptics.warn();
+      setFormError(
+        "We couldn't start your checkout. Please check your connection and try again."
+      );
       setIsLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen bg-trail-950 flex items-center justify-center px-4">
+    <div className="min-h-dvh bg-trail-950 flex items-center justify-center px-4 py-[max(2rem,env(safe-area-inset-top))] pb-[max(2rem,env(safe-area-inset-bottom))]">
       <div className="absolute inset-0 hero-gradient pointer-events-none" />
 
       <motion.div
@@ -42,7 +67,7 @@ export default function CheckoutPage() {
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-block mb-4">
+          <Link href="/" className="inline-block mb-4 pressable">
             <Logo
               iconClassName="text-alpine-500"
               wordmarkClassName="text-fg"
@@ -56,10 +81,22 @@ export default function CheckoutPage() {
         {/* Mock mode shortcut */}
         {IS_MOCK && (
           <div className="mb-4 flex gap-2">
-            <Button asChild variant="glass" size="sm" className="flex-1 text-xs">
+            <Button
+              asChild
+              variant="glass"
+              size="sm"
+              className="flex-1 text-xs"
+              onClick={() => haptics.tap()}
+            >
               <Link href="/checkout/success">→ Preview Success Page</Link>
             </Button>
-            <Button asChild variant="glass" size="sm" className="flex-1 text-xs">
+            <Button
+              asChild
+              variant="glass"
+              size="sm"
+              className="flex-1 text-xs"
+              onClick={() => haptics.tap()}
+            >
               <Link href="/checkout/cancel">→ Preview Cancel Page</Link>
             </Button>
           </div>
@@ -90,19 +127,39 @@ export default function CheckoutPage() {
             </ul>
 
             <div className="mb-4">
-              <label className="block text-fg-muted text-xs mb-1.5">
+              <label htmlFor="checkout-email" className="block text-fg-muted text-xs mb-1.5">
                 Your email address
               </label>
-              <input
+              <Input
+                id="checkout-email"
                 type="email"
                 inputMode="email"
                 autoComplete="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (emailError) setEmailError(undefined);
+                  if (formError) setFormError(undefined);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && emailValid && !isLoading) handleCheckout();
+                }}
                 placeholder="you@example.com"
-                className="w-full h-11 bg-trail-800 border border-stone-800 rounded-xl text-base text-fg placeholder:text-fg-muted px-4 outline-none transition-[border-color,box-shadow] focus:border-alpine-600 focus:ring-2 focus:ring-alpine-900/50"
+                error={emailError}
+                aria-invalid={!!emailError}
               />
             </div>
+
+            {/* Checkout / network error */}
+            {formError && (
+              <div
+                role="alert"
+                className="mb-4 flex items-start gap-2.5 rounded-lg border border-red-900 bg-red-950/60 px-3.5 py-3"
+              >
+                <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+                <p className="text-red-300 text-xs leading-relaxed">{formError}</p>
+              </div>
+            )}
 
             <Button
               variant="gold"
@@ -110,7 +167,7 @@ export default function CheckoutPage() {
               className="w-full"
               onClick={handleCheckout}
               loading={isLoading}
-              disabled={!email}
+              disabled={!emailValid}
             >
               <Zap className="w-4 h-4" />
               Pay CHF 29 — Get Instant Access
