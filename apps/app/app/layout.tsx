@@ -40,6 +40,11 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  // The app is a native-style PWA shell — pinch-zooming the chrome (and the
+  // map UI overlay) is unwanted. The map does its own zoom internally (Leaflet),
+  // so browser zoom only causes a stuck, shifted-up layout. Disable it.
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
