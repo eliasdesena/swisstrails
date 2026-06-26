@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useDragControls, type PanInfo } from "framer-motion";
 import {
   X, MapPin, ArrowRight, Clock, Mountain, Navigation,
   Route, MapPinned, Share2, Car, Bus, Gauge, Ruler,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { SPRING, EASE_OUT } from "@/lib/motion";
+import { haptics } from "@/lib/haptics";
+import { lockBodyScroll, unlockBodyScroll } from "@/lib/scroll-lock";
 import { useMapStore } from "@/store/map-store";
 import { useGeoStore } from "@/store/geo-store";
 import { useTripStore } from "@/store/trip-store";
@@ -54,12 +57,16 @@ function IconAction({
   return (
     <button
       type="button"
+      data-no-drag
       aria-label={label}
       aria-pressed={active}
-      onClick={onClick}
+      onClick={() => {
+        haptics.tap();
+        onClick();
+      }}
       className={cn(
-        "w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-full transition-colors active:scale-95",
-        active ? activeClass : "bg-white/[0.06] text-stone-300 hover:text-fg hover:bg-white/[0.1]"
+        "pressable w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-full transition-colors",
+        active ? activeClass : "bg-surface-2 text-stone-300 hover:text-fg hover:bg-surface-hover"
       )}
     >
       {children}
@@ -83,6 +90,8 @@ export function LocationDetailSheet({
   const [openInSheet, setOpenInSheet] = useState(false);
   const requestDirections = useMapPrefStore((s) => s.requestDirections);
 
+  const dragControls = useDragControls();
+
   // Real straight-line distance from the user, when we know their position.
   const awayKm =
     location && userPosition
@@ -96,14 +105,35 @@ export function LocationDetailSheet({
     : [];
 
   useEffect(() => {
-    if (location) {
-      scrollRef.current?.scrollTo(0, 0);
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => { document.body.style.overflow = ""; };
+    if (!location) return;
+    scrollRef.current?.scrollTo(0, 0);
+    lockBodyScroll();
+    return () => unlockBodyScroll();
   }, [location?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Only start a drag when the gesture shouldn't be a native scroll or a child
+  // interaction: never on buttons/links/inputs/[data-no-drag], and from inside
+  // the scroll body only when it's already at the top (so down-drags from a
+  // scrolled list scroll instead of dismissing).
+  function onSheetPointerDown(e: React.PointerEvent) {
+    // Desktop renders a centered modal — drag-to-dismiss is a mobile affordance.
+    if (window.matchMedia("(min-width: 1024px)").matches) return;
+    const el = e.target as Element | null;
+    if (el?.closest("button, a, input, select, textarea, [data-no-drag]")) return;
+    const sc = scrollRef.current;
+    if (sc && sc.contains(el as Node) && sc.scrollTop > 0) return;
+    dragControls.start(e);
+  }
+
+  // Drag-to-dismiss: close when dragged past a threshold or flicked down with
+  // velocity; otherwise framer springs back to the constraint (0). Mirrors the
+  // bottom-sheet's release feel.
+  function onDragEnd(_e: PointerEvent | MouseEvent | TouchEvent, info: PanInfo) {
+    if (info.offset.y > 120 || info.velocity.y > 650) {
+      haptics.tap();
+      onClose();
+    }
+  }
 
   function viewOnMap() {
     if (!location) return;
@@ -150,12 +180,23 @@ export function LocationDetailSheet({
             )}
             style={{ maxHeight: "calc(100dvh - 24px)" }}
             initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            animate={{ y: 0, transition: SPRING.soft }}
+            exit={{ y: "100%", transition: { duration: 0.22, ease: EASE_OUT } }}
+            drag="y"
+            dragListener={false}
+            dragControls={dragControls}
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0.04, bottom: 0.7 }}
+            onPointerDown={onSheetPointerDown}
+            onDragEnd={onDragEnd}
           >
+            {/* Grab handle — drag-to-dismiss affordance (mobile). */}
+            <div className="flex justify-center pt-2.5 pb-1 lg:hidden">
+              <span className="w-9 h-1.5 rounded-full bg-white/15" />
+            </div>
+
             {/* ── NON-SCROLLING HEADER: title + icon actions + photo strip ── */}
-            <div className="flex-shrink-0 px-5 pt-3 pb-3">
+            <div className="flex-shrink-0 px-5 pt-1.5 pb-3">
               <div className="flex items-start gap-3">
                 <div className="min-w-0 flex-1">
                   <h2 className="text-fg text-[22px] font-semibold leading-tight">{location.name}</h2>
@@ -269,11 +310,13 @@ export function LocationDetailSheet({
                       {similar.map((sim) => (
                         <button
                           key={sim.id}
+                          data-no-drag
                           onClick={() => {
+                            haptics.tap();
                             scrollRef.current?.scrollTo(0, 0);
                             onSelectSimilar(sim);
                           }}
-                          className="flex-shrink-0 w-28 rounded-lg overflow-hidden bg-white/[0.04] text-left"
+                          className="pressable flex-shrink-0 w-28 rounded-lg overflow-hidden bg-surface-1 text-left"
                         >
                           <div className="relative h-16">
                             <img
@@ -302,28 +345,38 @@ export function LocationDetailSheet({
             <div className="flex-shrink-0 border-t border-white/[0.06] bg-trail-950/95 px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2">
               <button
                 type="button"
-                onClick={() =>
+                data-no-drag
+                onClick={() => {
+                  haptics.tap();
                   requestDirections({
                     lat: location.coordinates.lat,
                     lng: location.coordinates.lng,
                     name: location.name,
-                  })
-                }
-                className="flex-1 flex items-center justify-center gap-2 min-h-[44px] py-3.5 bg-alpine-600 hover:bg-alpine-500 active:bg-alpine-700 text-white text-sm font-medium rounded-lg transition-colors"
+                  });
+                }}
+                className="pressable flex-1 flex items-center justify-center gap-2 min-h-[44px] py-3.5 bg-alpine-600 hover:bg-alpine-500 text-white text-sm font-medium rounded-lg transition-colors"
               >
                 <Navigation className="w-4 h-4" />
                 Get directions
               </button>
               <button
-                onClick={() => setOpenInSheet(true)}
+                data-no-drag
+                onClick={() => {
+                  haptics.tap();
+                  setOpenInSheet(true);
+                }}
                 aria-label="More apps"
-                className="w-11 flex-shrink-0 flex items-center justify-center bg-white/[0.05] hover:bg-white/[0.08] active:bg-white/[0.1] text-stone-200 rounded-lg transition-colors"
+                className="pressable w-11 flex-shrink-0 flex items-center justify-center bg-surface-2 hover:bg-surface-hover text-stone-200 rounded-lg transition-colors"
               >
                 <Share2 className="w-4 h-4" />
               </button>
               <button
-                onClick={viewOnMap}
-                className="flex items-center justify-center gap-1.5 px-4 min-h-[44px] py-3.5 bg-white/[0.05] hover:bg-white/[0.08] active:bg-white/[0.1] text-stone-200 text-sm font-medium rounded-lg transition-colors flex-shrink-0"
+                data-no-drag
+                onClick={() => {
+                  haptics.tap();
+                  viewOnMap();
+                }}
+                className="pressable flex items-center justify-center gap-1.5 px-4 min-h-[44px] py-3.5 bg-surface-2 hover:bg-surface-hover text-stone-200 text-sm font-medium rounded-lg transition-colors flex-shrink-0"
               >
                 <MapPin className="w-4 h-4" />
                 Map

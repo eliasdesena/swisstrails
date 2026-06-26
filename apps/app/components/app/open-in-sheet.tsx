@@ -15,6 +15,9 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { SPRING, EASE_OUT } from "@/lib/motion";
+import { haptics } from "@/lib/haptics";
+import { lockBodyScroll, unlockBodyScroll } from "@/lib/scroll-lock";
 import {
   googleMapsDirections,
   googleMapsApp,
@@ -48,7 +51,7 @@ interface RowProps {
 function Row({ icon: Icon, label, hint, href, onClick, done }: RowProps) {
   const inner = (
     <>
-      <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-white/[0.05] text-alpine-300 flex-shrink-0">
+      <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-surface-2 text-alpine-300 flex-shrink-0">
         <Icon className="w-[18px] h-[18px]" />
       </span>
       <span className="flex-1 min-w-0">
@@ -64,19 +67,24 @@ function Row({ icon: Icon, label, hint, href, onClick, done }: RowProps) {
   );
 
   const className = cn(
-    "w-full flex items-center gap-3 px-2 min-h-[52px] py-2.5 rounded-lg text-left",
-    "hover:bg-white/[0.04] active:bg-white/[0.06] transition-colors"
+    "pressable w-full flex items-center gap-3 px-2 min-h-[52px] py-2.5 rounded-lg text-left",
+    "hover:bg-surface-1 transition-colors"
   );
+
+  function handleClick() {
+    haptics.tap();
+    onClick?.();
+  }
 
   if (href) {
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className={className} onClick={onClick}>
+      <a href={href} target="_blank" rel="noopener noreferrer" className={className} onClick={handleClick}>
         {inner}
       </a>
     );
   }
   return (
-    <button type="button" className={className} onClick={onClick}>
+    <button type="button" className={className} onClick={handleClick}>
       {inner}
     </button>
   );
@@ -85,17 +93,14 @@ function Row({ icon: Icon, label, hint, href, onClick, done }: RowProps) {
 export function OpenInSheet({ location, onClose }: OpenInSheetProps) {
   const [copied, setCopied] = useState(false);
 
-  // Body-scroll-lock while open.
+  // Body-scroll-lock while open (ref-counted so it composes with other sheets).
   useEffect(() => {
-    if (location) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
+    if (!location) {
       setCopied(false);
+      return;
     }
-    return () => {
-      document.body.style.overflow = "";
-    };
+    lockBodyScroll();
+    return () => unlockBodyScroll();
   }, [location?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function copyCoords() {
@@ -136,9 +141,8 @@ export function OpenInSheet({ location, onClose }: OpenInSheetProps) {
               "lg:w-[420px] lg:rounded-xl"
             )}
             initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            animate={{ y: 0, transition: SPRING.soft }}
+            exit={{ y: "100%", transition: { duration: 0.22, ease: EASE_OUT } }}
             role="dialog"
             aria-label="Open in / Get directions"
           >
@@ -158,9 +162,12 @@ export function OpenInSheet({ location, onClose }: OpenInSheetProps) {
                 </h3>
               </div>
               <button
-                onClick={onClose}
+                onClick={() => {
+                  haptics.tap();
+                  onClose();
+                }}
                 aria-label="Close"
-                className="w-11 h-11 -mr-2 flex items-center justify-center text-fg-muted hover:text-fg transition-colors flex-shrink-0"
+                className="icon-button -mr-2 text-fg-muted hover:text-fg flex-shrink-0"
               >
                 <X className="w-5 h-5" />
               </button>

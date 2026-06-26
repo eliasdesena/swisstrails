@@ -24,6 +24,7 @@ import { WeatherWidget } from "@/components/app/weather-widget";
 import { PhotoStrip } from "@/components/app/photo-strip";
 import { ReactionBar } from "@/components/app/reaction-bar";
 import { useLocationImages } from "@/lib/location-images";
+import { haptics } from "@/lib/haptics";
 import type { Location } from "@/types";
 
 interface LocationDetailProps {
@@ -63,8 +64,8 @@ function IconAction({
       aria-pressed={active}
       onClick={onClick}
       className={cn(
-        "w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-full transition-colors active:scale-95",
-        active ? activeClass : "bg-white/[0.06] text-stone-300 hover:text-fg hover:bg-white/[0.1]"
+        "pressable w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-full transition-colors",
+        active ? activeClass : "bg-surface-2 text-stone-300 hover:text-fg hover:bg-surface-hover"
       )}
     >
       {children}
@@ -136,11 +137,22 @@ export function LocationDetail({ location, onClose, scrollRef }: LocationDetailP
               label={inTrip ? "Remove from trip" : "Add to trip"}
               active={inTrip}
               activeClass="bg-alpine-500/15 text-alpine-400"
-              onClick={() => toggleInTrip(location.id)}
+              onClick={() => {
+                // Firmer confirmation when adding, a light tick when removing.
+                if (inTrip) haptics.tap();
+                else haptics.success();
+                toggleInTrip(location.id);
+              }}
             >
               {inTrip ? <MapPinned className="w-[18px] h-[18px]" /> : <Route className="w-[18px] h-[18px]" />}
             </IconAction>
-            <IconAction label="Share" onClick={share}>
+            <IconAction
+              label="Share"
+              onClick={() => {
+                haptics.tap();
+                share();
+              }}
+            >
               <Share2 className="w-[18px] h-[18px]" />
             </IconAction>
           </div>
@@ -324,13 +336,14 @@ export function LocationDetail({ location, onClose, scrollRef }: LocationDetailP
           size="lg"
           className="flex-1"
           data-no-drag
-          onClick={() =>
+          onClick={() => {
+            haptics.tap();
             requestDirections({
               lat: location.coordinates.lat,
               lng: location.coordinates.lng,
               name: location.name,
-            })
-          }
+            });
+          }}
         >
           <Navigation className="w-4 h-4" />
           Get directions
@@ -339,8 +352,11 @@ export function LocationDetail({ location, onClose, scrollRef }: LocationDetailP
           type="button"
           data-no-drag
           aria-label="More apps"
-          onClick={() => setOpenInSheet(true)}
-          className="w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-lg bg-white/[0.06] text-stone-300 hover:text-fg active:scale-95 transition-colors"
+          onClick={() => {
+            haptics.tap();
+            setOpenInSheet(true);
+          }}
+          className="pressable w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-lg bg-surface-2 text-stone-300 hover:text-fg transition-colors"
         >
           <MoreHorizontal className="w-5 h-5" />
         </button>
