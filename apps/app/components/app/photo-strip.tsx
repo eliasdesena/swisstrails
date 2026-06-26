@@ -1,9 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useMotionValue,
+  useTransform,
+  animate,
+} from "framer-motion";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { SPRING } from "@/lib/motion";
+import { haptics } from "@/lib/haptics";
+import { cn } from "@/lib/utils";
 import type { LocationImage } from "@/types";
 
 interface PhotoStripProps {
@@ -41,9 +50,12 @@ export function PhotoStrip({ photos, className }: PhotoStripProps) {
             key={img.id ?? img.url}
             type="button"
             data-no-drag
-            onClick={() => setLightboxIndex(i)}
+            onClick={() => {
+              haptics.tap();
+              setLightboxIndex(i);
+            }}
             aria-label={`Open photo ${i + 1} of ${photos.length}`}
-            className="relative flex-shrink-0 h-24 w-32 rounded-xl overflow-hidden bg-white/[0.04] active:scale-[0.98] transition-transform"
+            className="pressable relative flex-shrink-0 h-24 w-32 rounded-xl overflow-hidden bg-surface-1"
           >
             <Image
               src={img.url}
@@ -74,21 +86,72 @@ interface LightboxProps {
   onIndexChange: (index: number) => void;
 }
 
-/** Simple full-screen carousel lightbox with prev/next + swipe. */
 function Lightbox({ photos, index, onClose, onIndexChange }: LightboxProps) {
-  const isOpen = index !== null;
+  return (
+    <AnimatePresence>
+      {index !== null && (
+        <LightboxInner
+          photos={photos}
+          index={index}
+          onClose={onClose}
+          onIndexChange={onIndexChange}
+        />
+      )}
+    </AnimatePresence>
+  );
+}
+
+/**
+ * Full-screen, native-feeling lightbox:
+ *  - a paged track driven by a shared `x` so the neighbouring photo slides in
+ *    under the finger (not a jump-on-threshold);
+ *  - swipe-down (or up) to dismiss, with the backdrop dimming as you pull;
+ *  - velocity-aware spring settles, load shimmer, and haptics.
+ * `dragDirectionLock` keeps a single gesture to one axis (page vs dismiss).
+ */
+function LightboxInner({
+  photos,
+  index,
+  onClose,
+  onIndexChange,
+}: {
+  photos: LocationImage[];
+  index: number;
+  onClose: () => void;
+  onIndexChange: (index: number) => void;
+}) {
+  const [w, setW] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth : 0
+  );
+  const x = useMotionValue(-index * w);
+  const y = useMotionValue(0);
+  // Backdrop fades as the photo is pulled away from centre.
+  const dim = useTransform(y, [-260, 0, 260], [0, 1, 0]);
+  const indexRef = useRef(index);
+  indexRef.current = index;
+
+  useEffect(() => {
+    const onResize = () => setW(window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  // Keep the track aligned to the active page (buttons / keyboard / resize).
+  useEffect(() => {
+    const controls = animate(x, -index * w, SPRING.soft);
+    return () => controls.stop();
+  }, [index, w, x]);
 
   const go = useCallback(
     (dir: number) => {
-      if (index === null) return;
-      const next = (index + dir + photos.length) % photos.length;
+      const next = (indexRef.current + dir + photos.length) % photos.length;
+      if (next !== indexRef.current) haptics.tap();
       onIndexChange(next);
     },
-    [index, photos.length, onIndexChange]
+    [photos.length, onIndexChange]
   );
 
   useEffect(() => {
-    if (!isOpen) return;
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
       else if (e.key === "ArrowRight") go(1);
@@ -96,87 +159,135 @@ function Lightbox({ photos, index, onClose, onIndexChange }: LightboxProps) {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [isOpen, go, onClose]);
+  }, [go, onClose]);
+
+  function onDragEnd(
+    _: unknown,
+    info: { offset: { x: number; y: number }; velocity: { x: number; y: number } }
+  ) {
+    const { offset, velocity } = info;
+    // Vertical-dominant pull → dismiss.
+    if (
+      Math.abs(offset.y) > Math.abs(offset.x) &&
+      (Math.abs(offset.y) > 110 || Math.abs(velocity.y) > 550)
+    ) {
+      haptics.tap();
+      onClose();
+      return;
+    }
+    // Otherwise settle: snap vertical back, page horizontally by offset/velocity.
+    animate(y, 0, SPRING.soft);
+    let target = index;
+    if (offset.x < -w * 0.22 || velocity.x < -450)
+      target = Math.min(photos.length - 1, index + 1);
+    else if (offset.x > w * 0.22 || velocity.x > 450)
+      target = Math.max(0, index - 1);
+    if (target !== index) {
+      haptics.tap();
+      onIndexChange(target);
+    }
+    animate(x, -target * w, { ...SPRING.soft, velocity: velocity.x });
+  }
 
   return (
-    <AnimatePresence>
-      {index !== null && (
-        <motion.div
-          className="fixed inset-0 z-[1800] bg-black/95 backdrop-blur-xl flex items-center justify-center select-none"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
-          onClick={onClose}
-        >
+    <motion.div
+      className="fixed inset-0 z-[1800] select-none overflow-hidden"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.18 }}
+    >
+      {/* Backdrop — solid at rest; the dim transform fades it as you pull away. */}
+      <motion.div
+        className="absolute inset-0 bg-black backdrop-blur-xl"
+        style={{ opacity: dim }}
+      />
+
+      {/* Paged track */}
+      <motion.div
+        className="absolute inset-0 flex"
+        style={{ x, y, width: photos.length * w || "100%" }}
+        drag={photos.length > 1 ? true : "y"}
+        dragDirectionLock
+        dragElastic={0.16}
+        dragConstraints={{ left: -(photos.length - 1) * w, right: 0 }}
+        onDragEnd={onDragEnd}
+      >
+        {photos.map((img, i) => (
+          <LightboxPage
+            key={img.id ?? img.url}
+            img={img}
+            width={w}
+            active={i === index}
+          />
+        ))}
+      </motion.div>
+
+      {/* Close */}
+      <button
+        aria-label="Close"
+        className="icon-button absolute top-[max(1rem,env(safe-area-inset-top))] right-3 rounded-full bg-white/10 text-white/80 hover:text-white"
+        onClick={onClose}
+      >
+        <X className="w-5 h-5" />
+      </button>
+
+      {/* Desktop prev/next */}
+      {photos.length > 1 && (
+        <>
           <button
-            aria-label="Close"
-            className="absolute top-[max(1rem,env(safe-area-inset-top))] right-4 w-11 h-11 rounded-lg bg-white/10 flex items-center justify-center text-white/80 hover:text-white active:scale-95 transition-colors"
-            onClick={(e) => {
-              e.stopPropagation();
-              onClose();
-            }}
+            aria-label="Previous photo"
+            className="icon-button absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/10 text-white/80 hover:text-white max-lg:hidden"
+            onClick={() => go(-1)}
           >
-            <X className="w-5 h-5" />
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <button
+            aria-label="Next photo"
+            className="icon-button absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white/10 text-white/80 hover:text-white max-lg:hidden"
+            onClick={() => go(1)}
+          >
+            <ChevronRight className="w-6 h-6" />
           </button>
 
-          {photos.length > 1 && (
-            <>
-              <button
-                aria-label="Previous photo"
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 flex items-center justify-center text-white/80 hover:text-white active:scale-95 transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  go(-1);
-                }}
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-              <button
-                aria-label="Next photo"
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 flex items-center justify-center text-white/80 hover:text-white active:scale-95 transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  go(1);
-                }}
-              >
-                <ChevronRight className="w-6 h-6" />
-              </button>
-            </>
-          )}
-
-          <motion.div
-            key={index}
-            className="relative w-full max-w-3xl aspect-[4/3] mx-4"
-            drag={photos.length > 1 ? "x" : false}
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.2}
-            onDragEnd={(_, info) => {
-              if (info.offset.x < -80) go(1);
-              else if (info.offset.x > 80) go(-1);
-            }}
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.2 }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Image
-              src={photos[index].url}
-              alt={photos[index].alt}
-              fill
-              className="object-contain rounded-lg"
-              sizes="100vw"
-              draggable={false}
-            />
-          </motion.div>
-
-          {photos.length > 1 && (
-            <p className="absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 text-white/70 text-xs font-medium tabular-nums">
-              {index + 1} / {photos.length}
-            </p>
-          )}
-        </motion.div>
+          <p className="absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 text-white/70 text-xs font-medium tabular-nums pointer-events-none">
+            {index + 1} / {photos.length}
+          </p>
+        </>
       )}
-    </AnimatePresence>
+    </motion.div>
+  );
+}
+
+function LightboxPage({
+  img,
+  width,
+  active,
+}: {
+  img: LocationImage;
+  width: number;
+  active: boolean;
+}) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <div
+      className="relative h-full flex-shrink-0"
+      style={{ width: width || "100%" }}
+    >
+      {!loaded && <div className="absolute inset-8 skeleton rounded-lg" />}
+      <Image
+        src={img.url}
+        alt={img.alt}
+        fill
+        className={cn(
+          "object-contain transition-opacity duration-300",
+          loaded ? "opacity-100" : "opacity-0"
+        )}
+        sizes="100vw"
+        draggable={false}
+        priority={active}
+        onLoad={() => setLoaded(true)}
+      />
+    </div>
   );
 }
