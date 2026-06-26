@@ -1,10 +1,13 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { Heart, Bookmark, CheckCircle2, type LucideIcon } from "lucide-react";
 import { useFavoritesStore } from "@/store/favorites-store";
 import { useVisitedStore } from "@/store/visited-store";
 import { useSocialStore } from "@/store/social-store";
 import { displayedCount } from "@/lib/social-counts";
+import { SPRING } from "@/lib/motion";
+import { haptics } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
 
 /**
@@ -52,15 +55,28 @@ export function ReactionBar({
             type="button"
             data-no-drag
             aria-pressed={on}
-            onClick={toggle}
+            onClick={() => {
+              if (!on) haptics.success();
+              else haptics.tap();
+              toggle();
+            }}
             className={cn(
-              "flex items-center gap-1.5 h-8 px-2.5 rounded-full text-xs font-medium transition-colors active:scale-95",
+              "pressable flex items-center gap-1.5 h-8 px-2.5 rounded-full text-xs font-medium transition-colors",
               on
-                ? cn("bg-white/[0.08]", activeColor)
-                : "bg-white/[0.04] text-fg-muted hover:text-fg"
+                ? cn("bg-surface-3", activeColor)
+                : "bg-surface-1 text-fg-muted hover:text-fg"
             )}
           >
-            <Icon className={cn("w-3.5 h-3.5", on && fill && "fill-current")} />
+            {/* Key swap on toggle gives the icon a spring pop on activation. */}
+            <motion.span
+              key={on ? "on" : "off"}
+              initial={{ scale: on ? 0.6 : 1 }}
+              animate={{ scale: 1 }}
+              transition={SPRING.snappy}
+              className="inline-flex"
+            >
+              <Icon className={cn("w-3.5 h-3.5", on && fill && "fill-current")} />
+            </motion.span>
             {count.toLocaleString()}
           </button>
         );

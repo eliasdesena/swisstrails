@@ -15,6 +15,7 @@ import { sortLocations, type SortMode } from "@/lib/sort";
 import { SortControl } from "@/components/app/sort-control";
 import { TripPill } from "@/components/app/trip-pill";
 import { cn } from "@/lib/utils";
+import { haptics } from "@/lib/haptics";
 
 const MapView = dynamic(
   () => import("@/components/app/map-view").then((m) => m.MapView),
@@ -72,10 +73,13 @@ export default function MapPage() {
         {/* Satellite/map toggle — floating below the search row */}
         <div className="absolute top-[calc(4rem+env(safe-area-inset-top))] right-3 z-[1100]">
           <button
-            onClick={() => setIsSatellite((v) => !v)}
+            onClick={() => {
+              haptics.tap();
+              setIsSatellite((v) => !v);
+            }}
             className={cn(
-              "flex items-center gap-1.5 h-10 px-3.5 rounded-lg text-sm font-medium transition-all",
-              "shadow-[0_2px_12px_rgba(0,0,0,0.45)]",
+              "pressable flex items-center gap-1.5 h-10 px-3.5 rounded-lg text-sm font-medium",
+              "transition-[background-color,color] shadow-[0_2px_12px_rgba(0,0,0,0.45)]",
               isSatellite
                 ? "bg-trail-950/90 text-fg backdrop-blur-md"
                 : "bg-white/90 text-trail-950 backdrop-blur-md"
@@ -164,12 +168,15 @@ export default function MapPage() {
         <button
           aria-label="Filters"
           className={cn(
-            "flex items-center gap-1.5 h-11 px-3.5 rounded-lg text-sm font-medium transition-colors flex-shrink-0 backdrop-blur-md shadow-[0_2px_12px_rgba(0,0,0,0.45)]",
+            "pressable flex items-center gap-1.5 h-11 px-3.5 rounded-lg text-sm font-medium transition-colors flex-shrink-0 backdrop-blur-md shadow-[0_2px_12px_rgba(0,0,0,0.45)]",
             activeFilterCount > 0
               ? "bg-alpine-700/85 text-white"
               : "bg-trail-950/85 text-fg-muted hover:text-fg"
           )}
-          onClick={() => setShowFilters((v) => !v)}
+          onClick={() => {
+            haptics.tap();
+            setShowFilters((v) => !v);
+          }}
         >
           <SlidersHorizontal className="w-4 h-4" />
           <span className="hidden sm:inline">Filters</span>
@@ -187,11 +194,14 @@ export default function MapPage() {
           ).map(({ v, icon: Icon }) => (
             <button
               key={v}
-              onClick={() => setView(v)}
+              onClick={() => {
+                haptics.tap();
+                setView(v);
+              }}
               aria-label={v === "map" ? "Map view" : "List view"}
               className={cn(
-                "w-11 flex items-center justify-center transition-colors",
-                view === v ? "bg-white/[0.14] text-fg" : "text-fg-muted hover:text-fg"
+                "pressable w-11 flex items-center justify-center transition-colors",
+                view === v ? "bg-surface-3 text-fg" : "text-fg-muted hover:text-fg"
               )}
             >
               <Icon className="w-4 h-4" />

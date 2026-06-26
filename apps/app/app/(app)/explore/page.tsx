@@ -7,6 +7,7 @@ import { useMapStore } from "@/store/map-store";
 import { useGeoStore } from "@/store/geo-store";
 import { PLACEHOLDER_LOCATIONS } from "@/data/locations";
 import { filterLocations, countActiveFilters } from "@/lib/filters";
+import { useLocationImages } from "@/lib/location-images";
 import { sortLocations, type SortMode } from "@/lib/sort";
 import { currentSeason, isInSeason } from "@/lib/season";
 import { seasonConfig } from "@/lib/utils";
@@ -269,7 +270,6 @@ export default function ExplorePage() {
                 location={loc}
                 aspectRatio={ASPECT_RATIOS[i % ASPECT_RATIOS.length]}
                 onClick={() => setSelectedLocation(loc)}
-                animDelay={Math.min((i % MASONRY_PAGE) * 0.025, 0.3)}
               />
             ))}
           </div>
@@ -300,33 +300,43 @@ interface MasonryCardProps {
   location: Location;
   aspectRatio: string;
   onClick: () => void;
-  animDelay: number;
 }
 
-function MasonryCard({ location, aspectRatio, onClick, animDelay }: MasonryCardProps) {
+function MasonryCard({ location, aspectRatio, onClick }: MasonryCardProps) {
   const [imgError, setImgError] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  // Resolve via the image source-priority resolver so admin/curated images
+  // appear on the wall too (previously it hard-used heroImage.url).
+  const images = useLocationImages(location);
+  const src = images[0]?.url ?? location.heroImage.url;
 
   return (
     <motion.button
-      className="relative w-full rounded-md overflow-hidden bg-white/[0.04] block break-inside-avoid mb-1 lg:mb-1.5"
+      className="relative w-full rounded-md overflow-hidden bg-surface-1 block break-inside-avoid mb-1 lg:mb-1.5"
       style={{ aspectRatio }}
       onClick={onClick}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.4, delay: animDelay }}
-      whileTap={{ scale: 0.99 }}
+      whileTap={{ scale: 0.97 }}
     >
+      {/* Shimmer placeholder until the image decodes — no grey-box→snap. */}
+      {!loaded && !imgError && (
+        <div className="absolute inset-0 skeleton rounded-none" />
+      )}
       {!imgError ? (
         <img
-          src={location.heroImage.url}
+          src={src}
           alt={location.name}
-          className="w-full h-full object-cover"
+          className={cn(
+            "w-full h-full object-cover transition-opacity duration-500",
+            loaded ? "opacity-100" : "opacity-0"
+          )}
           loading="lazy"
+          decoding="async"
+          onLoad={() => setLoaded(true)}
           onError={() => setImgError(true)}
         />
       ) : (
         <div className="w-full h-full flex items-center justify-center bg-trail-800">
-          <span className="text-stone-700 text-xs">{categoryConfig[location.category].label}</span>
+          <span className="text-stone-500 text-xs">{categoryConfig[location.category].label}</span>
         </div>
       )}
 
@@ -334,7 +344,7 @@ function MasonryCard({ location, aspectRatio, onClick, animDelay }: MasonryCardP
 
       <div className="absolute bottom-0 left-0 right-0 p-2.5 text-left">
         <p className="text-white text-xs font-medium leading-tight line-clamp-2">{location.name}</p>
-        <p className="text-white/70 text-[11px] mt-0.5">{regionConfig[location.region].label}</p>
+        <p className="text-white/70 t-2xs mt-0.5">{regionConfig[location.region].label}</p>
       </div>
     </motion.button>
   );
