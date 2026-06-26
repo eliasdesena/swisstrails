@@ -6,6 +6,34 @@ Organized by **build order**: shared primitives first (Phase 0), then the fixes 
 
 ---
 
+## ✅ Status (shipped 2026-06-26)
+
+All phases implemented and pushed to `main` (review on the live deploys):
+
+| Wave | Commit | What |
+|---|---|---|
+| Phase 0 | `451e41c` | Floating nav, unified `--nav-h`/`--nav-clear` geometry (PWA-jank root fix), velocity-spring sheet, `lib/motion`, `lib/haptics`, surface tokens, `pressable`/`icon-button` presets |
+| Phase 1a | `06af549` | Route transitions, animate-once masonry + resolver + fade-in, press-feedback sweep |
+| Phase 1b | `3d59f80` | Native photo-lightbox gestures (finger-tracking paging, swipe-to-dismiss) |
+| Phase 2a | `c53f129` | Explore: filter chips, persisted rail, skeleton match, instant filter scroll |
+| Phase 2b | `597a531` | Map: category-tinted markers, marker pop, recenter-on-open, Leaflet gesture tuning |
+| Phase 2c | `6ea2f4d` | Detail sheets: ref-counted scroll-lock fix, drag-to-dismiss, spring presentations |
+| Phase 2d | `3621a79` | Favourites/Profile: animated removal, hydration guards, count-up stats, segmented control, Cantons metric, wired sign-out |
+| Phase 3a | `bd7b4e0` | Trip: drag-to-reorder, animated add/remove, honest distance labelling |
+| Phase 3b | `d12fb12` | Trip: real Mapbox driving legs (Haversine fallback), elevation profile, shareable link |
+| Phase 4a | `a49e1aa` | Peripheral: admin dead-end fixes, checkout/login validation+errors, dvh+safe-area, image-editor mobile |
+| Phase 4b | `95a2067` | Marketing: stale-year fix, /privacy + /terms, "works offline" softened, reduced-motion, testimonials grid |
+| Phase 5 | `4754fe5` | `min-h-dvh` on the non-locked scrolling pages |
+
+### Deferred (need owner input before landing)
+- **Multi-day trip grouping** — a `trip-store` schema migration (`tripIds[]` → `days[]`) that touches the whole add-to-trip flow; too invasive to land blind. Own reviewable wave.
+- **Per-stop notes / timing** — small store addition; parked with the multi-day wave.
+- **Restore pinch-zoom** (`userScalable`) — left disabled pending on-device confirmation that the Phase 0 geometry fix resolved the "stuck nav" issue (re-enabling needs a PWA re-install to verify).
+
+---
+
+---
+
 ## Phase 0 — Foundations (shared primitives — build these first)
 
 The systemic audit's headline: the token foundation in `packages/ui/src/globals.css` is strong, but **`apps/app` barely consumes it** (type scale used 27× vs 201 raw/arbitrary `text-*`; ~150 ad-hoc `bg-white/[0.0x]` fills across 8 opacity values; the easing curve hand-copied 17×). Fixing this is ~5 primitives, not 200 edits. Everything downstream consumes them.
