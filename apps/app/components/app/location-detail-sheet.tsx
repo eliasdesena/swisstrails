@@ -22,6 +22,7 @@ import { platformDirections } from "@/lib/deep-links";
 import { OpenInSheet } from "@/components/app/open-in-sheet";
 import { WeatherWidget } from "@/components/app/weather-widget";
 import { PhotoStrip } from "@/components/app/photo-strip";
+import { ReactionBar } from "@/components/app/reaction-bar";
 import { PLACEHOLDER_LOCATIONS } from "@/data/locations";
 import type { Location, Difficulty, LocationImage } from "@/types";
 
@@ -205,9 +206,8 @@ export function LocationDetailSheet({
                 </div>
               </div>
 
-              {/* Reaction-count slot — Like / Want to go / Been there.
-                  Left empty; the parent wires the live counts here. */}
-              <div data-reaction-slot className="mt-2.5 empty:hidden" />
+              {/* Reaction counts — Like / Want to go / Been there. */}
+              <ReactionBar locationId={location.id} className="mt-2.5" />
 
               <PhotoStrip photos={photos} className="mt-3" />
             </div>

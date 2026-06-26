@@ -24,6 +24,7 @@ import { platformDirections } from "@/lib/deep-links";
 import { OpenInSheet } from "@/components/app/open-in-sheet";
 import { WeatherWidget } from "@/components/app/weather-widget";
 import { PhotoStrip } from "@/components/app/photo-strip";
+import { ReactionBar } from "@/components/app/reaction-bar";
 import type { Location, LocationImage } from "@/types";
 
 interface LocationDetailProps {
@@ -166,9 +167,8 @@ export function LocationDetail({ location, onClose, scrollRef }: LocationDetailP
           </div>
         </div>
 
-        {/* Reaction-count slot — Like / Want to go / Been there.
-            Intentionally left empty; the parent wires the live counts here. */}
-        <div data-reaction-slot className="mt-2.5 empty:hidden" />
+        {/* Reaction counts — Like / Want to go / Been there. */}
+        <ReactionBar locationId={location.id} className="mt-2.5" />
 
         {/* Photo strip — horizontal, swipeable; data-no-drag so it scrolls
             independently of the sheet. */}
