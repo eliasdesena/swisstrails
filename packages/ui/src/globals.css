@@ -118,6 +118,9 @@
     text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
     scroll-behavior: smooth;
+    /* On iOS the document-level rubber-band is governed by the documentElement,
+       not just body — without this the whole page bounces on overscroll. */
+    overscroll-behavior-y: none;
   }
 
   body {
@@ -126,6 +129,22 @@
     font-family: var(--font-body);
     overflow-x: hidden;
     overscroll-behavior-y: none;
+  }
+
+  /* App-shell lock — applied only on the fixed-shell tab routes (explore/map/
+     favourites/profile) via <ScrollLock>. Pins the document so it can't scroll
+     or rubber-band; only the inner containers scroll. NOT applied to the
+     scrolling pages (location/login/checkout/admin) or the marketing site. */
+  html.app-shell-locked,
+  body.app-shell-locked {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  body.app-shell-locked {
+    position: fixed;
+    inset: 0;
+    width: 100%;
   }
 
   ::selection {
