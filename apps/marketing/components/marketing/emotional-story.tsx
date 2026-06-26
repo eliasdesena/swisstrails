@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { useRef } from "react";
 import { Reveal } from "@/components/shared/reveal";
 
@@ -13,13 +13,16 @@ const STORY_MOMENTS = [
 ];
 
 export function EmotionalStory() {
+  const reduce = useReducedMotion();
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start end", "end start"],
   });
 
-  const y = useTransform(scrollYProgress, [0, 1], ["-5%", "5%"]);
+  const yRaw = useTransform(scrollYProgress, [0, 1], ["-5%", "5%"]);
+  // No parallax drift under reduced motion.
+  const y = reduce ? undefined : yRaw;
 
   return (
     <section

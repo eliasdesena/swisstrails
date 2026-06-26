@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Check, Zap, Shield } from "lucide-react";
 import { Reveal } from "@/components/shared/reveal";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,9 @@ import { PRICING } from "@/data/categories";
 import { APP_URL } from "@/lib/config";
 
 export function Pricing() {
+  const reduce = useReducedMotion();
   return (
-    <section id="pricing" className="py-24 lg:py-36 relative overflow-hidden">
+    <section id="pricing" className="py-24 lg:py-36 relative overflow-hidden scroll-mt-20 lg:scroll-mt-24">
       {/* Glow */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-gold-900/10 blur-3xl" />
@@ -40,10 +41,10 @@ export function Pricing() {
         <div className="max-w-lg mx-auto">
           <motion.div
             className="relative card-solid rounded-2xl overflow-hidden"
-            initial={{ opacity: 0, y: 40, scale: 0.97 }}
+            initial={reduce ? false : { opacity: 0, y: 40, scale: 0.97 }}
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: reduce ? 0 : 0.7, ease: [0.16, 1, 0.3, 1] }}
           >
             {/* Top gradient bar */}
             <div className="h-1 bg-gradient-to-r from-gold-700 via-gold-400 to-gold-700" />
@@ -88,7 +89,7 @@ export function Pricing() {
                 className="w-full shadow-[0_0_40px_rgba(245,184,40,0.2)]"
               >
                 <a href={`${APP_URL}/checkout`}>
-                  Unlock The Map — CHF 29 →
+                  Unlock the Map — CHF 29 →
                 </a>
               </Button>
 

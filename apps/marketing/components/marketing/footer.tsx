@@ -28,7 +28,7 @@ export function Footer() {
             size="xl"
             className="shadow-[0_0_40px_rgba(245,184,40,0.2)]"
           >
-            <a href="#pricing">Unlock The Map — CHF 29 →</a>
+            <a href="#pricing">Unlock the Map — CHF 29 →</a>
           </Button>
         </div>
       </div>
@@ -53,7 +53,7 @@ export function Footer() {
           {/* Links */}
           <div className="flex flex-wrap gap-x-6 gap-y-1">
             {[
-              { label: "About", href: "#" },
+              { label: "About", href: "#solution" },
               { label: "Pricing", href: "#pricing" },
               { label: "FAQ", href: "#faq" },
               { label: "Contact", href: "mailto:hello@swiss-trails.com" },

@@ -36,10 +36,12 @@ export function Navbar() {
     <>
       <motion.header
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
-          hasScrolled
-            ? "bg-trail-950/85 backdrop-blur-xl shadow-[0_2px_40px_rgba(0,0,0,0.4)]"
-            : "bg-transparent"
+          "fixed top-0 left-0 right-0 z-50 transition-all duration-500 pt-[env(safe-area-inset-top)]",
+          isMenuOpen
+            ? "bg-trail-950 shadow-[0_2px_40px_rgba(0,0,0,0.4)]"
+            : hasScrolled
+              ? "bg-trail-950/85 backdrop-blur-xl shadow-[0_2px_40px_rgba(0,0,0,0.4)]"
+              : "bg-transparent"
         )}
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -106,7 +108,8 @@ export function Navbar() {
           onClick={() => setIsMenuOpen(false)}
         />
         <motion.div
-          className="absolute top-16 left-0 right-0 bg-trail-900 p-6"
+          className="absolute left-0 right-0 bg-trail-900 p-6"
+          style={{ top: "calc(env(safe-area-inset-top) + 4rem)" }}
           initial={{ y: -20, opacity: 0 }}
           animate={isMenuOpen ? { y: 0, opacity: 1 } : { y: -20, opacity: 0 }}
           transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}

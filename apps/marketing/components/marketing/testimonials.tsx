@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Star } from "lucide-react";
 import { Reveal } from "@/components/shared/reveal";
 import { TESTIMONIALS } from "@/data/testimonials";
@@ -13,15 +13,16 @@ function TestimonialCard({
   testimonial: (typeof TESTIMONIALS)[0];
   index: number;
 }) {
+  const reduce = useReducedMotion();
   return (
     <motion.div
       className={cn(
-        "flex-shrink-0 w-full card-solid p-6 lg:p-7 rounded-xl"
+        "h-full w-full card-solid p-6 lg:p-7 rounded-xl"
       )}
-      initial={{ opacity: 0, y: 24 }}
+      initial={reduce ? false : { opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.6, delay: Math.min(index * 0.08, 0.3), ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: reduce ? 0 : 0.6, delay: reduce ? 0 : Math.min(index * 0.08, 0.3), ease: [0.16, 1, 0.3, 1] }}
     >
       {/* Stars */}
       <div className="flex gap-1 mb-5">
@@ -70,7 +71,7 @@ function TestimonialCard({
 
 export function Testimonials() {
   return (
-    <section id="testimonials" className="py-24 lg:py-36 bg-trail-900/30">
+    <section id="testimonials" className="py-24 lg:py-36 bg-trail-900/30 scroll-mt-20 lg:scroll-mt-24">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-16">
@@ -91,10 +92,15 @@ export function Testimonials() {
           </Reveal>
         </div>
 
-        {/* Testimonial cards — horizontal scroll */}
-        <div className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-none">
+        {/* Testimonial cards — snap-scroll on mobile, grid on desktop */}
+        <div
+          className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-none [mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)] [-webkit-mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)] lg:grid lg:grid-cols-3 lg:overflow-visible lg:pb-0 lg:[mask-image:none] lg:[-webkit-mask-image:none]"
+        >
           {TESTIMONIALS.map((t, i) => (
-            <div key={t.id} className="snap-start flex-shrink-0 w-[82vw] max-w-[340px]">
+            <div
+              key={t.id}
+              className="snap-start flex-shrink-0 w-[82vw] max-w-[340px] lg:w-auto lg:max-w-none"
+            >
               <TestimonialCard testimonial={t} index={i} />
             </div>
           ))}

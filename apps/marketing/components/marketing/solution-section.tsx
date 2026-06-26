@@ -1,9 +1,9 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useReducedMotion } from "framer-motion";
 import { useRef } from "react";
 import { Reveal, Stagger } from "@/components/shared/reveal";
-import { MapPin, Search, Heart, Route, Droplets } from "lucide-react";
+import { MapPin, Search, Heart, Smartphone, Droplets } from "lucide-react";
 
 const FEATURES = [
   {
@@ -22,18 +22,19 @@ const FEATURES = [
     body: "Build your personal adventure list. Plan multi-day trips. Never lose a spot you love.",
   },
   {
-    icon: Route,
-    title: "Works offline on mobile",
-    body: "No signal in the mountains? Every saved location works offline. Your adventures don't stop when the signal does.",
+    icon: Smartphone,
+    title: "Add to your home screen",
+    body: "Mobile-first and installable as a web app — open it in your browser and tap 'Add to Home Screen' for one-tap access on the trail.",
   },
 ];
 
 export function SolutionSection() {
+  const reduce = useReducedMotion();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.2 });
 
   return (
-    <section id="solution" className="py-24 lg:py-36 bg-trail-900/40">
+    <section id="solution" className="py-24 lg:py-36 bg-trail-900/40 scroll-mt-20 lg:scroll-mt-24">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
           {/* Text side */}
@@ -77,9 +78,9 @@ export function SolutionSection() {
           <div ref={ref}>
             <motion.div
               className="relative"
-              initial={{ opacity: 0, x: 40 }}
-              animate={isInView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+              initial={reduce ? false : { opacity: 0, x: 40 }}
+              animate={reduce || isInView ? { opacity: 1, x: 0 } : {}}
+              transition={{ duration: reduce ? 0 : 0.9, ease: [0.16, 1, 0.3, 1] }}
             >
               {/* Phone mockup */}
               <div className="relative mx-auto max-w-sm">

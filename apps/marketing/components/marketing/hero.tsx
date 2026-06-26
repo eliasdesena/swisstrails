@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { ArrowDown, Droplets, MountainSnow, Moon, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
@@ -33,14 +33,18 @@ const FLOATING_BADGES = [
 ];
 
 export function Hero() {
+  const reduce = useReducedMotion();
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end start"],
   });
 
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+  const yRaw = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const opacityRaw = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+  // No parallax / fade-out under reduced motion — keep content static and visible.
+  const y = reduce ? undefined : yRaw;
+  const opacity = reduce ? undefined : opacityRaw;
 
   return (
     <section
@@ -76,11 +80,11 @@ export function Hero() {
         {/* Eyebrow */}
         <motion.div
           className="flex items-center gap-2 mb-8"
-          initial={{ opacity: 0, y: 20 }}
+          initial={reduce ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: reduce ? 0 : 0.6, ease: [0.16, 1, 0.3, 1] }}
         >
-          <span className="t-eyebrow text-alpine-400">Switzerland · Summer 2025</span>
+          <span className="t-eyebrow">Switzerland · Summer</span>
           <span className="w-1 h-1 rounded-full bg-alpine-700" />
           <span className="t-eyebrow text-fg-subtle">500+ Hidden Locations</span>
         </motion.div>
@@ -88,9 +92,9 @@ export function Hero() {
         {/* Main headline */}
         <motion.h1
           className="t-display max-w-4xl mx-auto mb-6"
-          initial={{ opacity: 0, y: 36 }}
+          initial={reduce ? false : { opacity: 0, y: 36 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: reduce ? 0 : 0.8, delay: reduce ? 0 : 0.1, ease: [0.16, 1, 0.3, 1] }}
         >
           <span className="text-fg">Your Best Summer,</span>
           <br />
@@ -100,9 +104,9 @@ export function Hero() {
         {/* Subheadline */}
         <motion.p
           className="t-xl text-fg-muted max-w-xl mx-auto mb-10"
-          initial={{ opacity: 0, y: 24 }}
+          initial={reduce ? false : { opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: reduce ? 0 : 0.8, delay: reduce ? 0 : 0.2, ease: [0.16, 1, 0.3, 1] }}
         >
           500+ handpicked locations across Switzerland — hidden lakes, secret viewpoints,
           and weekends you&apos;ll remember forever. One payment. Lifetime access.
@@ -111,9 +115,9 @@ export function Hero() {
         {/* CTAs */}
         <motion.div
           className="flex flex-col sm:flex-row items-center gap-4"
-          initial={{ opacity: 0, y: 20 }}
+          initial={reduce ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: reduce ? 0 : 0.7, delay: reduce ? 0 : 0.3, ease: [0.16, 1, 0.3, 1] }}
         >
           <Button
             asChild
@@ -122,7 +126,7 @@ export function Hero() {
             className="shadow-[0_0_40px_rgba(245,184,40,0.2)]"
           >
             <a href="#pricing">
-              Unlock The Map — CHF 29
+              Unlock the Map — CHF 29
             </a>
           </Button>
           <Button asChild variant="ghost" size="xl">
@@ -136,9 +140,9 @@ export function Hero() {
         {/* Social proof micro */}
         <motion.div
           className="flex items-center gap-6 mt-10"
-          initial={{ opacity: 0 }}
+          initial={reduce ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
+          transition={{ duration: reduce ? 0 : 0.8, delay: reduce ? 0 : 0.5 }}
         >
           <div className="flex items-center gap-2">
             <span className="text-fg-muted text-sm">3,200+ explorers</span>
@@ -158,11 +162,11 @@ export function Hero() {
         <motion.div
           key={badge.id}
           className={`absolute z-20 ${badge.className}`}
-          initial={{ opacity: 0, y: 12 }}
+          initial={reduce ? false : { opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{
-            duration: 0.6,
-            delay: 1.0 + badge.delay,
+            duration: reduce ? 0 : 0.6,
+            delay: reduce ? 0 : 1.0 + badge.delay,
             ease: [0.16, 1, 0.3, 1],
           }}
         >
@@ -187,9 +191,9 @@ export function Hero() {
       {/* Scroll indicator — bottom */}
       <motion.div
         className="absolute bottom-8 left-0 right-0 flex justify-center z-10"
-        initial={{ opacity: 0 }}
+        initial={reduce ? false : { opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 0.8 }}
+        transition={{ delay: reduce ? 0 : 1.5, duration: reduce ? 0 : 0.8 }}
       >
         <button
           aria-label="Scroll down"

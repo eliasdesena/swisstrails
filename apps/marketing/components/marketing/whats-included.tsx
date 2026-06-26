@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useReducedMotion } from "framer-motion";
 import { useRef } from "react";
 import { Reveal } from "@/components/shared/reveal";
 import { CATEGORIES } from "@/data/categories";
@@ -23,11 +23,12 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
 };
 
 export function WhatsIncluded() {
+  const reduce = useReducedMotion();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.1 });
 
   return (
-    <section id="whats-inside" className="py-24 lg:py-36">
+    <section id="whats-inside" className="py-24 lg:py-36 scroll-mt-20 lg:scroll-mt-24">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-16">
           <div className="max-w-xl">
@@ -60,11 +61,11 @@ export function WhatsIncluded() {
               <motion.div
                 key={cat.id}
                 className="group relative card-solid p-6 card-hover overflow-hidden cursor-default"
-                initial={{ opacity: 0, y: 32 }}
-                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                initial={reduce ? false : { opacity: 0, y: 32 }}
+                animate={reduce || isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{
-                  duration: 0.6,
-                  delay: 0.05 + i * 0.07,
+                  duration: reduce ? 0 : 0.6,
+                  delay: reduce ? 0 : 0.05 + i * 0.07,
                   ease: [0.16, 1, 0.3, 1],
                 }}
               >

@@ -23,7 +23,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Can I use this on my phone?",
-    a: "Absolutely. Swiss Trails is built mobile-first. It works seamlessly on iOS and Android through your browser — no app download needed. The map, location details, and your saved favourites all work perfectly on mobile.",
+    a: "Absolutely. Swiss Trails is built mobile-first and works seamlessly on iOS and Android through your browser — no app download needed. You can even add it to your home screen for one-tap access. The map, location details, and your saved favourites all work perfectly on mobile.",
   },
   {
     q: "What if I don't have a car?",
@@ -45,7 +45,7 @@ const FAQ_ITEMS = [
 
 export function FAQ() {
   return (
-    <section id="faq" className="py-24 lg:py-36">
+    <section id="faq" className="py-24 lg:py-36 scroll-mt-20 lg:scroll-mt-24">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-16 lg:gap-24">
           {/* Left: header */}

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
+import { useInView, useReducedMotion } from "framer-motion";
 import { useRef } from "react";
 import { Reveal } from "@/components/shared/reveal";
 
@@ -25,11 +25,12 @@ const PAIN_POINTS = [
 ];
 
 export function ProblemSection() {
+  const reduce = useReducedMotion();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.2 });
 
   return (
-    <section id="problem" className="py-24 lg:py-36 relative overflow-hidden">
+    <section id="problem" className="py-24 lg:py-36 relative overflow-hidden scroll-mt-20 lg:scroll-mt-24">
       {/* Background decoration */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-stone-800 to-transparent" />
 
@@ -64,11 +65,11 @@ export function ProblemSection() {
             <motion.div
               key={point.title}
               className="card-solid p-8 card-hover group"
-              initial={{ opacity: 0, y: 32 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              initial={reduce ? false : { opacity: 0, y: 32 }}
+              animate={reduce || isInView ? { opacity: 1, y: 0 } : {}}
               transition={{
-                duration: 0.65,
-                delay: 0.1 + i * 0.1,
+                duration: reduce ? 0 : 0.65,
+                delay: reduce ? 0 : 0.1 + i * 0.1,
                 ease: [0.16, 1, 0.3, 1],
               }}
             >
