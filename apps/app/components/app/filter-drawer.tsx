@@ -77,7 +77,7 @@ export function FilterDrawer({ isOpen, onClose, resultCount }: FilterDrawerProps
           <motion.div
             className={cn(
               "fixed z-[1200] bg-trail-950 overflow-hidden flex flex-col",
-              "bottom-[calc(4rem+env(safe-area-inset-bottom))] left-2 right-2 max-h-[72dvh] rounded-xl",
+              "bottom-[calc(var(--nav-clear)+0.5rem)] left-2 right-2 max-h-[72dvh] rounded-xl",
               "lg:bottom-auto lg:left-auto lg:top-[56px] lg:right-4 lg:w-72 lg:max-h-[calc(100vh-72px)] lg:rounded-xl"
             )}
             initial={{ opacity: 0, y: 8 }}

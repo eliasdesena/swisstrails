@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 import { Map, Heart, User, Compass } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SPRING } from "@/lib/motion";
 import { Logo } from "@/components/brand/logo";
 
 const NAV_ITEMS = [
@@ -35,11 +37,11 @@ export function AppHeader() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors duration-150 rounded",
-                  isActive ? "text-fg" : "text-fg-muted hover:text-fg"
+                  "pressable flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors duration-150 rounded-lg",
+                  isActive ? "text-fg bg-surface-1" : "text-fg-muted hover:text-fg"
                 )}
               >
-                <item.icon className={cn("w-3.5 h-3.5", isActive ? "text-alpine-400" : "")} />
+                <item.icon className={cn("w-4 h-4", isActive ? "text-alpine-400" : "")} />
                 {item.label}
               </Link>
             );
@@ -53,9 +55,18 @@ export function AppHeader() {
         </div>
       </header>
 
-      {/* Bottom nav — mobile */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-trail-950/98 backdrop-blur-xl pb-[env(safe-area-inset-bottom)]" style={{ boxShadow: "0 -1px 0 rgba(255,255,255,0.04)" }}>
-        <div className="flex items-stretch justify-around h-16 px-2">
+      {/* Bottom nav — mobile: a floating glass pill. The outer wrapper is
+          click-through (pointer-events-none) so the map fills the gaps beside
+          the pill; only the pill itself is interactive. Geometry keys off the
+          shared --nav vars so the shell padding and bottom sheet stay in sync. */}
+      <nav
+        className="lg:hidden fixed inset-x-0 z-40 px-3 pointer-events-none"
+        style={{ bottom: "calc(var(--safe-b) + var(--nav-gap))" }}
+      >
+        <div
+          className="mx-auto flex max-w-md items-stretch gap-1 rounded-full card-glass-strong shadow-lg pointer-events-auto px-1.5"
+          style={{ height: "var(--nav-bar-h)" }}
+        >
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href || (item.href === "/explore" && pathname === "/");
             return (
@@ -63,18 +74,25 @@ export function AppHeader() {
                 key={item.href}
                 href={item.href}
                 aria-current={isActive ? "page" : undefined}
-                className="flex flex-1 flex-col items-center justify-center gap-1.5 min-w-[56px]"
+                className="pressable relative flex flex-1 flex-col items-center justify-center gap-0.5"
               >
+                {isActive && (
+                  <motion.span
+                    layoutId="navActivePill"
+                    className="absolute inset-y-1.5 inset-x-0.5 rounded-full bg-surface-2 ring-1 ring-white/[0.06]"
+                    transition={SPRING.snappy}
+                  />
+                )}
                 <item.icon
                   className={cn(
-                    "w-6 h-6 transition-colors duration-150",
-                    isActive ? "text-alpine-400" : "text-fg-muted"
+                    "relative w-[22px] h-[22px] transition-colors duration-150",
+                    isActive ? "text-alpine-300" : "text-fg-muted"
                   )}
                 />
                 <span
                   className={cn(
-                    "text-[11px] font-medium tracking-wide transition-colors duration-150",
-                    isActive ? "text-alpine-400" : "text-fg-muted"
+                    "relative t-3xs transition-colors duration-150",
+                    isActive ? "text-alpine-300" : "text-fg-muted"
                   )}
                 >
                   {item.label}

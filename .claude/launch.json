@@ -4,13 +4,13 @@
     {
       "name": "app",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "swiss-trails-app", "dev", "--", "--port", "3001"],
+      "runtimeArgs": ["--filter", "swiss-trails-app", "exec", "next", "dev", "--turbopack", "--port", "3001"],
       "port": 3001
     },
     {
       "name": "marketing",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "swiss-trails-marketing", "dev", "--", "--port", "3000"],
+      "runtimeArgs": ["--filter", "swiss-trails-marketing", "exec", "next", "dev", "--turbopack", "--port", "3000"],
       "port": 3000
     }
   ]

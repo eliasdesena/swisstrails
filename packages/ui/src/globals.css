@@ -63,6 +63,15 @@
   --color-border-subtle:  rgba(255,255,255,0.04);
   --color-border-strong:  rgba(255,255,255,0.14);
 
+  /* ── SURFACE ELEVATION (white overlays on the dark base) ──
+     A 3-step ramp replacing ~150 ad-hoc bg-white/[0.0x] fills. Generates
+     bg-surface-1/2/3, border-surface-*, etc. surface-hover is the +1 step
+     a row/chip moves to on hover. */
+  --color-surface-1:      rgba(255,255,255,0.03);
+  --color-surface-2:      rgba(255,255,255,0.05);
+  --color-surface-3:      rgba(255,255,255,0.08);
+  --color-surface-hover:  rgba(255,255,255,0.07);
+
   --color-fg:             #F0EDE6;
   --color-fg-muted:       var(--color-stone-400);
   --color-fg-subtle:      var(--color-stone-600);
@@ -100,6 +109,27 @@
   --duration-fast:   150ms;
   --duration-normal: 300ms;
   --duration-slow:   500ms;
+
+  /* ── GLASS ── */
+  --blur: 20px;
+}
+
+/* ── LAYOUT GEOMETRY (single source of truth) ──
+   The mobile nav height and safe-area insets are consumed by the app shell
+   padding, the floating nav, and the bottom-sheet geometry. Defined on :root
+   (not @theme) because they reference env(); keeping one definition here means
+   the nav, the content reservation, and the sheet can never drift apart — the
+   root cause of the "nav stuck high / sheet won't fully expand" PWA bug. */
+:root {
+  --safe-t: env(safe-area-inset-top);
+  --safe-b: env(safe-area-inset-bottom);
+  --nav-gap: 0.75rem;        /* gap around the floating nav pill */
+  --nav-bar-h: 3.5rem;       /* the visible pill height */
+  /* Total bottom space the content must reserve = pill + gaps + safe area. */
+  --nav-h: calc(var(--nav-bar-h) + var(--nav-gap) * 2 + var(--safe-b));
+  /* Distance from the viewport bottom to the TOP of the floating nav —
+     what an overlay (the bottom sheet) must clear to keep the nav visible. */
+  --nav-clear: calc(var(--nav-bar-h) + var(--nav-gap) + var(--safe-b));
 }
 
 @layer base {
@@ -231,6 +261,20 @@
     line-height: 140%;
     letter-spacing: 0.02em;
   }
+  .t-2xs {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 11px;
+    line-height: 130%;
+    letter-spacing: 0.02em;
+  }
+  .t-3xs {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 10px;
+    line-height: 120%;
+    letter-spacing: 0.03em;
+  }
   .t-eyebrow {
     font-family: var(--font-body);
     font-weight: 500;
@@ -255,18 +299,45 @@
 
   .card-glass {
     background: rgba(10, 15, 28, 0.7);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(var(--blur));
+    -webkit-backdrop-filter: blur(var(--blur));
     border: 1px solid var(--color-border);
     border-radius: var(--radius-xl);
   }
   .card-glass-strong {
     background: rgba(10, 15, 28, 0.9);
-    backdrop-filter: blur(32px);
-    -webkit-backdrop-filter: blur(32px);
+    backdrop-filter: blur(calc(var(--blur) * 1.6));
+    -webkit-backdrop-filter: blur(calc(var(--blur) * 1.6));
     border: 1px solid var(--color-border-strong);
     border-radius: var(--radius-xl);
   }
+
+  /* ── INTERACTION PRESETS ──
+     One consistent press response + a 44px hit-area helper, replacing the
+     6 different ad-hoc active:scale values scattered across the app. */
+  .pressable {
+    transition: transform var(--duration-fast) var(--ease-out-expo);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .pressable:active { transform: scale(0.97); }
+  .pressable-sm:active { transform: scale(0.985); }
+
+  /* Guarantees a 44px minimum touch target while letting the visual glyph stay
+     small — for hand-rolled icon buttons that aren't the shared <Button>. */
+  .icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transition: transform var(--duration-fast) var(--ease-out-expo),
+                background-color var(--duration-fast) var(--ease-out-expo),
+                color var(--duration-fast) var(--ease-out-expo);
+  }
+  .icon-button:active { transform: scale(0.92); }
   .card-solid {
     background: var(--color-bg-raised);
     border: 1px solid var(--color-border);

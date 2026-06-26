@@ -20,7 +20,7 @@ export function TripPill() {
     <AnimatePresence>
       {count > 0 && (
         <motion.div
-          className="absolute left-3 z-[1100] bottom-[calc(1rem+4rem+env(safe-area-inset-bottom))] lg:bottom-4"
+          className="absolute left-3 z-[1100] bottom-[calc(var(--nav-clear)+0.75rem)] lg:bottom-4"
           initial={{ opacity: 0, y: 8, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 8, scale: 0.96 }}
