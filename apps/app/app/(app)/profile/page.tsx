@@ -1,6 +1,6 @@
 "use client";
 
-import { User, MapPin, Heart, Settings, LogOut, Shield, ChevronRight, Star, Route } from "lucide-react";
+import { User, MapPin, Heart, Settings, LogOut, Shield, ChevronRight, Star, Route, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,13 @@ const MENU_ITEMS = [
     href: "/trip",
     description: "Plan your itinerary",
     soon: false,
+  },
+  {
+    icon: Users,
+    label: "Hike Buddy",
+    href: "/hike-buddy",
+    description: "Find hiking partners",
+    soon: true,
   },
   {
     icon: Settings,

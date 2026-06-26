@@ -163,6 +163,53 @@ export interface Favorite {
 }
 
 /* ─────────────────────────────────────────────
+   SOCIAL TYPES — reactions / counts
+───────────────────────────────────────────── */
+
+/** The three social reactions a user can give a location. */
+export type ReactionKind = "like" | "wantToGo" | "beenThere";
+
+/** Aggregate social counts for a single location. */
+export interface SocialCounts {
+  like: number;
+  wantToGo: number;
+  beenThere: number;
+}
+
+/* ─────────────────────────────────────────────
+   HIKE BUDDY TYPES (gated feature)
+───────────────────────────────────────────── */
+
+export type HikePace = "relaxed" | "steady" | "brisk";
+export type ExperienceLevel = "beginner" | "intermediate" | "advanced" | "expert";
+export type AvailabilitySlot = "weekday" | "weekend";
+
+/**
+ * A matchable hiker profile used by the Hike Buddy feature. The current user
+ * edits their own profile; seed candidates are matched against it.
+ */
+export interface HikeBuddyProfile {
+  id: string;
+  displayName: string;
+  /** Single uppercase initial used for the avatar fallback. */
+  avatarInitial: string;
+  /** Preferred trail difficulty. */
+  preferredDifficulty: Difficulty;
+  /** Cantons / regions the hiker likes to explore. */
+  preferredRegions: Region[];
+  /** Walking pace preference. */
+  pace: HikePace;
+  /** When the hiker is typically free to hike. */
+  availability: AvailabilitySlot[];
+  /** Overall hiking experience. */
+  experience: ExperienceLevel;
+  /** Spoken languages (ISO-ish short codes, e.g. "de", "fr", "en", "it"). */
+  languages: string[];
+  /** Optional short bio shown on the candidate card. */
+  bio?: string;
+}
+
+/* ─────────────────────────────────────────────
    APP STATE TYPES
 ───────────────────────────────────────────── */
 
