@@ -1,7 +1,7 @@
 export default function LocationLoading() {
   return (
-    <div className="min-h-screen bg-trail-950">
-      <div className="h-[55vh] min-h-[340px] bg-white/[0.04] animate-pulse" />
+    <div className="min-h-dvh bg-trail-950">
+      <div className="h-[55vh] min-h-[340px] bg-surface-1 animate-pulse" />
       <div className="max-w-2xl mx-auto px-5 py-8 space-y-6">
         <div className="h-5 w-2/3 bg-white/[0.04] rounded animate-pulse" />
         <div className="space-y-2">

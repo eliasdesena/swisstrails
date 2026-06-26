@@ -69,7 +69,7 @@ export default async function LocationPage({ params }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-trail-950 text-fg">
+    <div className="min-h-dvh bg-trail-950 text-fg">
       {/* Hero */}
       <div className="relative h-[55vh] min-h-[340px]">
         <Image

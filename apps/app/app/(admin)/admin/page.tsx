@@ -25,7 +25,7 @@ const QUICK_LINKS = [
 
 export default function AdminPage() {
   return (
-    <div className="min-h-screen bg-trail-950 p-6 pt-[max(1rem,env(safe-area-inset-top))]">
+    <div className="min-h-dvh bg-trail-950 p-6 pt-[max(1rem,env(safe-area-inset-top))]">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
