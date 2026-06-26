@@ -4,6 +4,8 @@ import { useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, useMap, ZoomControl } from "react-leaflet";
 import { useMapStore } from "@/store/map-store";
 import { PLACEHOLDER_LOCATIONS, SWITZERLAND_CENTER, SWITZERLAND_DEFAULT_ZOOM } from "@/data/locations";
+import { categoryConfig } from "@/lib/utils";
+import { haptics } from "@/lib/haptics";
 import type { Location } from "@/types";
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
@@ -32,26 +34,29 @@ if (process.env.NODE_ENV === "development" && typeof window !== "undefined") {
   }
 }
 
-// 40px transparent hit area wrapping a 16–20px visible dot.
-// White on satellite, white on dark — universally readable.
-function createLocationIcon(_location: Location, isSelected: boolean) {
+// 44px transparent hit area wrapping a category-tinted dot with a white ring
+// so it stays legible on satellite tiles. The selected dot scales up and pops
+// in via a CSS keyframe (see .leaflet-marker-pop in app globals.css).
+function createLocationIcon(location: Location, isSelected: boolean) {
+  const tint = categoryConfig[location.category]?.color ?? "#FFFFFF";
   const dot = isSelected ? 20 : 14;
-  const bg = isSelected ? "#FFFFFF" : "rgba(255,255,255,0.85)";
+  const ring = isSelected ? 2.5 : 2;
   const shadow = isSelected
-    ? "0 0 0 5px rgba(107,120,255,0.28), 0 3px 14px rgba(0,0,0,0.6)"
-    : "0 2px 8px rgba(0,0,0,0.55), 0 0 0 1.5px rgba(255,255,255,0.1)";
+    ? `0 0 0 5px rgba(107,120,255,0.28), 0 3px 14px rgba(0,0,0,0.6)`
+    : `0 2px 8px rgba(0,0,0,0.55)`;
+  const popClass = isSelected ? " leaflet-marker-pop" : "";
 
   return L.divIcon({
     html: `<div style="
       width:44px;height:44px;
       display:flex;align-items:center;justify-content:center;
       cursor:pointer;
-    "><div style="
+    "><div class="leaflet-marker-dot${popClass}" style="
       width:${dot}px;height:${dot}px;
       border-radius:50%;
-      background:${bg};
+      background:${tint};
+      border:${ring}px solid rgba(255,255,255,0.95);
       box-shadow:${shadow};
-      transition:all 0.15s;
     "></div></div>`,
     className: "",
     iconSize: [44, 44],
@@ -96,6 +101,34 @@ function MapController() {
   return null;
 }
 
+// When a marker is selected, pan so it lands in the visible band above the
+// bottom sheet (~30% from the top), rather than hiding behind the sheet.
+function RecenterController() {
+  const map = useMap();
+  const { selectedLocationId } = useMapStore();
+
+  useEffect(() => {
+    if (!selectedLocationId) return;
+    const location = PLACEHOLDER_LOCATIONS.find((l) => l.id === selectedLocationId);
+    if (!location) return;
+
+    const zoom = map.getZoom();
+    const target = L.latLng(location.coordinates.lat, location.coordinates.lng);
+    // Project the marker to a screen point, then derive the map centre that
+    // places it ~30% from the top (the sheet covers roughly the bottom half).
+    // The centre always sits at size.y/2 on screen, so shift by that delta.
+    const size = map.getSize();
+    const desiredY = size.y * 0.3;
+    const point = map.project(target, zoom);
+    const offset = size.y / 2 - desiredY;
+    const newCenter = map.unproject(L.point(point.x, point.y + offset), zoom);
+
+    map.panTo(newCenter, { animate: true, duration: 0.4 });
+  }, [selectedLocationId, map]);
+
+  return null;
+}
+
 function ClusterLayer({ locations }: { locations: Location[] }) {
   const map = useMap();
   const { openBottomSheet } = useMapStore();
@@ -116,7 +149,10 @@ function ClusterLayer({ locations }: { locations: Location[] }) {
       const marker = L.marker([loc.coordinates.lat, loc.coordinates.lng], {
         icon: createLocationIcon(loc, false),
       });
-      marker.on("click", () => openBottomSheet(loc.id));
+      marker.on("click", () => {
+        haptics.tap();
+        openBottomSheet(loc.id);
+      });
       group.addLayer(marker);
     });
 
@@ -163,10 +199,17 @@ export function MapView({ locations, isSatellite = true }: MapViewProps) {
       center={[SWITZERLAND_CENTER.lat, SWITZERLAND_CENTER.lng]}
       zoom={SWITZERLAND_DEFAULT_ZOOM}
       zoomControl={false}
+      zoomSnap={0.25}
+      zoomDelta={0.5}
+      wheelPxPerZoomLevel={80}
+      inertia
+      inertiaDeceleration={2800}
+      bounceAtZoomLimits
       className="w-full h-full"
       style={{ background: isSatellite ? "#1a2a1a" : "#0b0f1c" }}
     >
       <MapController />
+      <RecenterController />
 
       <TileLayer
         key={isSatellite ? "satellite" : "dark"}
