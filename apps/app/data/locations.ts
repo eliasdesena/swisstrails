@@ -9218,7 +9218,7 @@ export const PLACEHOLDER_LOCATIONS: Location[] = [
     category: "viewpoint",
     difficulty: "moderate",
     region: "vaud",
-    coordinates: { lat: 46.42500, lng: 7.18500 },
+    coordinates: { lat: 46.44420, lng: 7.15610 },
     heroImage: {
       id: "img-loc-264",
       url: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=1200&q=80",
@@ -11563,7 +11563,7 @@ export const PLACEHOLDER_LOCATIONS: Location[] = [
     category: "viewpoint",
     difficulty: "challenging",
     region: "glarus",
-    coordinates: { lat: 47.05500, lng: 9.21500 },
+    coordinates: { lat: 47.03430, lng: 9.25060 },
     heroImage: {
       id: "img-loc-331",
       url: "https://images.unsplash.com/photo-1440342359743-84fcb8c21f21?w=1200&q=80",
@@ -12823,7 +12823,7 @@ export const PLACEHOLDER_LOCATIONS: Location[] = [
     category: "sunset-spot",
     difficulty: "moderate",
     region: "appenzell",
-    coordinates: { lat: 47.31500, lng: 9.27500 },
+    coordinates: { lat: 47.27540, lng: 9.25386 },
     heroImage: {
       id: "img-loc-367",
       url: "https://images.unsplash.com/photo-1503614472-8c93d56e92ce?w=1200&q=80",
@@ -12858,7 +12858,7 @@ export const PLACEHOLDER_LOCATIONS: Location[] = [
     category: "viewpoint",
     difficulty: "easy",
     region: "appenzell",
-    coordinates: { lat: 47.36500, lng: 9.42500 },
+    coordinates: { lat: 47.38126, lng: 9.46779 },
     heroImage: {
       id: "img-loc-368",
       url: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=1200&q=80",
@@ -13768,7 +13768,7 @@ export const PLACEHOLDER_LOCATIONS: Location[] = [
     category: "viewpoint",
     difficulty: "challenging",
     region: "st-gallen",
-    coordinates: { lat: 47.05500, lng: 9.21500 },
+    coordinates: { lat: 47.02400, lng: 9.23630 },
     heroImage: {
       id: "img-loc-394",
       url: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=1200&q=80",
@@ -15378,7 +15378,7 @@ export const PLACEHOLDER_LOCATIONS: Location[] = [
     category: "viewpoint",
     difficulty: "moderate",
     region: "bern",
-    coordinates: { lat: 47.33500, lng: 7.41500 },
+    coordinates: { lat: 47.30833, lng: 7.42917 },
     heroImage: {
       id: "img-loc-440",
       url: "https://images.unsplash.com/photo-1496450681664-3df85efbd29f?w=1200&q=80",
@@ -16043,7 +16043,7 @@ export const PLACEHOLDER_LOCATIONS: Location[] = [
     category: "viewpoint",
     difficulty: "challenging",
     region: "vaud",
-    coordinates: { lat: 46.42500, lng: 7.18500 },
+    coordinates: { lat: 46.44056, lng: 7.19500 },
     heroImage: {
       id: "img-loc-459",
       url: "https://images.unsplash.com/photo-1464207687429-7505649dae38?w=1200&q=80",
