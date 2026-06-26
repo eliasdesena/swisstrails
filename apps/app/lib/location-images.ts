@@ -3,6 +3,7 @@
 import type { Location, LocationImage } from "@/types";
 import { useImageOverridesStore } from "@/store/image-overrides-store";
 import { SUPABASE_IMAGES_ENABLED } from "@/lib/flags";
+import { SOURCED_IMAGES } from "@/data/sourced-images";
 
 /**
  * Image source-priority model.
@@ -18,14 +19,17 @@ import { SUPABASE_IMAGES_ENABLED } from "@/lib/flags";
  */
 
 /**
- * Priority tier #3 — the location's own sourced images (Unsplash + Wikimedia),
- * as `[heroImage, ...gallery]`, deduped by url. Pure: safe to call from server
- * components, loaders, tests, etc.
+ * Priority tier #3 — the location's own sourced images, deduped by url:
+ *   heroImage (Unsplash) → real geo-located Wikimedia Commons photos
+ *   (scripts/source-images.mjs → data/sourced-images.ts) → any inline gallery.
+ * Locations with no Commons coverage (e.g. loc-175) simply fall back to their
+ * hero. Pure: safe to call from server components, loaders, tests, etc.
  */
 export function resolveSourcedImages(location: Location): LocationImage[] {
   const seen = new Set<string>();
   const out: LocationImage[] = [];
-  for (const img of [location.heroImage, ...location.gallery]) {
+  const commons = SOURCED_IMAGES[location.id] ?? [];
+  for (const img of [location.heroImage, ...commons, ...location.gallery]) {
     if (!img?.url || seen.has(img.url)) continue;
     seen.add(img.url);
     out.push(img);
