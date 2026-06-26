@@ -4,14 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X, MapPin, ArrowRight, Clock, Mountain, Navigation,
-  CheckCircle2, Route, MapPinned, Heart, Share2, Car, Bus, Gauge, Ruler,
+  Route, MapPinned, Share2, Car, Bus, Gauge, Ruler,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMapStore } from "@/store/map-store";
 import { useGeoStore } from "@/store/geo-store";
-import { useVisitedStore } from "@/store/visited-store";
 import { useTripStore } from "@/store/trip-store";
-import { useFavoritesStore } from "@/store/favorites-store";
 import { distanceKm as haversineKm, formatDistance } from "@/lib/distance";
 import { similarLocations } from "@/lib/similarity";
 import {
@@ -77,16 +75,10 @@ export function LocationDetailSheet({
   const router = useRouter();
   const { openBottomSheet } = useMapStore();
   const userPosition = useGeoStore((s) => s.position);
-  const visited = useVisitedStore((s) =>
-    location ? s.visitedIds.has(location.id) : false
-  );
-  const toggleVisited = useVisitedStore((s) => s.toggleVisited);
   const inTrip = useTripStore((s) =>
     location ? s.tripIds.includes(location.id) : false
   );
   const toggleInTrip = useTripStore((s) => s.toggleInTrip);
-  const { isFavorite, toggleFavorite } = useFavoritesStore();
-  const fav = location ? isFavorite(location.id) : false;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [openInSheet, setOpenInSheet] = useState(false);
   const requestDirections = useMapPrefStore((s) => s.requestDirections);
@@ -177,22 +169,6 @@ export function LocationDetailSheet({
                 </div>
 
                 <div className="flex items-center gap-1.5 flex-shrink-0">
-                  <IconAction
-                    label={fav ? "Remove favourite" : "Add favourite"}
-                    active={fav}
-                    activeClass="bg-red-500/15 text-red-400"
-                    onClick={() => toggleFavorite(location.id)}
-                  >
-                    <Heart className={cn("w-[18px] h-[18px]", fav && "fill-red-400")} />
-                  </IconAction>
-                  <IconAction
-                    label={visited ? "Mark not visited" : "Mark visited"}
-                    active={visited}
-                    activeClass="bg-emerald-500/15 text-emerald-400"
-                    onClick={() => toggleVisited(location.id)}
-                  >
-                    <CheckCircle2 className="w-[18px] h-[18px]" />
-                  </IconAction>
                   <IconAction
                     label={inTrip ? "Remove from trip" : "Add to trip"}
                     active={inTrip}

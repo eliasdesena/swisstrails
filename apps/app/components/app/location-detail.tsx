@@ -1,14 +1,12 @@
 "use client";
 
 import {
-  Clock, Navigation, Heart, Share2, Mountain,
+  Clock, Navigation, Share2, Mountain,
   ChevronLeft, Bus, Car, Lightbulb, Package, ChevronDown,
-  MoreHorizontal, CheckCircle2, Route, MapPinned, Ruler, Gauge,
+  MoreHorizontal, Route, MapPinned, Ruler, Gauge,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useFavoritesStore } from "@/store/favorites-store";
-import { useVisitedStore } from "@/store/visited-store";
 import { useTripStore } from "@/store/trip-store";
 import { useGeoStore } from "@/store/geo-store";
 import { distanceKm, formatDistance } from "@/lib/distance";
@@ -77,14 +75,10 @@ function IconAction({
 export function LocationDetail({ location, onClose, scrollRef }: LocationDetailProps) {
   const [openInSheet, setOpenInSheet] = useState(false);
   const [tipsOpen, setTipsOpen] = useState(false);
-  const { isFavorite, toggleFavorite } = useFavoritesStore();
-  const visited = useVisitedStore((s) => s.visitedIds.has(location.id));
-  const toggleVisited = useVisitedStore((s) => s.toggleVisited);
   const inTrip = useTripStore((s) => s.tripIds.includes(location.id));
   const toggleInTrip = useTripStore((s) => s.toggleInTrip);
   const userPosition = useGeoStore((s) => s.position);
   const requestDirections = useMapPrefStore((s) => s.requestDirections);
-  const fav = isFavorite(location.id);
   const diff = difficultyConfig[location.difficulty];
   const cat = categoryConfig[location.category];
   const region = regionConfig[location.region];
@@ -135,24 +129,9 @@ export function LocationDetail({ location, onClose, scrollRef }: LocationDetailP
             </p>
           </div>
 
-          {/* Compact icon actions: favourite, visited, add-to-trip, share */}
+          {/* Compact icon actions: add-to-trip, share.
+              Like/Visited live in the reaction chips below (synced). */}
           <div className="flex items-center gap-1.5 flex-shrink-0">
-            <IconAction
-              label={fav ? "Remove favourite" : "Add favourite"}
-              active={fav}
-              activeClass="bg-red-500/15 text-red-400"
-              onClick={() => toggleFavorite(location.id)}
-            >
-              <Heart className={cn("w-[18px] h-[18px]", fav && "fill-red-400")} />
-            </IconAction>
-            <IconAction
-              label={visited ? "Mark not visited" : "Mark visited"}
-              active={visited}
-              activeClass="bg-emerald-500/15 text-emerald-400"
-              onClick={() => toggleVisited(location.id)}
-            >
-              <CheckCircle2 className="w-[18px] h-[18px]" />
-            </IconAction>
             <IconAction
               label={inTrip ? "Remove from trip" : "Add to trip"}
               active={inTrip}
