@@ -20,6 +20,12 @@ interface TripStore {
   moveItem: (from: number, to: number) => void;
   moveUp: (index: number) => void;
   moveDown: (index: number) => void;
+  /**
+   * Replace the trip order wholesale (e.g. from a drag-reorder). Guards against
+   * a mismatched id set — only commits when `ids` is a permutation of the
+   * current `tripIds`, so a stale/partial list can't silently drop stops.
+   */
+  setOrder: (ids: string[]) => void;
   clearTrip: () => void;
 }
 
@@ -70,6 +76,18 @@ export const useTripStore = create<TripStore>()(
 
       moveUp: (index) => get().moveItem(index, index - 1),
       moveDown: (index) => get().moveItem(index, index + 1),
+
+      setOrder: (ids) =>
+        set((state) => {
+          // Only accept a true permutation of the existing ids.
+          if (ids.length !== state.tripIds.length) return state;
+          const current = new Set(state.tripIds);
+          if (ids.length !== current.size) return state;
+          for (const id of ids) {
+            if (!current.has(id)) return state;
+          }
+          return { tripIds: ids };
+        }),
 
       clearTrip: () => set({ tripIds: [] }),
     }),

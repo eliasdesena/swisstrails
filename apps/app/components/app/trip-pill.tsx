@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Route } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTripStore } from "@/store/trip-store";
+import { SPRING } from "@/lib/motion";
 
 /**
  * Floating "Trip · N" pill — links to /trip. Only rendered when the trip is
@@ -33,8 +34,19 @@ export function TripPill() {
           >
             <Route className="w-4 h-4" />
             Trip
-            <span className="ml-0.5 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full bg-white/20 text-xs font-semibold">
-              {count}
+            <span className="ml-0.5 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full bg-white/20 text-xs font-semibold overflow-hidden">
+              {/* Key-swap on count so the number pops when a stop is added. */}
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.span
+                  key={count}
+                  initial={{ scale: 0.5, opacity: 0, y: 4 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  exit={{ scale: 0.5, opacity: 0, y: -4 }}
+                  transition={SPRING.snappy}
+                >
+                  {count}
+                </motion.span>
+              </AnimatePresence>
             </span>
           </Link>
         </motion.div>
