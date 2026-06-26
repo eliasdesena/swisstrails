@@ -50,7 +50,7 @@ export function LocationGrid({
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="max-w-5xl mx-auto px-4 pt-4 pb-[calc(var(--nav-h)+0.5rem)] lg:pb-6">
+      <div className="max-w-5xl mx-auto px-4 pt-4 pb-6">
         {/* Results header */}
         <div className="flex items-center justify-between mb-4">
           <p className="text-fg-subtle text-xs">

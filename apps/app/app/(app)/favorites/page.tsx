@@ -27,7 +27,7 @@ export default function FavoritesPage() {
   const count = favoriteLocations.length;
 
   return (
-    <div className="h-full overflow-y-auto px-4 lg:px-6 pb-[calc(var(--nav-h)+0.5rem)] lg:pb-6 pt-[max(1rem,env(safe-area-inset-top))] lg:pt-6">
+    <div className="h-full overflow-y-auto px-4 lg:px-6 pb-4 lg:pb-6 pt-[max(1rem,env(safe-area-inset-top))] lg:pt-6">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="mb-8">

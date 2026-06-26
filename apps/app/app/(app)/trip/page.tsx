@@ -237,7 +237,7 @@ function TripPageInner() {
 
   if (stops.length === 0) {
     return (
-      <div className="h-full overflow-y-auto px-4 lg:px-6 pb-[calc(var(--nav-h)+0.5rem)] lg:pb-6 pt-[max(1rem,env(safe-area-inset-top))] lg:pt-6">
+      <div className="h-full overflow-y-auto px-4 lg:px-6 pb-4 lg:pb-6 pt-[max(1rem,env(safe-area-inset-top))] lg:pt-6">
         <motion.div
           className="max-w-2xl mx-auto"
           variants={staggerContainer(0.06)}
@@ -278,7 +278,7 @@ function TripPageInner() {
   }
 
   return (
-    <div className="h-full overflow-y-auto px-4 pt-4 pb-[calc(var(--nav-h)+0.5rem)] lg:px-6 lg:pt-6 lg:pb-6">
+    <div className="h-full overflow-y-auto p-4 lg:p-6">
       <motion.div
         className="max-w-2xl mx-auto"
         variants={staggerContainer(0.05)}
