@@ -90,8 +90,8 @@ export default function MapPage() {
           </button>
         </div>
 
-        {/* Location count — bottom center */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1100] pointer-events-none">
+        {/* Location count — bottom center, lifted above the floating nav */}
+        <div className="absolute bottom-[calc(var(--nav-clear)+0.5rem)] lg:bottom-4 left-1/2 -translate-x-1/2 z-[1100] pointer-events-none">
           <div className="bg-trail-950/80 backdrop-blur-xl rounded-lg px-3 py-1.5">
             <p className="text-fg-muted text-xs whitespace-nowrap">
               <span className="text-fg font-medium">{filteredLocations.length}</span>

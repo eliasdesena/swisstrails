@@ -33,6 +33,11 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "Swiss Trails",
   },
+  // Next.js 15 only generates `mobile-web-app-capable` from appleWebApp.capable;
+  // iOS Safari specifically needs the apple-prefixed tag to enable standalone mode.
+  other: {
+    "apple-mobile-web-app-capable": "yes",
+  },
 };
 
 export const viewport: Viewport = {

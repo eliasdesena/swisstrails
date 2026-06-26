@@ -290,7 +290,7 @@ export default function ExplorePage() {
             </p>
           </div>
         ) : (
-            <div className="columns-2 lg:columns-3 xl:columns-4 [column-gap:4px] lg:[column-gap:6px] px-1 pt-1 pb-20 lg:px-1.5 lg:pt-1.5 lg:pb-8">
+            <div className="columns-2 lg:columns-3 xl:columns-4 [column-gap:4px] lg:[column-gap:6px] px-1 pt-1 pb-[calc(var(--nav-h)+0.5rem)] lg:px-1.5 lg:pt-1.5 lg:pb-8">
             {visibleLocations.map((loc, i) => (
               <MasonryCard
                 key={loc.id}

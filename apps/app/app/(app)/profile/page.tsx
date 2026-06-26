@@ -140,7 +140,7 @@ export default function ProfilePage() {
         variants={fadeUp}
         initial="hidden"
         animate="show"
-        className="max-w-lg mx-auto px-4 lg:px-6 pb-4 lg:pb-6 pt-[max(1rem,env(safe-area-inset-top))] lg:pt-6"
+        className="max-w-lg mx-auto px-4 lg:px-6 pb-[calc(var(--nav-h)+0.5rem)] lg:pb-6 pt-[max(1rem,env(safe-area-inset-top))] lg:pt-6"
       >
         {/* Profile header */}
         <div className="flex items-center gap-4 mb-8 p-5 card-solid rounded-xl">
