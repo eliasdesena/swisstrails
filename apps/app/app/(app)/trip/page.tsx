@@ -71,7 +71,7 @@ export default function TripPage() {
 
   if (stops.length === 0) {
     return (
-      <div className="h-full overflow-y-auto p-4 lg:p-6">
+      <div className="h-full overflow-y-auto px-4 lg:px-6 pb-4 lg:pb-6 pt-[max(1rem,env(safe-area-inset-top))] lg:pt-6">
         <div className="max-w-2xl mx-auto">
           <div className="mb-8">
             <Reveal>
@@ -120,9 +120,9 @@ export default function TripPage() {
                 <p className="t-body text-fg-muted">
                   {stops.length} stop{stops.length > 1 ? "s" : ""}
                   <span className="text-stone-600"> · </span>
-                  {formatDistance(totalKm)} total
+                  {formatDistance(totalKm)}
                   <span className="text-stone-600"> · </span>
-                  ~{formatVisitDuration(totalVisitMin, totalVisitMax)} of visits
+                  ~{formatVisitDuration(totalVisitMin, totalVisitMax)}
                 </p>
               </div>
               <button
@@ -195,43 +195,45 @@ export default function TripPage() {
                   </p>
                 </div>
 
-                {/* Controls */}
-                <div className="flex-shrink-0 flex flex-col items-center">
+                {/* Reorder stepper + remove */}
+                <div className="flex-shrink-0 flex items-center gap-1.5">
+                  <div className="flex flex-col rounded-lg bg-white/[0.04] overflow-hidden">
+                    <button
+                      aria-label="Move up"
+                      disabled={i === 0}
+                      onClick={() => moveUp(i)}
+                      className={cn(
+                        "w-9 h-9 flex items-center justify-center transition-colors",
+                        i === 0
+                          ? "text-stone-700 cursor-not-allowed"
+                          : "text-stone-300 hover:text-fg hover:bg-white/[0.06] active:scale-95"
+                      )}
+                    >
+                      <ChevronUp className="w-4 h-4" />
+                    </button>
+                    <div className="h-px bg-white/[0.06]" />
+                    <button
+                      aria-label="Move down"
+                      disabled={i === stops.length - 1}
+                      onClick={() => moveDown(i)}
+                      className={cn(
+                        "w-9 h-9 flex items-center justify-center transition-colors",
+                        i === stops.length - 1
+                          ? "text-stone-700 cursor-not-allowed"
+                          : "text-stone-300 hover:text-fg hover:bg-white/[0.06] active:scale-95"
+                      )}
+                    >
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                  </div>
                   <button
-                    aria-label="Move up"
-                    disabled={i === 0}
-                    onClick={() => moveUp(i)}
-                    className={cn(
-                      "w-11 h-11 flex items-center justify-center rounded-lg transition-colors",
-                      i === 0
-                        ? "text-stone-700 cursor-not-allowed"
-                        : "text-stone-400 hover:text-fg hover:bg-white/[0.05] active:scale-95"
-                    )}
+                    aria-label={`Remove ${loc.name} from trip`}
+                    onClick={() => removeFromTrip(loc.id)}
+                    className="w-9 h-9 flex items-center justify-center rounded-lg text-stone-600 hover:text-red-300 hover:bg-red-950/30 active:scale-95 transition-colors"
                   >
-                    <ChevronUp className="w-5 h-5" />
-                  </button>
-                  <button
-                    aria-label="Move down"
-                    disabled={i === stops.length - 1}
-                    onClick={() => moveDown(i)}
-                    className={cn(
-                      "w-11 h-11 flex items-center justify-center rounded-lg transition-colors",
-                      i === stops.length - 1
-                        ? "text-stone-700 cursor-not-allowed"
-                        : "text-stone-400 hover:text-fg hover:bg-white/[0.05] active:scale-95"
-                    )}
-                  >
-                    <ChevronDown className="w-5 h-5" />
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
-
-                <button
-                  aria-label={`Remove ${loc.name} from trip`}
-                  onClick={() => removeFromTrip(loc.id)}
-                  className="flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-lg text-stone-500 hover:text-red-300 hover:bg-red-950/30 active:scale-95 transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
               </motion.div>
             </div>
           ))}

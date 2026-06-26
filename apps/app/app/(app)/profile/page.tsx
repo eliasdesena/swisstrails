@@ -12,7 +12,7 @@ const MENU_ITEMS = [
   {
     icon: MapPin,
     label: "Explore the map",
-    href: "/explore",
+    href: "/map",
     description: "Discover new locations",
     soon: false,
   },

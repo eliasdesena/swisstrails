@@ -20,7 +20,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           type={type}
           ref={ref}
           className={cn(
-            "w-full h-11 bg-trail-800 border border-stone-800 rounded-xl text-base text-fg placeholder:text-fg-muted",
+            "w-full h-11 bg-trail-800 border border-stone-800 rounded-lg text-base text-fg placeholder:text-fg-muted",
             "px-4 outline-none transition-[border-color,box-shadow] duration-150",
             "hover:border-stone-700",
             "focus:border-alpine-600 focus:ring-2 focus:ring-alpine-900/50",

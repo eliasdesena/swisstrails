@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, SlidersHorizontal, X, Sparkles } from "lucide-react";
 import { useMapStore } from "@/store/map-store";
@@ -21,6 +21,11 @@ const ASPECT_RATIOS = ["3/4", "4/5", "2/3", "4/5", "3/4", "1/1", "4/5", "3/5"];
 
 // How many spots to show in the "In season now" rail.
 const SEASON_RAIL_LIMIT = 12;
+
+// Infinite-scroll page size for the masonry — keeps the DOM light and avoids
+// mounting all 500 cards (and fetching their images) up front, which would
+// burn Unsplash/Vercel bandwidth the user may never scroll to.
+const MASONRY_PAGE = 24;
 
 export default function ExplorePage() {
   const { searchQuery, setSearchQuery, activeFilters, clearFilters } = useMapStore();
@@ -64,6 +69,38 @@ export default function ExplorePage() {
     !searchQuery &&
     activeFilterCount === 0 &&
     inSeasonLocations.length > 0;
+
+  // Continuous loading: render a window of cards and grow it as the user nears
+  // the end, so we never mount all 500 (and their images) at once.
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const [visibleCount, setVisibleCount] = useState(MASONRY_PAGE);
+
+  // Reset the window (and scroll to top) whenever the result set changes.
+  useEffect(() => {
+    setVisibleCount(MASONRY_PAGE);
+    scrollRef.current?.scrollTo({ top: 0 });
+  }, [filteredLocations]);
+
+  // Grow the window when the sentinel nears view. Rooted on the inner scroll
+  // container since the document itself is locked on tab routes.
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((c) => Math.min(c + MASONRY_PAGE, filteredLocations.length));
+        }
+      },
+      { root: scrollRef.current, rootMargin: "800px 0px" }
+    );
+    io.observe(sentinel);
+    return () => io.disconnect();
+  }, [filteredLocations.length]);
+
+  const visibleLocations = filteredLocations.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredLocations.length;
 
   return (
     <div className="relative w-full h-full flex flex-col">
@@ -146,7 +183,7 @@ export default function ExplorePage() {
       </AnimatePresence>
 
       {/* Masonry wall — full width, no max-width cap */}
-      <div className="flex-1 overflow-y-auto overscroll-contain">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto overscroll-contain">
         {/* "In season now" rail — dismissible, sits above the masonry */}
         <AnimatePresence initial={false}>
           {showSeasonRail && (
@@ -226,17 +263,19 @@ export default function ExplorePage() {
           </div>
         ) : (
             <div className="columns-2 lg:columns-3 xl:columns-4 [column-gap:4px] lg:[column-gap:6px] px-1 pt-1 pb-20 lg:px-1.5 lg:pt-1.5 lg:pb-8">
-            {filteredLocations.map((loc, i) => (
+            {visibleLocations.map((loc, i) => (
               <MasonryCard
                 key={loc.id}
                 location={loc}
                 aspectRatio={ASPECT_RATIOS[i % ASPECT_RATIOS.length]}
                 onClick={() => setSelectedLocation(loc)}
-                animDelay={Math.min(i * 0.025, 0.3)}
+                animDelay={Math.min((i % MASONRY_PAGE) * 0.025, 0.3)}
               />
             ))}
           </div>
         )}
+        {/* Infinite-scroll sentinel — loading the next window before it's reached */}
+        {hasMore && <div ref={sentinelRef} aria-hidden className="h-4" />}
       </div>
 
       <FilterDrawer
