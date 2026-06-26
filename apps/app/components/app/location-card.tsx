@@ -1,8 +1,11 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { Heart, Clock, TrendingUp, MapPin, Check } from "lucide-react";
 import Image from "next/image";
 import { cn, difficultyConfig, categoryConfig, formatDuration } from "@/lib/utils";
+import { SPRING } from "@/lib/motion";
+import { haptics } from "@/lib/haptics";
 import { useFavoritesStore } from "@/store/favorites-store";
 import { useVisitedStore } from "@/store/visited-store";
 import { useGeoStore } from "@/store/geo-store";
@@ -39,6 +42,14 @@ export function LocationCard({
   const awayKm = userPosition
     ? formatDistance(distanceKm(userPosition, location.coordinates))
     : null;
+
+  // Favourite on → success double-tick, off → light tap. Mirrors reaction-bar.
+  const handleToggleFav = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (fav) haptics.tap();
+    else haptics.success();
+    toggleFavorite(location.id);
+  };
 
   return (
     <div
@@ -90,18 +101,24 @@ export function LocationCard({
           {/* Fav button */}
           <button
             aria-label={fav ? "Remove favourite" : "Add favourite"}
-            className="min-w-[48px] flex items-center justify-center bg-trail-900"
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleFavorite(location.id);
-            }}
+            aria-pressed={fav}
+            className="pressable min-w-[48px] flex items-center justify-center bg-trail-900"
+            onClick={handleToggleFav}
           >
-            <Heart
-              className={cn(
-                "w-5 h-5 transition-colors",
-                fav ? "fill-red-400 text-red-400" : "text-stone-400 hover:text-fg"
-              )}
-            />
+            <motion.span
+              key={fav ? "on" : "off"}
+              initial={{ scale: fav ? 0.6 : 1 }}
+              animate={{ scale: 1 }}
+              transition={SPRING.snappy}
+              className="inline-flex"
+            >
+              <Heart
+                className={cn(
+                  "w-5 h-5 transition-colors",
+                  fav ? "fill-red-400 text-red-400" : "text-stone-400 hover:text-fg"
+                )}
+              />
+            </motion.span>
           </button>
         </>
       ) : (
@@ -127,18 +144,24 @@ export function LocationCard({
             {/* Fav button */}
             <button
               aria-label={fav ? "Remove favourite" : "Add favourite"}
-              className="absolute top-2 right-2 w-11 h-11 rounded-lg bg-black/40 backdrop-blur-sm flex items-center justify-center transition-colors hover:bg-black/60 active:scale-95"
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleFavorite(location.id);
-              }}
+              aria-pressed={fav}
+              className="pressable absolute top-2 right-2 w-11 h-11 rounded-lg bg-black/40 backdrop-blur-sm flex items-center justify-center transition-colors hover:bg-black/60"
+              onClick={handleToggleFav}
             >
-              <Heart
-                className={cn(
-                  "w-4 h-4 transition-colors",
-                  fav ? "fill-red-400 text-red-400" : "text-white/80"
-                )}
-              />
+              <motion.span
+                key={fav ? "on" : "off"}
+                initial={{ scale: fav ? 0.6 : 1 }}
+                animate={{ scale: 1 }}
+                transition={SPRING.snappy}
+                className="inline-flex"
+              >
+                <Heart
+                  className={cn(
+                    "w-4 h-4 transition-colors",
+                    fav ? "fill-red-400 text-red-400" : "text-white/80"
+                  )}
+                />
+              </motion.span>
             </button>
 
             {/* Visited chip */}
