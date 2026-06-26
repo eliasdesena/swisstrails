@@ -7,6 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/shared/reveal";
 import { useFavoritesStore } from "@/store/favorites-store";
 import { useVisitedStore } from "@/store/visited-store";
+import { useMapPrefStore } from "@/store/map-pref-store";
+import { cn } from "@/lib/utils";
+
+const MAP_APP_OPTIONS = [
+  { v: "auto", label: "Auto" },
+  { v: "apple", label: "Apple Maps" },
+  { v: "google", label: "Google Maps" },
+] as const;
 
 const MENU_ITEMS = [
   {
@@ -56,6 +64,8 @@ const MENU_ITEMS = [
 export default function ProfilePage() {
   const { favoriteIds } = useFavoritesStore();
   const { visitedIds } = useVisitedStore();
+  const mapApp = useMapPrefStore((s) => s.preferredMapApp);
+  const setMapApp = useMapPrefStore((s) => s.setPreferredMapApp);
 
   return (
     <div className="h-full overflow-y-auto">
@@ -138,6 +148,38 @@ export default function ProfilePage() {
                 </Link>
               );
             })}
+          </div>
+        </Reveal>
+
+        {/* Directions app preference */}
+        <Reveal delay={0.25}>
+          <div className="card-solid rounded-xl p-5 mb-6">
+            <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-fg-muted mb-3">
+              Directions app
+            </p>
+            <div className="flex gap-2">
+              {MAP_APP_OPTIONS.map((opt) => {
+                const active = (mapApp ?? "auto") === opt.v;
+                return (
+                  <button
+                    key={opt.v}
+                    onClick={() => setMapApp(opt.v)}
+                    className={cn(
+                      "flex-1 h-10 rounded-lg text-sm font-medium transition-colors",
+                      active
+                        ? "bg-alpine-700/80 text-white"
+                        : "bg-white/[0.04] text-fg-muted hover:text-fg"
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-fg-subtle text-xs mt-2.5">
+              Used when you tap “Get directions”.
+              {mapApp == null && " You'll be asked the first time."}
+            </p>
           </div>
         </Reveal>
 

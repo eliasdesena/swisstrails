@@ -230,17 +230,35 @@ export function openUrl(url: string): void {
   }
 }
 
+/** The user's chosen directions app. `"auto"` = the platform default. */
+export type MapAppPref = "auto" | "apple" | "google";
+
+/** Build the directions URL for a specific app preference. */
+export function directionsUrlFor(
+  app: MapAppPref,
+  lat: number,
+  lng: number,
+  name: string
+): string {
+  if (app === "apple") return appleMapsApp(lat, lng, name);
+  if (app === "google") {
+    return isIOS() || isAndroid()
+      ? googleMapsApp(lat, lng)
+      : googleMapsDirections(lat, lng);
+  }
+  // auto → platform default
+  if (isIOS()) return appleMapsApp(lat, lng, name);
+  if (isAndroid()) return geoUri(lat, lng, name);
+  return googleMapsDirections(lat, lng);
+}
+
 /**
- * One-tap "Get directions" → the platform's native maps app directly:
- * Apple Maps (`maps://`) on iOS, the default `geo:` handler on Android, and
- * Google Maps (web) on desktop. Avoids the in-app browser popup.
+ * One-tap "Get directions" → the platform's native maps app directly (the
+ * `"auto"` behaviour). For the user-chosen app, see directionsUrlFor +
+ * the map-pref store.
  */
 export function openDirections(lat: number, lng: number, name: string): void {
-  let url: string;
-  if (isIOS()) url = appleMapsApp(lat, lng, name);
-  else if (isAndroid()) url = geoUri(lat, lng, name);
-  else url = googleMapsDirections(lat, lng);
-  openUrl(url);
+  openUrl(directionsUrlFor("auto", lat, lng, name));
 }
 
 /**

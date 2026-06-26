@@ -18,7 +18,7 @@ import {
   categoryConfig, regionConfig, difficultyConfig, seasonConfig,
   formatDuration, cn,
 } from "@/lib/utils";
-import { openDirections } from "@/lib/deep-links";
+import { useMapPrefStore } from "@/store/map-pref-store";
 import { OpenInSheet } from "@/components/app/open-in-sheet";
 import { WeatherWidget } from "@/components/app/weather-widget";
 import { PhotoStrip } from "@/components/app/photo-strip";
@@ -89,6 +89,7 @@ export function LocationDetailSheet({
   const fav = location ? isFavorite(location.id) : false;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [openInSheet, setOpenInSheet] = useState(false);
+  const requestDirections = useMapPrefStore((s) => s.requestDirections);
 
   // Real straight-line distance from the user, when we know their position.
   const awayKm =
@@ -326,7 +327,11 @@ export function LocationDetailSheet({
               <button
                 type="button"
                 onClick={() =>
-                  openDirections(location.coordinates.lat, location.coordinates.lng, location.name)
+                  requestDirections({
+                    lat: location.coordinates.lat,
+                    lng: location.coordinates.lng,
+                    name: location.name,
+                  })
                 }
                 className="flex-1 flex items-center justify-center gap-2 min-h-[44px] py-3.5 bg-alpine-600 hover:bg-alpine-500 active:bg-alpine-700 text-white text-sm font-medium rounded-lg transition-colors"
               >

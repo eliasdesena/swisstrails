@@ -20,7 +20,7 @@ import {
   regionConfig,
   formatDuration,
 } from "@/lib/utils";
-import { openDirections } from "@/lib/deep-links";
+import { useMapPrefStore } from "@/store/map-pref-store";
 import { OpenInSheet } from "@/components/app/open-in-sheet";
 import { WeatherWidget } from "@/components/app/weather-widget";
 import { PhotoStrip } from "@/components/app/photo-strip";
@@ -83,6 +83,7 @@ export function LocationDetail({ location, onClose, scrollRef }: LocationDetailP
   const inTrip = useTripStore((s) => s.tripIds.includes(location.id));
   const toggleInTrip = useTripStore((s) => s.toggleInTrip);
   const userPosition = useGeoStore((s) => s.position);
+  const requestDirections = useMapPrefStore((s) => s.requestDirections);
   const fav = isFavorite(location.id);
   const diff = difficultyConfig[location.difficulty];
   const cat = categoryConfig[location.category];
@@ -345,7 +346,11 @@ export function LocationDetail({ location, onClose, scrollRef }: LocationDetailP
           className="flex-1"
           data-no-drag
           onClick={() =>
-            openDirections(location.coordinates.lat, location.coordinates.lng, location.name)
+            requestDirections({
+              lat: location.coordinates.lat,
+              lng: location.coordinates.lng,
+              name: location.name,
+            })
           }
         >
           <Navigation className="w-4 h-4" />
