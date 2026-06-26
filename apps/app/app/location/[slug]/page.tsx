@@ -6,7 +6,12 @@ import { PLACEHOLDER_LOCATIONS } from "@/data/locations";
 import { categoryConfig, difficultyConfig, regionConfig, formatDuration } from "@/lib/utils";
 import { DirectionsActions } from "@/components/app/directions-actions";
 import { WeatherWidget } from "@/components/app/weather-widget";
-import { MapPin, Clock, Mountain, ArrowLeft } from "lucide-react";
+import { PhotoStrip } from "@/components/app/photo-strip";
+import {
+  MapPin, Clock, Mountain, ArrowLeft, Navigation, Gauge,
+  Car, Bus, Lightbulb,
+} from "lucide-react";
+import type { LocationImage } from "@/types";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -49,6 +54,12 @@ export default async function LocationPage({ params }: Props) {
   const cat = categoryConfig[location.category];
   const diff = difficultyConfig[location.difficulty];
   const region = regionConfig[location.region];
+
+  // Photos for the strip: hero first, then gallery (dedupe by url).
+  const photoStrip: LocationImage[] = [
+    location.heroImage,
+    ...location.gallery.filter((g) => g.url !== location.heroImage.url),
+  ];
 
   const DIFF_COLOR: Record<string, string> = {
     easy: "text-emerald-400",
@@ -98,28 +109,69 @@ export default async function LocationPage({ params }: Props) {
 
       {/* Content */}
       <div className="max-w-2xl mx-auto px-5 py-8 space-y-8">
-        {/* Quick stats */}
-        <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
-          <span className={`font-medium ${DIFF_COLOR[location.difficulty]}`}>{diff.label}</span>
-          <span className="flex items-center gap-1.5 text-stone-400">
-            <Clock className="w-3.5 h-3.5" />
-            ~{formatDuration(location.travelTimeMinutes)} by car
-          </span>
+        {/* Photo strip — hero + gallery thumbnails, swipeable, with lightbox */}
+        <PhotoStrip photos={photoStrip} />
+
+        {/* Key stats — essentials up top */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <Stat
+            icon={<Gauge className="w-4 h-4" />}
+            label="Difficulty"
+            value={diff.label}
+            valueClass={DIFF_COLOR[location.difficulty]}
+          />
           {location.elevation && (
-            <span className="flex items-center gap-1.5 text-stone-400">
-              <Mountain className="w-3.5 h-3.5" />
-              {location.elevation.toLocaleString()}m
-            </span>
+            <Stat
+              icon={<Mountain className="w-4 h-4" />}
+              label="Elevation"
+              value={`${location.elevation.toLocaleString()} m`}
+            />
           )}
-          <span className="flex items-center gap-1.5 text-stone-400">
-            <MapPin className="w-3.5 h-3.5" />
-            {region.canton}
-          </span>
+          <Stat
+            icon={<Clock className="w-4 h-4" />}
+            label="Visit time"
+            value={`${location.visitDurationHours.min}–${location.visitDurationHours.max} h`}
+          />
+          <Stat
+            icon={<Car className="w-4 h-4" />}
+            label="By car"
+            value={`~${formatDuration(location.travelTimeMinutes)}`}
+          />
+          <Stat
+            icon={<MapPin className="w-4 h-4" />}
+            label="Canton"
+            value={region.canton}
+          />
         </div>
 
         {/* Description */}
         {location.description && (
           <p className="text-stone-300 leading-relaxed">{location.description}</p>
+        )}
+
+        {/* Getting there — access + parking/transport chips */}
+        {(location.accessInfo || location.parkingAvailable || location.publicTransport) && (
+          <div>
+            <p className="text-[11px] font-medium tracking-[0.14em] uppercase text-fg-muted mb-2.5 flex items-center gap-1.5">
+              <Navigation className="w-3 h-3" />
+              Getting there
+            </p>
+            {location.accessInfo && (
+              <p className="text-stone-400 text-sm mb-2.5">{location.accessInfo}</p>
+            )}
+            <div className="flex flex-wrap gap-2">
+              {location.parkingAvailable && (
+                <span className="inline-flex items-center gap-1.5 bg-white/[0.05] rounded-full px-3 py-1.5 text-xs text-stone-300">
+                  <Car className="w-3.5 h-3.5" /> Parking
+                </span>
+              )}
+              {location.publicTransport && (
+                <span className="inline-flex items-center gap-1.5 bg-white/[0.05] rounded-full px-3 py-1.5 text-xs text-stone-300">
+                  <Bus className="w-3.5 h-3.5" /> Public transport
+                </span>
+              )}
+            </div>
+          </div>
         )}
 
         {/* Weather (client island) */}
@@ -128,14 +180,14 @@ export default async function LocationPage({ params }: Props) {
           lng={location.coordinates.lng}
         />
 
-        {/* Highlights */}
+        {/* Highlights — short */}
         {location.highlights.length > 0 && (
           <div>
             <p className="text-[11px] font-medium tracking-[0.14em] uppercase text-fg-muted mb-3">
               Highlights
             </p>
             <ul className="space-y-2">
-              {location.highlights.map((h) => (
+              {location.highlights.slice(0, 5).map((h) => (
                 <li key={h} className="flex items-start gap-2.5 text-sm text-stone-400">
                   <span className="w-px h-3 bg-alpine-600 mt-1 flex-shrink-0" />
                   {h}
@@ -145,13 +197,18 @@ export default async function LocationPage({ params }: Props) {
           </div>
         )}
 
-        {/* Tips */}
+        {/* Tips — demoted below the essentials */}
         {location.tips.length > 0 && (
-          <div>
-            <p className="text-[11px] font-medium tracking-[0.14em] uppercase text-fg-muted mb-3">
-              Tips
-            </p>
-            <ul className="space-y-2">
+          <details className="group rounded-xl border border-white/[0.06] overflow-hidden">
+            <summary className="flex items-center justify-between gap-2 px-4 min-h-[48px] py-3 cursor-pointer list-none text-sm font-medium text-stone-200">
+              <span className="flex items-center gap-2">
+                <Lightbulb className="w-4 h-4 text-alpine-400" />
+                Insider tips
+              </span>
+              <span className="text-fg-muted text-xs group-open:hidden">Show</span>
+              <span className="text-fg-muted text-xs hidden group-open:inline">Hide</span>
+            </summary>
+            <ul className="px-4 pb-4 pt-0 space-y-2">
               {location.tips.map((tip) => (
                 <li key={tip} className="flex items-start gap-2.5 text-sm text-stone-400">
                   <span className="w-1.5 h-1.5 rounded-full bg-alpine-700 mt-1.5 flex-shrink-0" />
@@ -159,20 +216,10 @@ export default async function LocationPage({ params }: Props) {
                 </li>
               ))}
             </ul>
-          </div>
+          </details>
         )}
 
-        {/* Access */}
-        {location.accessInfo && (
-          <div>
-            <p className="text-[11px] font-medium tracking-[0.14em] uppercase text-fg-muted mb-2">
-              Getting there
-            </p>
-            <p className="text-stone-400 text-sm">{location.accessInfo}</p>
-          </div>
-        )}
-
-        {/* CTA row */}
+        {/* CTA row — Get directions is the primary action */}
         <div className="pt-4 flex gap-3">
           <DirectionsActions location={location} />
           <Link
@@ -195,6 +242,30 @@ export default async function LocationPage({ params }: Props) {
           </Link>
         </div>
       </div>
+    </div>
+  );
+}
+
+function Stat({
+  icon,
+  label,
+  value,
+  valueClass,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  valueClass?: string;
+}) {
+  return (
+    <div className="flex items-center gap-2.5 rounded-xl bg-white/[0.04] px-3 py-2.5">
+      <span className="text-fg-muted flex-shrink-0">{icon}</span>
+      <span className="min-w-0">
+        <span className="block text-[11px] text-fg-muted leading-none">{label}</span>
+        <span className={`block text-sm font-medium text-stone-200 mt-1 truncate ${valueClass ?? ""}`}>
+          {value}
+        </span>
+      </span>
     </div>
   );
 }

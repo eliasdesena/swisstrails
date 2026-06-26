@@ -1,12 +1,10 @@
 "use client";
 
 import {
-  Clock, MapPin, Navigation, Heart, Share2, Mountain,
-  ChevronLeft, Camera, X, Bus, Car, Lightbulb, Package,
-  Waves, Sun, Leaf, Snowflake, MoreHorizontal, CheckCircle2, Route, MapPinned
+  Clock, Navigation, Heart, Share2, Mountain,
+  ChevronLeft, Bus, Car, Lightbulb, Package, ChevronDown,
+  MoreHorizontal, CheckCircle2, Route, MapPinned, Ruler, Gauge,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useFavoritesStore } from "@/store/favorites-store";
@@ -19,25 +17,22 @@ import {
   difficultyConfig,
   categoryConfig,
   seasonConfig,
+  regionConfig,
   formatDuration,
 } from "@/lib/utils";
 import { platformDirections } from "@/lib/deep-links";
 import { OpenInSheet } from "@/components/app/open-in-sheet";
 import { WeatherWidget } from "@/components/app/weather-widget";
-import type { Location } from "@/types";
+import { PhotoStrip } from "@/components/app/photo-strip";
+import type { Location, LocationImage } from "@/types";
 
 interface LocationDetailProps {
   location: Location;
   onClose: () => void;
+  /** Optional ref for the scrollable body — lets the sheet read scrollTop
+      so a drag-down from the top can collapse it. */
+  scrollRef?: React.Ref<HTMLDivElement>;
 }
-
-const SEASON_ICONS = {
-  spring: Leaf,
-  summer: Sun,
-  autumn: Leaf,
-  winter: Snowflake,
-  "year-round": Waves,
-};
 
 const DIFF_COLOR: Record<string, string> = {
   easy: "text-alpine-400",
@@ -46,9 +41,40 @@ const DIFF_COLOR: Record<string, string> = {
   expert: "text-red-400",
 };
 
-export function LocationDetail({ location, onClose }: LocationDetailProps) {
-  const [activeGalleryIndex, setActiveGalleryIndex] = useState<number | null>(null);
+/** Compact, square icon action used in the title header row. */
+function IconAction({
+  label,
+  active,
+  activeClass,
+  onClick,
+  children,
+}: {
+  label: string;
+  active?: boolean;
+  activeClass?: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      data-no-drag
+      aria-label={label}
+      aria-pressed={active}
+      onClick={onClick}
+      className={cn(
+        "w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-full transition-colors active:scale-95",
+        active ? activeClass : "bg-white/[0.06] text-stone-300 hover:text-fg hover:bg-white/[0.1]"
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+export function LocationDetail({ location, onClose, scrollRef }: LocationDetailProps) {
   const [openInSheet, setOpenInSheet] = useState(false);
+  const [tipsOpen, setTipsOpen] = useState(false);
   const { isFavorite, toggleFavorite } = useFavoritesStore();
   const visited = useVisitedStore((s) => s.visitedIds.has(location.id));
   const toggleVisited = useVisitedStore((s) => s.toggleVisited);
@@ -58,319 +84,266 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
   const fav = isFavorite(location.id);
   const diff = difficultyConfig[location.difficulty];
   const cat = categoryConfig[location.category];
+  const region = regionConfig[location.region];
 
   const awayKm = userPosition
     ? formatDistance(distanceKm(userPosition, location.coordinates))
     : null;
 
+  // Photos for the strip: hero first, then gallery (skip dupes by url).
+  const photos: LocationImage[] = [
+    location.heroImage,
+    ...location.gallery.filter((g) => g.url !== location.heroImage.url),
+  ];
+
+  function share() {
+    const url = `https://swiss-trails.com/location/${location.slug}`;
+    if (navigator.share) void navigator.share({ title: location.name, url });
+    else void navigator.clipboard.writeText(url);
+  }
+
   return (
     <div className="flex flex-col h-full">
-      {/* Hero image */}
-      <div className="relative flex-shrink-0 h-52 sm:h-64">
-        <Image
-          src={location.heroImage.url}
-          alt={location.heroImage.alt}
-          fill
-          className="object-cover"
-          priority
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-trail-950 via-trail-950/10 to-transparent" />
-
-        {/* Close */}
-        <button
-          aria-label="Close"
-          className="absolute top-3 left-3 w-11 h-11 bg-black/50 backdrop-blur-md rounded-lg flex items-center justify-center text-white/80 hover:text-white active:scale-95 transition-colors"
-          onClick={onClose}
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-
-        {/* Action buttons */}
-        <div className="absolute top-3 right-3 flex items-center gap-2">
+      {/* ── NON-SCROLLING HEADER: title + icon actions + photo strip ── */}
+      <div className="flex-shrink-0 px-4 pt-1 pb-3">
+        {/* Title row + compact icon actions */}
+        <div className="flex items-start gap-3">
+          {/* Close (mobile uses the drag handle; this is the explicit back/close) */}
           <button
-            aria-label="Share"
-            className="w-11 h-11 bg-black/50 backdrop-blur-md rounded-lg flex items-center justify-center text-white/80 hover:text-white active:scale-95 transition-colors"
-            onClick={() => {
-              const url = `https://swiss-trails.com/location/${location.slug}`;
-              if (navigator.share) {
-                void navigator.share({ title: location.name, url });
-              } else {
-                void navigator.clipboard.writeText(url);
-              }
-            }}
+            type="button"
+            data-no-drag
+            aria-label="Close"
+            onClick={onClose}
+            className="hidden lg:flex w-9 h-9 -ml-1 mt-0.5 flex-shrink-0 items-center justify-center rounded-full text-stone-400 hover:text-fg hover:bg-white/[0.06] transition-colors"
           >
-            <Share2 className="w-4 h-4" />
+            <ChevronLeft className="w-5 h-5" />
           </button>
-          <button
-            aria-label={fav ? "Remove favourite" : "Add favourite"}
-            className={cn(
-              "w-11 h-11 rounded-lg backdrop-blur-md flex items-center justify-center active:scale-95 transition-colors",
-              fav ? "bg-red-500/20 text-red-400" : "bg-black/50 text-white/80 hover:text-white"
-            )}
-            onClick={() => toggleFavorite(location.id)}
-          >
-            <Heart className={cn("w-4 h-4", fav && "fill-red-400")} />
-          </button>
-        </div>
 
-        {/* Name overlay */}
-        <div className="absolute bottom-0 left-0 right-0 px-5 pb-4">
-          <p className="text-xs font-medium tracking-[0.12em] uppercase text-fg-muted mb-1">
-            {cat.label}
-          </p>
-          <h2 className="text-fg text-xl font-semibold leading-tight">{location.name}</h2>
-          {location.tagline && (
-            <p className="text-fg-muted text-sm mt-0.5 line-clamp-1">{location.tagline}</p>
-          )}
-        </div>
-      </div>
-
-      {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto overscroll-contain">
-        <div className="px-5 py-4 space-y-6">
-          {/* Quick meta row */}
-          <div className="flex items-center gap-4 text-xs text-fg-muted">
-            <span className="flex items-center gap-1.5">
-              <MapPin className="w-3 h-3" />
-              {location.region.charAt(0).toUpperCase() + location.region.slice(1).replace("-", " ")}
-            </span>
-            <span className={cn("font-medium", DIFF_COLOR[location.difficulty])}>
-              {diff.label}
-            </span>
-            {awayKm ? (
-              <span className="flex items-center gap-1.5">
-                <Navigation className="w-3 h-3" />
-                {awayKm} away
+          <div className="min-w-0 flex-1">
+            <h2 className="text-fg text-[22px] font-semibold leading-tight">
+              {location.name}
+            </h2>
+            <p className="text-fg-muted text-[13px] mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+              <span>{cat.label}</span>
+              <span className="text-fg-subtle">·</span>
+              <span>{region.label}</span>
+              <span className="text-fg-subtle">·</span>
+              <span className={cn("font-medium", DIFF_COLOR[location.difficulty])}>
+                {diff.label}
               </span>
-            ) : (
-              <span className="flex items-center gap-1.5">
-                <Clock className="w-3 h-3" />
-                ~{formatDuration(location.travelTimeMinutes)} by car
-              </span>
-            )}
-            {location.elevation && (
-              <span className="flex items-center gap-1.5">
-                <Mountain className="w-3 h-3" />
-                {location.elevation}m
-              </span>
-            )}
+            </p>
           </div>
 
-          {/* Secondary actions — Visited / Add to trip */}
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              aria-pressed={visited}
+          {/* Compact icon actions: favourite, visited, add-to-trip, share */}
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <IconAction
+              label={fav ? "Remove favourite" : "Add favourite"}
+              active={fav}
+              activeClass="bg-red-500/15 text-red-400"
+              onClick={() => toggleFavorite(location.id)}
+            >
+              <Heart className={cn("w-[18px] h-[18px]", fav && "fill-red-400")} />
+            </IconAction>
+            <IconAction
+              label={visited ? "Mark not visited" : "Mark visited"}
+              active={visited}
+              activeClass="bg-emerald-500/15 text-emerald-400"
               onClick={() => toggleVisited(location.id)}
-              className={cn(
-                "flex items-center justify-center gap-2 h-11 px-3 text-sm font-medium rounded-lg border transition-colors active:scale-[0.99]",
-                visited
-                  ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
-                  : "bg-transparent border-white/10 text-stone-400 hover:text-fg hover:border-white/20"
-              )}
             >
-              <CheckCircle2 className={cn("w-4 h-4", visited && "text-emerald-400")} />
-              {visited ? "Visited ✓" : "Visited"}
-            </button>
-            <button
-              aria-pressed={inTrip}
+              <CheckCircle2 className="w-[18px] h-[18px]" />
+            </IconAction>
+            <IconAction
+              label={inTrip ? "Remove from trip" : "Add to trip"}
+              active={inTrip}
+              activeClass="bg-alpine-500/15 text-alpine-400"
               onClick={() => toggleInTrip(location.id)}
-              className={cn(
-                "flex items-center justify-center gap-2 h-11 px-3 text-sm font-medium rounded-lg border transition-colors active:scale-[0.99]",
-                inTrip
-                  ? "bg-alpine-500/15 border-alpine-500/40 text-alpine-300"
-                  : "bg-transparent border-white/10 text-stone-400 hover:text-fg hover:border-white/20"
-              )}
             >
-              {inTrip ? <MapPinned className="w-4 h-4 text-alpine-400" /> : <Route className="w-4 h-4" />}
-              {inTrip ? "In trip ✓" : "Add to trip"}
-            </button>
+              {inTrip ? <MapPinned className="w-[18px] h-[18px]" /> : <Route className="w-[18px] h-[18px]" />}
+            </IconAction>
+            <IconAction label="Share" onClick={share}>
+              <Share2 className="w-[18px] h-[18px]" />
+            </IconAction>
+          </div>
+        </div>
+
+        {/* Reaction-count slot — Like / Want to go / Been there.
+            Intentionally left empty; the parent wires the live counts here. */}
+        <div data-reaction-slot className="mt-2.5 empty:hidden" />
+
+        {/* Photo strip — horizontal, swipeable; data-no-drag so it scrolls
+            independently of the sheet. */}
+        <PhotoStrip photos={photos} className="mt-3" />
+      </div>
+
+      {/* ── SCROLLABLE BODY ── */}
+      <div
+        ref={scrollRef}
+        data-sheet-scroll
+        className="flex-1 overflow-y-auto overscroll-contain"
+      >
+        <div className="px-4 pb-5 space-y-5">
+          {/* Key stats — distance / elevation / duration / from-you */}
+          <div className="grid grid-cols-2 gap-2">
+            <Stat
+              icon={<Gauge className="w-4 h-4" />}
+              label="Difficulty"
+              value={diff.label}
+              valueClass={DIFF_COLOR[location.difficulty]}
+            />
+            {location.distanceKm != null && (
+              <Stat
+                icon={<Ruler className="w-4 h-4" />}
+                label="Distance"
+                value={`${location.distanceKm} km`}
+              />
+            )}
+            {location.elevation != null && (
+              <Stat
+                icon={<Mountain className="w-4 h-4" />}
+                label="Elevation"
+                value={`${location.elevation.toLocaleString()} m`}
+              />
+            )}
+            <Stat
+              icon={<Clock className="w-4 h-4" />}
+              label="Visit time"
+              value={`${location.visitDurationHours.min}–${location.visitDurationHours.max} h`}
+            />
+            {awayKm ? (
+              <Stat
+                icon={<Navigation className="w-4 h-4" />}
+                label="From you"
+                value={`${awayKm} away`}
+              />
+            ) : (
+              <Stat
+                icon={<Car className="w-4 h-4" />}
+                label="By car"
+                value={`~${formatDuration(location.travelTimeMinutes)}`}
+              />
+            )}
           </div>
 
           {/* Description */}
           {location.description && (
-            <p className="text-stone-400 text-sm leading-relaxed">{location.description}</p>
+            <p className="text-stone-300 text-sm leading-relaxed">{location.description}</p>
           )}
 
-          {/* Highlights */}
+          {/* Highlights — short bullet list */}
           {location.highlights.length > 0 && (
-            <div>
-              <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-fg-muted mb-3">
-                Highlights
-              </p>
-              <ul className="space-y-2">
-                {location.highlights.map((h) => (
+            <Section title="Highlights">
+              <ul className="space-y-1.5">
+                {location.highlights.slice(0, 4).map((h) => (
                   <li key={h} className="flex items-start gap-2.5 text-sm text-stone-400">
-                    <span className="w-px h-3 bg-alpine-600 mt-1 flex-shrink-0" />
+                    <span className="w-px h-3 bg-alpine-600 mt-1.5 flex-shrink-0" />
                     {h}
                   </li>
                 ))}
               </ul>
-            </div>
+            </Section>
           )}
 
-          {/* Best season */}
-          <div>
-            <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-fg-muted mb-3">
-              Best season
-            </p>
+          {/* Getting there — access + parking/transport chips */}
+          <Section title="Getting there" icon={<Navigation className="w-3 h-3" />}>
+            {location.accessInfo && (
+              <p className="text-stone-400 text-sm mb-2.5">{location.accessInfo}</p>
+            )}
             <div className="flex flex-wrap gap-2">
-              {location.bestSeason.map((s) => {
-                const sc = seasonConfig[s];
-                const Icon = SEASON_ICONS[s] ?? Sun;
-                return (
-                  <div
-                    key={s}
-                    className="flex items-center gap-1.5 bg-white/[0.04] rounded px-2.5 py-1.5"
-                  >
-                    <Icon className="w-3 h-3 text-fg-muted" />
-                    <div>
-                      <p className="text-stone-200 text-xs font-medium">{sc.label}</p>
-                      <p className="text-fg-muted text-[11px]">{sc.months}</p>
-                    </div>
-                  </div>
-                );
-              })}
+              {location.parkingAvailable && <InfoChip icon={<Car className="w-3.5 h-3.5" />}>Parking</InfoChip>}
+              {location.publicTransport && <InfoChip icon={<Bus className="w-3.5 h-3.5" />}>Public transport</InfoChip>}
             </div>
-          </div>
+          </Section>
+
+          {/* Best season — compact inline chip set */}
+          {location.bestSeason.length > 0 && (
+            <Section title="Best season">
+              <div className="flex flex-wrap gap-1.5">
+                {location.bestSeason.map((s) => {
+                  const sc = seasonConfig[s];
+                  return (
+                    <span
+                      key={s}
+                      className="inline-flex items-center gap-1.5 bg-white/[0.05] rounded-full px-3 py-1 text-xs text-stone-300"
+                    >
+                      <span>{sc.emoji}</span>
+                      {sc.label}
+                      <span className="text-fg-subtle">{sc.months}</span>
+                    </span>
+                  );
+                })}
+              </div>
+            </Section>
+          )}
 
           {/* Weather */}
-          <WeatherWidget
-            lat={location.coordinates.lat}
-            lng={location.coordinates.lng}
-          />
+          <WeatherWidget lat={location.coordinates.lat} lng={location.coordinates.lng} />
 
-          {/* Tips */}
-          {location.tips.length > 0 && (
-            <div>
-              <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-fg-muted mb-3 flex items-center gap-1.5">
-                <Lightbulb className="w-3 h-3" />
-                Insider tips
-              </p>
-              <ol className="space-y-2.5">
-                {location.tips.map((tip, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-stone-400">
-                    <span className="text-alpine-400 text-[11px] font-mono mt-0.5 flex-shrink-0">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    {tip}
-                  </li>
-                ))}
-              </ol>
-            </div>
-          )}
-
-          {/* What to bring */}
-          {location.whatToBring.length > 0 && (
-            <div>
-              <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-fg-muted mb-3 flex items-center gap-1.5">
-                <Package className="w-3 h-3" />
-                What to bring
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {location.whatToBring.map((item) => (
-                  <span
-                    key={item}
-                    className="bg-white/[0.04] text-stone-400 text-xs px-2.5 py-1 rounded"
-                  >
-                    {item}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Tags */}
-          {location.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {location.tags.map((tag) => (
-                <span key={tag} className="text-fg-muted text-xs">
-                  #{tag}
+          {/* Insider tips + What to bring — collapsed by default to declutter */}
+          {(location.tips.length > 0 || location.whatToBring.length > 0) && (
+            <div className="rounded-xl border border-white/[0.06] overflow-hidden">
+              <button
+                type="button"
+                data-no-drag
+                onClick={() => setTipsOpen((v) => !v)}
+                aria-expanded={tipsOpen}
+                className="w-full flex items-center justify-between gap-2 px-3.5 min-h-[44px] py-2.5 text-left active:bg-white/[0.03] transition-colors"
+              >
+                <span className="flex items-center gap-2 text-sm font-medium text-stone-200">
+                  <Lightbulb className="w-4 h-4 text-alpine-400" />
+                  Tips &amp; what to bring
                 </span>
-              ))}
-            </div>
-          )}
-
-          {/* Getting there */}
-          <div>
-            <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-fg-muted mb-3 flex items-center gap-1.5">
-              <Navigation className="w-3 h-3" />
-              Getting there
-            </p>
-            {location.accessInfo && (
-              <p className="text-stone-400 text-sm mb-3">{location.accessInfo}</p>
-            )}
-            <div className="flex gap-3">
-              {location.parkingAvailable && (
-                <span className="flex items-center gap-1.5 text-xs text-fg-muted">
-                  <Car className="w-3 h-3" /> Parking
-                </span>
+                <ChevronDown
+                  className={cn(
+                    "w-4 h-4 text-fg-muted transition-transform",
+                    tipsOpen && "rotate-180"
+                  )}
+                />
+              </button>
+              {tipsOpen && (
+                <div className="px-3.5 pb-3.5 pt-0.5 space-y-3.5">
+                  {location.tips.length > 0 && (
+                    <ol className="space-y-2">
+                      {location.tips.map((tip, i) => (
+                        <li key={i} className="flex items-start gap-2.5 text-sm text-stone-400">
+                          <span className="text-alpine-400 text-[11px] font-mono mt-0.5 flex-shrink-0">
+                            {String(i + 1).padStart(2, "0")}
+                          </span>
+                          {tip}
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                  {location.whatToBring.length > 0 && (
+                    <div>
+                      <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-fg-muted mb-2 flex items-center gap-1.5">
+                        <Package className="w-3 h-3" />
+                        What to bring
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {location.whatToBring.map((item) => (
+                          <span
+                            key={item}
+                            className="bg-white/[0.04] text-stone-400 text-xs px-2.5 py-1 rounded-full"
+                          >
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
-              {location.publicTransport && (
-                <span className="flex items-center gap-1.5 text-xs text-fg-muted">
-                  <Bus className="w-3 h-3" /> Public transport
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Coordinates */}
-          <div className="bg-white/[0.03] rounded-lg p-3 flex items-center justify-between">
-            <p className="font-mono text-fg-muted text-xs">
-              {location.coordinates.lat.toFixed(6)}, {location.coordinates.lng.toFixed(6)}
-            </p>
-            <MapPin className="w-3 h-3 text-fg-subtle" />
-          </div>
-
-          {/* Gallery */}
-          {location.gallery.length > 0 && (
-            <div>
-              <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-fg-muted mb-3 flex items-center gap-1.5">
-                <Camera className="w-3 h-3" />
-                Gallery
-              </p>
-              <div className="grid grid-cols-3 gap-1.5">
-                {location.gallery.map((img, i) => (
-                  <button
-                    key={img.id}
-                    className="aspect-square rounded overflow-hidden relative"
-                    onClick={() => setActiveGalleryIndex(i)}
-                  >
-                    <Image
-                      src={img.url}
-                      alt={img.alt}
-                      fill
-                      className="object-cover hover:scale-105 transition-transform duration-300"
-                      sizes="100px"
-                    />
-                  </button>
-                ))}
-              </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Bottom CTA */}
-      <div className="flex-shrink-0 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2">
-        <button
-          className={cn(
-            "flex items-center justify-center gap-2 h-11 px-4 text-sm rounded-lg bg-white/[0.04] transition-colors flex-shrink-0",
-            fav ? "text-red-400 bg-red-950/30" : "text-stone-400 hover:text-fg"
-          )}
-          onClick={() => toggleFavorite(location.id)}
-        >
-          <Heart className={cn("w-4 h-4", fav && "fill-red-400")} />
-          {fav ? "Saved" : "Save"}
-        </button>
-        {/* One-tap platform-default directions (Apple Maps on iOS, Google elsewhere) */}
+      {/* ── BOTTOM CTA — Get directions is the single primary action ── */}
+      <div className="flex-shrink-0 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2 border-t border-white/[0.06]">
         <Button variant="alpine" size="lg" className="flex-1" asChild>
           <a
-            href={platformDirections(
-              location.coordinates.lat,
-              location.coordinates.lng,
-              location.name
-            )}
+            data-no-drag
+            href={platformDirections(location.coordinates.lat, location.coordinates.lng, location.name)}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -378,48 +351,76 @@ export function LocationDetail({ location, onClose }: LocationDetailProps) {
             Get directions
           </a>
         </Button>
-        {/* Open the full "Open in…" sheet for more apps */}
         <button
+          type="button"
+          data-no-drag
           aria-label="More apps"
           onClick={() => setOpenInSheet(true)}
-          className="w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-lg bg-white/[0.04] text-stone-400 hover:text-fg active:scale-95 transition-colors"
+          className="w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-lg bg-white/[0.06] text-stone-300 hover:text-fg active:scale-95 transition-colors"
         >
           <MoreHorizontal className="w-5 h-5" />
         </button>
       </div>
 
-      {/* Open in… sheet */}
       <OpenInSheet
         location={openInSheet ? location : null}
         onClose={() => setOpenInSheet(false)}
       />
-
-      {/* Gallery lightbox */}
-      <AnimatePresence>
-        {activeGalleryIndex !== null && (
-          <motion.div
-            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            onClick={() => setActiveGalleryIndex(null)}
-          >
-            <button aria-label="Close" className="absolute top-[max(1rem,env(safe-area-inset-top))] right-4 w-11 h-11 rounded-lg bg-white/10 flex items-center justify-center text-white/80 hover:text-white">
-              <X className="w-5 h-5" />
-            </button>
-            <div className="relative w-full max-w-2xl aspect-video rounded-lg overflow-hidden">
-              <Image
-                src={location.gallery[activeGalleryIndex].url}
-                alt={location.gallery[activeGalleryIndex].alt}
-                fill
-                className="object-cover"
-                sizes="100vw"
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
+  );
+}
+
+/* ── small presentational helpers ── */
+
+function Stat({
+  icon,
+  label,
+  value,
+  valueClass,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  valueClass?: string;
+}) {
+  return (
+    <div className="flex items-center gap-2.5 rounded-xl bg-white/[0.04] px-3 py-2.5">
+      <span className="text-fg-muted flex-shrink-0">{icon}</span>
+      <span className="min-w-0">
+        <span className="block text-[11px] text-fg-muted leading-none">{label}</span>
+        <span className={cn("block text-sm font-medium text-stone-200 mt-1 truncate", valueClass)}>
+          {value}
+        </span>
+      </span>
+    </div>
+  );
+}
+
+function Section({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-fg-muted mb-2.5 flex items-center gap-1.5">
+        {icon}
+        {title}
+      </p>
+      {children}
+    </div>
+  );
+}
+
+function InfoChip({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 bg-white/[0.05] rounded-full px-3 py-1.5 text-xs text-stone-300">
+      {icon}
+      {children}
+    </span>
   );
 }

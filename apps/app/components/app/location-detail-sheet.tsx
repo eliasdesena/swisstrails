@@ -2,19 +2,28 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, MapPin, ArrowRight, Clock, Mountain, Navigation, Calendar, CheckCircle2, Route, MapPinned } from "lucide-react";
+import {
+  X, MapPin, ArrowRight, Clock, Mountain, Navigation,
+  CheckCircle2, Route, MapPinned, Heart, Share2, Car, Bus, Gauge, Ruler,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMapStore } from "@/store/map-store";
 import { useGeoStore } from "@/store/geo-store";
 import { useVisitedStore } from "@/store/visited-store";
 import { useTripStore } from "@/store/trip-store";
+import { useFavoritesStore } from "@/store/favorites-store";
 import { distanceKm as haversineKm, formatDistance } from "@/lib/distance";
 import { similarLocations } from "@/lib/similarity";
-import { categoryConfig, regionConfig, cn } from "@/lib/utils";
+import {
+  categoryConfig, regionConfig, difficultyConfig, seasonConfig,
+  formatDuration, cn,
+} from "@/lib/utils";
+import { platformDirections } from "@/lib/deep-links";
 import { OpenInSheet } from "@/components/app/open-in-sheet";
 import { WeatherWidget } from "@/components/app/weather-widget";
+import { PhotoStrip } from "@/components/app/photo-strip";
 import { PLACEHOLDER_LOCATIONS } from "@/data/locations";
-import type { Location, Difficulty } from "@/types";
+import type { Location, Difficulty, LocationImage } from "@/types";
 
 interface LocationDetailSheetProps {
   location: Location | null;
@@ -28,6 +37,35 @@ const DIFF_COLORS: Record<Difficulty, string> = {
   challenging: "text-orange-400",
   expert: "text-red-400",
 };
+
+function IconAction({
+  label,
+  active,
+  activeClass,
+  onClick,
+  children,
+}: {
+  label: string;
+  active?: boolean;
+  activeClass?: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      aria-pressed={active}
+      onClick={onClick}
+      className={cn(
+        "w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-full transition-colors active:scale-95",
+        active ? activeClass : "bg-white/[0.06] text-stone-300 hover:text-fg hover:bg-white/[0.1]"
+      )}
+    >
+      {children}
+    </button>
+  );
+}
 
 export function LocationDetailSheet({
   location,
@@ -45,6 +83,8 @@ export function LocationDetailSheet({
     location ? s.tripIds.includes(location.id) : false
   );
   const toggleInTrip = useTripStore((s) => s.toggleInTrip);
+  const { isFavorite, toggleFavorite } = useFavoritesStore();
+  const fav = location ? isFavorite(location.id) : false;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [openInSheet, setOpenInSheet] = useState(false);
 
@@ -77,12 +117,24 @@ export function LocationDetailSheet({
     onClose();
   }
 
+  function share() {
+    if (!location) return;
+    const url = `https://swiss-trails.com/location/${location.slug}`;
+    if (navigator.share) void navigator.share({ title: location.name, url });
+    else void navigator.clipboard.writeText(url);
+  }
+
   const cat = location ? categoryConfig[location.category] : null;
   const region = location ? regionConfig[location.region] : null;
+  const diff = location ? difficultyConfig[location.difficulty] : null;
+
+  const photos: LocationImage[] = location
+    ? [location.heroImage, ...location.gallery.filter((g) => g.url !== location.heroImage.url)]
+    : [];
 
   return (
     <AnimatePresence>
-      {location && (
+      {location && cat && region && diff && (
         <>
           {/* Backdrop */}
           <motion.div
@@ -108,151 +160,135 @@ export function LocationDetailSheet({
             exit={{ y: "100%" }}
             transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
           >
-            {/* Hero */}
-            <div className="relative flex-shrink-0 h-[40vh] lg:h-56 bg-trail-900">
-              <img
-                src={location.heroImage.url}
-                alt={location.name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-trail-950 via-trail-950/10 to-transparent" />
-
-              <button
-                onClick={onClose}
-                aria-label="Close"
-                className="absolute top-3 right-3 w-11 h-11 bg-black/60 backdrop-blur-md rounded-lg flex items-center justify-center text-white/80 hover:text-white active:scale-95 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-
-              <div className="absolute bottom-0 left-0 right-0 px-5 pb-4">
-                <p className="text-xs font-medium tracking-[0.12em] uppercase text-fg-muted mb-1">
-                  {cat?.label}
-                </p>
-                <h2 className="text-fg text-xl font-semibold leading-tight">{location.name}</h2>
-                {location.tagline && (
-                  <p className="text-fg-muted text-sm mt-0.5 line-clamp-1">{location.tagline}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Body */}
-            <div ref={scrollRef} className="flex-1 overflow-y-auto overscroll-contain">
-              <div className="px-5 py-4 space-y-5">
-                {/* Meta row */}
-                <div className="flex flex-wrap gap-3 text-xs text-fg-muted">
-                  <span className="flex items-center gap-1.5">
-                    <MapPin className="w-3 h-3" />
-                    {region?.label ?? location.region}
-                  </span>
-                  <span className={cn("font-medium", DIFF_COLORS[location.difficulty])}>
-                    {location.difficulty.charAt(0).toUpperCase() + location.difficulty.slice(1)}
-                  </span>
-                  {location.elevation != null && (
-                    <span className="flex items-center gap-1.5">
-                      <Mountain className="w-3 h-3" />
-                      {location.elevation}m
-                    </span>
-                  )}
-                  {awayKm && (
-                    <span className="flex items-center gap-1.5">
-                      <Navigation className="w-3 h-3" />
-                      {awayKm} away
-                    </span>
-                  )}
-                  <span className="flex items-center gap-1.5">
-                    <Clock className="w-3 h-3" />
-                    {location.visitDurationHours.min}–{location.visitDurationHours.max}h visit
-                  </span>
-                  {location.bestSeason.length > 0 && (
-                    <span className="flex items-center gap-1.5">
-                      <Calendar className="w-3 h-3" />
-                      {location.bestSeason
-                        .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-                        .join(", ")}
-                    </span>
-                  )}
+            {/* ── NON-SCROLLING HEADER: title + icon actions + photo strip ── */}
+            <div className="flex-shrink-0 px-5 pt-3 pb-3">
+              <div className="flex items-start gap-3">
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-fg text-[22px] font-semibold leading-tight">{location.name}</h2>
+                  <p className="text-fg-muted text-[13px] mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+                    <span>{cat.label}</span>
+                    <span className="text-fg-subtle">·</span>
+                    <span>{region.label}</span>
+                    <span className="text-fg-subtle">·</span>
+                    <span className={cn("font-medium", DIFF_COLORS[location.difficulty])}>{diff.label}</span>
+                  </p>
                 </div>
 
-                {/* Secondary actions — Visited / Add to trip */}
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    aria-pressed={visited}
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <IconAction
+                    label={fav ? "Remove favourite" : "Add favourite"}
+                    active={fav}
+                    activeClass="bg-red-500/15 text-red-400"
+                    onClick={() => toggleFavorite(location.id)}
+                  >
+                    <Heart className={cn("w-[18px] h-[18px]", fav && "fill-red-400")} />
+                  </IconAction>
+                  <IconAction
+                    label={visited ? "Mark not visited" : "Mark visited"}
+                    active={visited}
+                    activeClass="bg-emerald-500/15 text-emerald-400"
                     onClick={() => toggleVisited(location.id)}
-                    className={cn(
-                      "flex items-center justify-center gap-2 h-11 px-3 text-sm font-medium rounded-lg border transition-colors active:scale-[0.99]",
-                      visited
-                        ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
-                        : "bg-transparent border-white/10 text-stone-400 hover:text-fg hover:border-white/20"
-                    )}
                   >
-                    <CheckCircle2 className={cn("w-4 h-4", visited && "text-emerald-400")} />
-                    {visited ? "Visited ✓" : "Visited"}
-                  </button>
-                  <button
-                    aria-pressed={inTrip}
+                    <CheckCircle2 className="w-[18px] h-[18px]" />
+                  </IconAction>
+                  <IconAction
+                    label={inTrip ? "Remove from trip" : "Add to trip"}
+                    active={inTrip}
+                    activeClass="bg-alpine-500/15 text-alpine-400"
                     onClick={() => toggleInTrip(location.id)}
-                    className={cn(
-                      "flex items-center justify-center gap-2 h-11 px-3 text-sm font-medium rounded-lg border transition-colors active:scale-[0.99]",
-                      inTrip
-                        ? "bg-alpine-500/15 border-alpine-500/40 text-alpine-300"
-                        : "bg-transparent border-white/10 text-stone-400 hover:text-fg hover:border-white/20"
-                    )}
                   >
-                    {inTrip ? <MapPinned className="w-4 h-4 text-alpine-400" /> : <Route className="w-4 h-4" />}
-                    {inTrip ? "In trip ✓" : "Add to trip"}
-                  </button>
+                    {inTrip ? <MapPinned className="w-[18px] h-[18px]" /> : <Route className="w-[18px] h-[18px]" />}
+                  </IconAction>
+                  <IconAction label="Close" onClick={onClose}>
+                    <X className="w-5 h-5" />
+                  </IconAction>
+                </div>
+              </div>
+
+              {/* Reaction-count slot — Like / Want to go / Been there.
+                  Left empty; the parent wires the live counts here. */}
+              <div data-reaction-slot className="mt-2.5 empty:hidden" />
+
+              <PhotoStrip photos={photos} className="mt-3" />
+            </div>
+
+            {/* ── SCROLLABLE BODY ── */}
+            <div ref={scrollRef} className="flex-1 overflow-y-auto overscroll-contain">
+              <div className="px-5 pb-4 space-y-5">
+                {/* Key stats */}
+                <div className="grid grid-cols-2 gap-2">
+                  <Stat icon={<Gauge className="w-4 h-4" />} label="Difficulty" value={diff.label} valueClass={DIFF_COLORS[location.difficulty]} />
+                  {location.distanceKm != null && (
+                    <Stat icon={<Ruler className="w-4 h-4" />} label="Distance" value={`${location.distanceKm} km`} />
+                  )}
+                  {location.elevation != null && (
+                    <Stat icon={<Mountain className="w-4 h-4" />} label="Elevation" value={`${location.elevation.toLocaleString()} m`} />
+                  )}
+                  <Stat icon={<Clock className="w-4 h-4" />} label="Visit time" value={`${location.visitDurationHours.min}–${location.visitDurationHours.max} h`} />
+                  {awayKm ? (
+                    <Stat icon={<Navigation className="w-4 h-4" />} label="From you" value={`${awayKm} away`} />
+                  ) : (
+                    <Stat icon={<Car className="w-4 h-4" />} label="By car" value={`~${formatDuration(location.travelTimeMinutes)}`} />
+                  )}
                 </div>
 
                 {/* Description */}
                 {location.description && (
-                  <p className="text-stone-400 text-sm leading-relaxed">{location.description}</p>
+                  <p className="text-stone-300 text-sm leading-relaxed">{location.description}</p>
                 )}
 
-                {/* Highlights */}
+                {/* Highlights — short */}
                 {location.highlights.length > 0 && (
-                  <div>
-                    <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-fg-muted mb-2.5">
-                      Highlights
-                    </p>
+                  <Section title="Highlights">
                     <ul className="space-y-1.5">
-                      {location.highlights.map((h, i) => (
+                      {location.highlights.slice(0, 4).map((h, i) => (
                         <li key={i} className="flex items-start gap-2.5 text-sm text-stone-400">
                           <span className="w-px h-3 bg-alpine-600 mt-1.5 flex-shrink-0" />
                           {h}
                         </li>
                       ))}
                     </ul>
-                  </div>
+                  </Section>
+                )}
+
+                {/* Getting there */}
+                {(location.accessInfo || location.parkingAvailable || location.publicTransport) && (
+                  <Section title="Getting there" icon={<Navigation className="w-3 h-3" />}>
+                    {location.accessInfo && (
+                      <p className="text-stone-400 text-sm mb-2.5">{location.accessInfo}</p>
+                    )}
+                    <div className="flex flex-wrap gap-2">
+                      {location.parkingAvailable && <InfoChip icon={<Car className="w-3.5 h-3.5" />}>Parking</InfoChip>}
+                      {location.publicTransport && <InfoChip icon={<Bus className="w-3.5 h-3.5" />}>Public transport</InfoChip>}
+                    </div>
+                  </Section>
+                )}
+
+                {/* Best season — compact chip set */}
+                {location.bestSeason.length > 0 && (
+                  <Section title="Best season">
+                    <div className="flex flex-wrap gap-1.5">
+                      {location.bestSeason.map((s) => {
+                        const sc = seasonConfig[s];
+                        return (
+                          <span key={s} className="inline-flex items-center gap-1.5 bg-white/[0.05] rounded-full px-3 py-1 text-xs text-stone-300">
+                            <span>{sc.emoji}</span>
+                            {sc.label}
+                            <span className="text-fg-subtle">{sc.months}</span>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </Section>
                 )}
 
                 {/* Weather */}
-                <WeatherWidget
-                  lat={location.coordinates.lat}
-                  lng={location.coordinates.lng}
-                />
-
-                {/* Tags */}
-                {location.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {location.tags.map((tag) => (
-                      <span key={tag} className="text-fg-muted text-xs">
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
+                <WeatherWidget lat={location.coordinates.lat} lng={location.coordinates.lng} />
 
                 {/* Similar */}
                 {similar.length > 0 && (
-                  <div>
-                    <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-fg-muted mb-2.5">
-                      Similar nearby
-                    </p>
-                    <div
-                      className="flex gap-2 overflow-x-auto pb-1"
-                      style={{ scrollbarWidth: "none" }}
-                    >
+                  <Section title="Similar nearby">
+                    <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
                       {similar.map((sim) => (
                         <button
                           key={sim.id}
@@ -278,30 +314,37 @@ export function LocationDetailSheet({
                         </button>
                       ))}
                     </div>
-                  </div>
+                  </Section>
                 )}
 
                 <div className="h-1" />
               </div>
             </div>
 
-            {/* Sticky footer CTA — always visible above the fold + home indicator */}
+            {/* Sticky footer — Get directions is the primary CTA; View on Map secondary. */}
             <div className="flex-shrink-0 border-t border-white/[0.06] bg-trail-950/95 px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2">
-              {/* Get directions / Open in… — opens the deep-link sheet */}
-              <button
-                onClick={() => setOpenInSheet(true)}
-                className="flex items-center justify-center gap-2 px-4 min-h-[44px] py-3.5 bg-white/[0.05] hover:bg-white/[0.08] active:bg-white/[0.1] text-stone-200 text-sm font-medium rounded-lg transition-colors flex-shrink-0"
-              >
-                <Navigation className="w-4 h-4" />
-                Directions
-              </button>
-              {/* In-app navigation to the map */}
-              <button
-                onClick={viewOnMap}
+              <a
+                href={platformDirections(location.coordinates.lat, location.coordinates.lng, location.name)}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex-1 flex items-center justify-center gap-2 min-h-[44px] py-3.5 bg-alpine-600 hover:bg-alpine-500 active:bg-alpine-700 text-white text-sm font-medium rounded-lg transition-colors"
               >
+                <Navigation className="w-4 h-4" />
+                Get directions
+              </a>
+              <button
+                onClick={() => setOpenInSheet(true)}
+                aria-label="More apps"
+                className="w-11 flex-shrink-0 flex items-center justify-center bg-white/[0.05] hover:bg-white/[0.08] active:bg-white/[0.1] text-stone-200 rounded-lg transition-colors"
+              >
+                <Share2 className="w-4 h-4" />
+              </button>
+              <button
+                onClick={viewOnMap}
+                className="flex items-center justify-center gap-1.5 px-4 min-h-[44px] py-3.5 bg-white/[0.05] hover:bg-white/[0.08] active:bg-white/[0.1] text-stone-200 text-sm font-medium rounded-lg transition-colors flex-shrink-0"
+              >
                 <MapPin className="w-4 h-4" />
-                View on Map
+                Map
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -315,5 +358,58 @@ export function LocationDetailSheet({
         </>
       )}
     </AnimatePresence>
+  );
+}
+
+/* ── small presentational helpers ── */
+
+function Stat({
+  icon,
+  label,
+  value,
+  valueClass,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  valueClass?: string;
+}) {
+  return (
+    <div className="flex items-center gap-2.5 rounded-xl bg-white/[0.04] px-3 py-2.5">
+      <span className="text-fg-muted flex-shrink-0">{icon}</span>
+      <span className="min-w-0">
+        <span className="block text-[11px] text-fg-muted leading-none">{label}</span>
+        <span className={cn("block text-sm font-medium text-stone-200 mt-1 truncate", valueClass)}>{value}</span>
+      </span>
+    </div>
+  );
+}
+
+function Section({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-fg-muted mb-2.5 flex items-center gap-1.5">
+        {icon}
+        {title}
+      </p>
+      {children}
+    </div>
+  );
+}
+
+function InfoChip({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 bg-white/[0.05] rounded-full px-3 py-1.5 text-xs text-stone-300">
+      {icon}
+      {children}
+    </span>
   );
 }
