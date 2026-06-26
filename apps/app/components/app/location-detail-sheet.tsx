@@ -23,8 +23,9 @@ import { OpenInSheet } from "@/components/app/open-in-sheet";
 import { WeatherWidget } from "@/components/app/weather-widget";
 import { PhotoStrip } from "@/components/app/photo-strip";
 import { ReactionBar } from "@/components/app/reaction-bar";
+import { useLocationImages } from "@/lib/location-images";
 import { PLACEHOLDER_LOCATIONS } from "@/data/locations";
-import type { Location, Difficulty, LocationImage } from "@/types";
+import type { Location, Difficulty } from "@/types";
 
 interface LocationDetailSheetProps {
   location: Location | null;
@@ -129,9 +130,8 @@ export function LocationDetailSheet({
   const region = location ? regionConfig[location.region] : null;
   const diff = location ? difficultyConfig[location.difficulty] : null;
 
-  const photos: LocationImage[] = location
-    ? [location.heroImage, ...location.gallery.filter((g) => g.url !== location.heroImage.url)]
-    : [];
+  // Resolved by source priority (admin override → sourced; Supabase later).
+  const photos = useLocationImages(location);
 
   return (
     <AnimatePresence>

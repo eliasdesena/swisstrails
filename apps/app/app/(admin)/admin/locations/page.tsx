@@ -1,13 +1,23 @@
-import { Plus, Edit, Trash2, Eye } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { Plus, Edit, Trash2, Eye, ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PLACEHOLDER_LOCATIONS } from "@/data/locations";
 import { categoryConfig, difficultyConfig } from "@/lib/utils";
+import { useImageOverridesStore } from "@/store/image-overrides-store";
+import { LocationImageEditor } from "@/components/admin/location-image-editor";
+import type { Location } from "@/types";
 
 export default function AdminLocationsPage() {
+  const [editing, setEditing] = useState<Location | null>(null);
+  // Subscribe so the per-row "override" badge updates live as edits are made.
+  const overrides = useImageOverridesStore((s) => s.overrides);
+
   return (
-    <div className="min-h-screen bg-trail-950 p-6">
+    <div className="min-h-screen bg-trail-950 p-6 pt-[max(1rem,env(safe-area-inset-top))]">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -34,6 +44,7 @@ export default function AdminLocationsPage() {
           {PLACEHOLDER_LOCATIONS.map((loc) => {
             const cat = categoryConfig[loc.category];
             const diff = difficultyConfig[loc.difficulty];
+            const hasOverride = !!overrides[loc.id]?.length;
             return (
               <div key={loc.id} className="card-solid rounded-xl p-4">
                 <div className="flex items-start justify-between gap-3">
@@ -55,6 +66,18 @@ export default function AdminLocationsPage() {
                   <span className={`font-medium ${diff.color}`}>{diff.label}</span>
                 </div>
                 <div className="flex items-center gap-2 mt-4">
+                  <button
+                    type="button"
+                    aria-label="Edit images"
+                    onClick={() => setEditing(loc)}
+                    className="relative flex-1 h-11 rounded-lg bg-trail-700 border border-stone-700 flex items-center justify-center gap-1.5 text-fg-muted hover:text-fg transition-colors"
+                  >
+                    <ImageIcon className="w-4 h-4" />
+                    <span className="text-xs font-medium">Images</span>
+                    {hasOverride && (
+                      <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-alpine-400" />
+                    )}
+                  </button>
                   <button aria-label="View" className="flex-1 h-11 rounded-lg bg-trail-700 border border-stone-700 flex items-center justify-center text-fg-muted hover:text-fg transition-colors">
                     <Eye className="w-4 h-4" />
                   </button>
@@ -90,6 +113,7 @@ export default function AdminLocationsPage() {
                 {PLACEHOLDER_LOCATIONS.map((loc) => {
                   const cat = categoryConfig[loc.category];
                   const diff = difficultyConfig[loc.difficulty];
+                  const hasOverride = !!overrides[loc.id]?.length;
                   return (
                     <tr
                       key={loc.id}
@@ -125,6 +149,19 @@ export default function AdminLocationsPage() {
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            aria-label="Edit images"
+                            title="Edit images"
+                            onClick={() => setEditing(loc)}
+                            className="relative h-7 px-2 rounded-lg bg-trail-700 border border-stone-700 flex items-center gap-1 text-fg-subtle hover:text-fg transition-colors"
+                          >
+                            <ImageIcon className="w-3.5 h-3.5" />
+                            <span className="text-xs font-medium">Images</span>
+                            {hasOverride && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-alpine-400" />
+                            )}
+                          </button>
                           <button className="w-7 h-7 rounded-lg bg-trail-700 border border-stone-700 flex items-center justify-center text-fg-subtle hover:text-fg transition-colors">
                             <Eye className="w-3.5 h-3.5" />
                           </button>
@@ -144,6 +181,11 @@ export default function AdminLocationsPage() {
           </div>
         </div>
       </div>
+
+      {/* Per-location image editor (modal / bottom-sheet) */}
+      {editing && (
+        <LocationImageEditor location={editing} onClose={() => setEditing(null)} />
+      )}
     </div>
   );
 }

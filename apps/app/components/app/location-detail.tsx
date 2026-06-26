@@ -25,7 +25,8 @@ import { OpenInSheet } from "@/components/app/open-in-sheet";
 import { WeatherWidget } from "@/components/app/weather-widget";
 import { PhotoStrip } from "@/components/app/photo-strip";
 import { ReactionBar } from "@/components/app/reaction-bar";
-import type { Location, LocationImage } from "@/types";
+import { useLocationImages } from "@/lib/location-images";
+import type { Location } from "@/types";
 
 interface LocationDetailProps {
   location: Location;
@@ -91,11 +92,9 @@ export function LocationDetail({ location, onClose, scrollRef }: LocationDetailP
     ? formatDistance(distanceKm(userPosition, location.coordinates))
     : null;
 
-  // Photos for the strip: hero first, then gallery (skip dupes by url).
-  const photos: LocationImage[] = [
-    location.heroImage,
-    ...location.gallery.filter((g) => g.url !== location.heroImage.url),
-  ];
+  // Photos for the strip — resolved by source priority (admin override →
+  // sourced; Supabase later). See lib/location-images.ts.
+  const photos = useLocationImages(location);
 
   function share() {
     const url = `https://swiss-trails.com/location/${location.slug}`;

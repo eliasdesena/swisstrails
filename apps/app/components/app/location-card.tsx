@@ -7,6 +7,7 @@ import { useFavoritesStore } from "@/store/favorites-store";
 import { useVisitedStore } from "@/store/visited-store";
 import { useGeoStore } from "@/store/geo-store";
 import { distanceKm, formatDistance } from "@/lib/distance";
+import { useLocationImages } from "@/lib/location-images";
 import type { Location } from "@/types";
 
 interface LocationCardProps {
@@ -28,6 +29,10 @@ export function LocationCard({
   const fav = isFavorite(location.id);
   const diff = difficultyConfig[location.difficulty];
   const cat = categoryConfig[location.category];
+
+  // Card image — first resolved image by source priority (admin override →
+  // sourced). Falls back to the sourced hero. See lib/location-images.ts.
+  const cardImage = useLocationImages(location)[0] ?? location.heroImage;
 
   // Real, honest distance when we know where the user is; otherwise fall back
   // to the static travel-time estimate (relabelled "~X by car", no "away").
@@ -52,8 +57,8 @@ export function LocationCard({
           {/* Image thumb */}
           <div className="relative w-20 h-full flex-shrink-0 overflow-hidden">
             <Image
-              src={location.heroImage.url}
-              alt={location.heroImage.alt}
+              src={cardImage.url}
+              alt={cardImage.alt}
               fill
               className="object-cover"
               sizes="80px"
@@ -104,8 +109,8 @@ export function LocationCard({
           {/* Image */}
           <div className="relative aspect-[4/3] overflow-hidden">
             <Image
-              src={location.heroImage.url}
-              alt={location.heroImage.alt}
+              src={cardImage.url}
+              alt={cardImage.alt}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

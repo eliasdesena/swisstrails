@@ -1,8 +1,14 @@
 import { Map, Users, ShoppingBag, Star, Plus, Settings } from "lucide-react";
 import Link from "next/link";
+import { PLACEHOLDER_LOCATIONS } from "@/data/locations";
 
 const STATS = [
-  { label: "Total Locations", value: "8", icon: Map, trend: "+3 this month" },
+  {
+    label: "Total Locations",
+    value: String(PLACEHOLDER_LOCATIONS.length),
+    icon: Map,
+    trend: "Seeded catalogue",
+  },
   { label: "Total Users", value: "0", icon: Users, trend: "Awaiting launch" },
   { label: "Total Sales", value: "CHF 0", icon: ShoppingBag, trend: "—" },
   { label: "Avg. Rating", value: "—", icon: Star, trend: "—" },
@@ -17,7 +23,7 @@ const QUICK_LINKS = [
 
 export default function AdminPage() {
   return (
-    <div className="min-h-screen bg-trail-950 p-6">
+    <div className="min-h-screen bg-trail-950 p-6 pt-[max(1rem,env(safe-area-inset-top))]">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
